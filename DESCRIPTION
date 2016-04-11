@@ -1,0 +1,44 @@
+Package: icd
+Title: Tools for Working with ICD-9 and ICD-10 Codes, and Finding
+        Comorbidities
+Description: Calculate comorbidities, Charlson scores, perform fast and accurate
+    validation, conversion, manipulation, filtering and comparison of ICD-9 and
+    ICD-10 codes. Common ambiguities and code formats are handled. This
+    package enables a work flow from raw lists of ICD codes in hospital
+    billing databases to comorbidities. ICD-9 and ICD-10 comorbidity mappings
+    from Quan (Deyo and Elixhauser versions), Elixhauser and AHRQ included.
+Classification/ACM-2012: Social and professional topics~Medical
+        records, Applied computing~Health care information systems,
+        Applied computing~Health informatics, Applied
+        computing~Bioinformatics
+Version: 2.0
+Date: 2016-04-10
+Authors@R: c(
+    person(given = "Jack O.", family = "Wasey", role = c("aut", "cre", "cph"), email = "jack@jackwasey.com"),
+    person(given = "William", family = "Murphy", role = "ctb", email = "WMurphy@eatright.org", comment = "Van Walraven scores"),
+    person("R Core Team", role = c("ctb", "cph"), comment = "m4 macro for OpenMP detection in configure"),
+    person("Kevin Ushey", role = c("ctb", "cph"), comment = "Fast factor creation, adapted from GPL-2 package fastmatch")
+    )
+Maintainer: Jack O. Wasey <jack@jackwasey.com>
+URL: https://github.com/jackwasey/icd
+Depends: R (>= 3.1.0)
+Imports: checkmate (>= 1.5.1), magrittr, stats, Rcpp (>= 0.12.3),
+        stringr, utils
+Suggests: knitr, RODBC, roxygen2 (>= 5.0.0), rmarkdown, testthat, xml2
+LazyData: true
+LazyDataCompression: xz
+BugReports: https://github.com/jackwasey/icd/issues
+License: GPL-3
+Copyright: See file (inst/)COPYRIGHTS
+VignetteBuilder: knitr
+LinkingTo: Rcpp, testthat
+RoxygenNote: 5.0.1
+NeedsCompilation: yes
+Packaged: 2016-04-10 21:53:25 UTC; jack
+Author: Jack O. Wasey [aut, cre, cph],
+  William Murphy [ctb] (Van Walraven scores),
+  R Core Team [ctb, cph] (m4 macro for OpenMP detection in configure),
+  Kevin Ushey [ctb, cph] (Fast factor creation, adapted from GPL-2
+    package fastmatch)
+Repository: CRAN
+Date/Publication: 2016-04-11 15:10:25
