@@ -28,12 +28,12 @@ See the vignettes for examples.
 
 Please cite this package if you find it useful in your published work.
 citation(package = \"icd\")
-
 ")
   # nolint end
 
   if (system.file(package = "icd9") != "")
-    warning("The 'icd9' package is now deprecated, and should be removed to avoid conflicts with 'icd'.
+    packageStartupMessage(
+      "The 'icd9' package is now deprecated, and should be removed to avoid conflicts with 'icd'.
 The new 'icd' package contains tested versions of all the deprecated function names which overlap with those in the old
 'icd9' package, e.g. 'icd9ComorbidAhrq'. It is strongly recommended to run the command:
 
@@ -88,6 +88,7 @@ release_questions <- function() {
     "Is every SEXP PROTECT()ed and UNPROTECT()ed, when appropriate?",
     "Is the naming scheme consistent, with deprecated old style names?",
     "Are all public S3 classes all exported? use devtools::missing_s3()",
+    "use LLVM scan build by adding 'scan-build before compiler path in .R/Makevars",
     # testing and compilation and different platforms:
     "Have you run with testthat <= and > 0.11.0?",
     "Have you run autoreconf before building and testing?",

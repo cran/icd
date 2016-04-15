@@ -1,5 +1,5 @@
 d32239bcb673463ab874e80d47fae504 *COPYING
-b943cf7c7c6d49504e7d892fecd87c2e *DESCRIPTION
+3a159acc08452b9224a00664daf632c9 *DESCRIPTION
 dc1f1731adf9b4641aaa303421aed53c *NAMESPACE
 572513d6417970e1c004e614decb84e4 *R/RcppExports.R
 629de5e7bf33032776db256e729ccc5f *R/attr.R
@@ -35,7 +35,7 @@ b4911c9722e78a1749eac10be804536d *R/util-file.R
 08d2b7047036dd35236f0144809ffe1f *R/util-test.R
 c8821929a9d646d4bf7e11da4e898c66 *R/util.R
 1f046ac843a52acc17c4f790b87959be *R/valid.R
-e996ea0f5f2ebe67534edd72055ed0cb *R/zzz.R
+5bf4583f39b23813679be24f6d4898c1 *R/zzz.R
 1598a6152b62728e53a3e24cb8d7faf6 *README.md
 aeb4266c59c088a07c6cf48ee7c50c29 *build/vignette.rds
 ad1a5be94a23163a5d53481df9f3c8b1 *cleanup
@@ -67,13 +67,13 @@ d32239bcb673463ab874e80d47fae504 *inst/COPYING
 309225434cbfe2d103868d6d7defbce0 *inst/COPYRIGHTS
 a0eb01b61962ef56479b91479742dcca *inst/doc/Charlson_and_other_scores.R
 af114e7b0237e13efc48b1d1d5cffab0 *inst/doc/Charlson_and_other_scores.Rmd
-813f7eeb382486ca12d0e896282f78d7 *inst/doc/Charlson_and_other_scores.html
+7c79b4f07c0fa162165f4b0dfaf00513 *inst/doc/Charlson_and_other_scores.html
 d25b3f13053aaff00d25e178fdef8f7e *inst/doc/icd-10.R
 3cf3cbe6aecc025ee614bfeba23c2b1a *inst/doc/icd-10.Rmd
-6016a76f504fe8d3f24e1d45284eb31f *inst/doc/icd-10.html
+9b14400893d7b8fa8833fe0af17408af *inst/doc/icd-10.html
 cd9f8f26708b6ce59fe7f2319d2d1301 *inst/doc/introduction.R
 dc94b00c10df2912d1092ec4bc8ea6d7 *inst/doc/introduction.Rmd
-246531404766cb18d99cf52c86bf3dc5 *inst/doc/introduction.html
+be372ebae452c2087abcea0b35c91907 *inst/doc/introduction.html
 e12dfdcf4a537a30da2e63571911f028 *inst/include/icd.h
 02b87943f8dd3aec5af00269b357c867 *inst/include/icd_RcppExports.h
 7f30e474ded8309afdc1bda5bb3282d1 *man/apply_hier.Rd
