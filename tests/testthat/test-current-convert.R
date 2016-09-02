@@ -143,6 +143,12 @@ test_that("icd10 short to decimal", {
 
 })
 
+test_that("#97 is fixed", {
+  expect_warning(res <- icd_short_to_decimal(icd10_map_elix$CHF), NA)
+  expect_true("P29.0" %in% res)
+  expect_false("I43." %in% res)
+})
+
 test_that("icd10 short to decimal for multiple codes", {
   # pick up specific bug where a warning was given for muliple codes
   expect_warning(res <- icd_short_to_decimal(c("O9A119", "O9A53", "S0000XA", "T3299", "P150", "P159",
@@ -259,12 +265,12 @@ test_that("short to decimal conversions also convert class", {
 })
 
 test_that("parts to decimal", {
-  expect_that(icd9PartsToDecimal(data.frame(major = "100", minor = NA)), testthat::equals("100"))
-  expect_that(icd9PartsToDecimal(data.frame(major = "100", minor = "")), testthat::equals("100"))
-  expect_that(icd9PartsToDecimal(data.frame(major = "100", minor = "1")), testthat::equals("100.1"))
-  expect_that(icd9MajMinToDecimal("100", NA), testthat::equals("100"))
-  expect_that(icd9MajMinToDecimal("100", ""), testthat::equals("100"))
-  expect_that(icd9MajMinToDecimal("100", "1"), testthat::equals("100.1"))
+  expect_equal(icd9PartsToDecimal(data.frame(major = "100", minor = NA)), "100")
+  expect_equal(icd9PartsToDecimal(data.frame(major = "100", minor = "")), "100")
+  expect_equal(icd9PartsToDecimal(data.frame(major = "100", minor = "1")), "100.1")
+  expect_equal(icd9MajMinToDecimal("100", NA), "100")
+  expect_equal(icd9MajMinToDecimal("100", ""), "100")
+  expect_equal(icd9MajMinToDecimal("100", "1"), "100.1")
 })
 
 test_that("parts to short invalid inputs", {
@@ -326,12 +332,14 @@ test_that("maj min to short for multiple majors", {
 })
 
 test_that("icd9 parts to short: don't allow cycling.", {
+  skip("removed this internal check for speed")
   expect_error(icd9MajMinToShort(c("123", "34", "56"), c("1", "20")))
   # causes hang only when compiled with MinGW GCC 4.9 in Rtools 3.2 on 64 bit
   expect_error(icd9MajMinToShort(c("123", "34"), c("1", "20", "45")))
 })
 
 test_that("Windows Rtools 3.2 hang test - also triggers bug #75", {
+  skip("removed this internal check for speed")
   expect_error(icd9MajMinToShort(c("123", "34"), c("1", "20", "45")))
   # see Rcpp issue #276.
 })
@@ -371,7 +379,6 @@ test_that("code routes through RcppExports.R and slower versions", {
 
 
 context("icd10 conversions")
-# TODO: this needs fleshing out
 
 test_that("decimal ICD-10 to parts", {
   expect_identical(
@@ -390,7 +397,7 @@ test_that("decimal ICD-10 to parts", {
 
 test_that("icd10 short to parts", {
   expect_equal(icd_short_to_parts("A0101"),
-              data.frame(major = "A01", minor = "01", stringsAsFactors = FALSE))
+               data.frame(major = "A01", minor = "01", stringsAsFactors = FALSE))
   # for V and E codes, we can't just assume ICD-10 will work with the ICD-9 function:
   expect_equal(icd_short_to_parts(as.icd10cm("E8989")),
                data.frame(major = "E89", minor = "89", stringsAsFactors = FALSE))

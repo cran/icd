@@ -23,11 +23,11 @@ utils::globalVariables(c("icd9_sources", "icd9cm_billable"))
 #' generate all package data
 #'
 #' Parses (and downloads if necessary) CDC annual revisions of ICD-9-CM to get
-#' the 'billable' codes. Also parses the AHRQ and Quan/Deyo comorbidity mappings
+#' the 'billable' codes. Also parses the AHRQ, Quan/Deyo, and CMS HCC comorbidity mappings
 #' from the source SAS data. Elixhauser and Quan/Elixhauser mappings are
 #' generated from transcribed codes.
 #' @keywords internal
-update_everything <- function() {
+icd_update_everything <- function() {
   # this is not strictly a parsing step, but is quite slow. It relies on picking
   # up already saved files from previous steps. It can take hours to complete,
   # but only needs to be done rarely. This is only intended to be run from
@@ -50,10 +50,12 @@ update_everything <- function() {
   # ICD 9
   icd9_parse_ahrq_sas(save_data = TRUE)
   icd9_parse_quan_deyo_sas(save_data = TRUE)
+  icd9_parse_cc(save_data = TRUE)
   icd9_generate_map_quan_elix(save_data = TRUE)
   icd9_generate_map_elix(save_data = TRUE)
   # ICD 10
   icd10_parse_ahrq_sas(save_data = TRUE)
+  icd10_parse_cc(save_data = TRUE)
   icd10_generate_map_quan_elix(save_data = TRUE)
   icd10_generate_map_quan_deyo(save_data = TRUE)
   icd10_generate_map_elix(save_data = TRUE)
@@ -66,9 +68,9 @@ update_everything <- function() {
 }
 # nocov end
 
-#' get billable codes from all available years
+#' Get billable codes from all available years
 #'
-#' for versions 23 to 32, those which are on the CMS web site, get
+#' For versions 23 to 32, those which are on the CMS web site, get
 #'   any codes with long or short descriptions. Earlier years only have
 #'   abbreviated descriptions.
 #' @param save_data single logical value, if \code{TRUE} the source text or CSV
@@ -100,9 +102,10 @@ parse_leaf_descriptions_all <- function(save_data = TRUE, offline = TRUE) {
     icd9cm_billable[[v]] <- icd9_parse_leaf_desc_ver(version = v,
                                                      save_data = save_data,
                                                      offline = offline)
+    icd9cm_billable[[v]][["short_desc"]] <- enc2utf8(icd9cm_billable[[v]][["short_desc"]])
+    icd9cm_billable[[v]][["long_desc"]] <- enc2utf8(icd9cm_billable[[v]][["long_desc"]])
   }
 
-  # and in my utils.R  getNonASCII(charactervector)
   if (save_data)
     save_in_data_dir(icd9cm_billable)
   invisible(icd9cm_billable)
@@ -125,13 +128,13 @@ parse_leaf_descriptions_all <- function(save_data = TRUE, offline = TRUE) {
 #' @template offline
 #' @examples
 #' \dontrun{
-#' library(stringr)
 #' library(microbenchmark)
-#' # str_split is faster
+#' requireNamepsace("stringr")
+#' # stringr::str_split is faster this time
 #' x <- icd:::generate_random_decimal_icd9(10)
-#' microbenchmark(strsplit(x, "\\."), str_split(x, "\\."))
+#' microbenchmark(strsplit(x, "\\."), stringr::str_split(x, "\\."))
 #' # str_trim is faster with nothing to trim
-#' microbenchmark(trim(x), str_trim(x))
+#' microbenchmark(trim(x), stringr::str_trim(x))
 #' }
 #' @return invisibly return the result
 #' @keywords internal
@@ -176,16 +179,16 @@ icd9_parse_leaf_desc_ver <- function(version = icd9cm_latest_edition(),
     message("got long lines")
   } else longlines <- NA_character_
 
-  shortlines <- str_split(shortlines, "[[:space:]]+")
-  longlines <- str_split(longlines, "[[:space:]]+")
+  shortlines <- strsplit(shortlines, "[[:space:]]+")
+  longlines <- strsplit(longlines, "[[:space:]]+")
   message("split done")
 
   # no need to trim: we just split on "space', so there can't be any extra spaces
   short_codes <- vapply(shortlines, FUN = function(x) x[1], FUN.VALUE = character(1))
   short_descs <- vapply(shortlines, FUN = function(x) paste(x[-1], collapse = " "), FUN.VALUE = character(1))
   if (!is.na(longlines[1]))
-    long_descs <- str_trim(vapply(longlines, function(x) paste(x[-1], collapse = " "), FUN.VALUE = character(1)))
-  else long_descs <- NA
+    long_descs <- trim(vapply(longlines, function(x) paste(x[-1], collapse = " "), FUN.VALUE = character(1)))
+  else long_descs <- NA_character_
 
   message("codes and descs separated")
 
@@ -198,7 +201,7 @@ icd9_parse_leaf_desc_ver <- function(version = icd9cm_latest_edition(),
   reorder <- icd9_order_short(out[["code"]])
   stopifnot(!anyNA(out[["code"]]))
   stopifnot(!anyNA(reorder))
-  stopifnot(!any(str_detect(out[["code"]], "[[:space:]]")))
+  stopifnot(!any(grepl(out[["code"]], pattern = "[[:space:]]")))
   stopifnot(!anyDuplicated(reorder))
   stopifnot(all(1:nrow(out)) %in% reorder)
   # catches a mistaken zero-indexed reorder result
@@ -214,10 +217,10 @@ icd9_parse_leaf_desc_ver <- function(version = icd9cm_latest_edition(),
   on.exit(options(oldwarn))
   if (!is.na(fn_long_orig)) {
     encs <- Encoding(out[["long_desc"]])
-    message("Found labelled encodings: ", paste(unique(encs), collapse = ", "))
+    message("Found labelled encodings in long_desc: ", paste(unique(encs), collapse = ", "))
     message("non-ASCII rows of long descriptions are: ",
-            paste(getNonASCII(out[["long_desc"]]), collapse = ", "))
-    message("Encodings found: ", unique(Encoding(out[["long_desc"]][isNonASCII(out[["long_desc"]])])))
+            paste(get_non_ASCII(out[["long_desc"]]), collapse = ", "))
+    message("Encodings found in long_desc: ", unique(Encoding(out[["long_desc"]][is_non_ASCII(out[["long_desc"]])])))
   }
   invisible(out)
 }
@@ -296,7 +299,7 @@ icd9cm_generate_chapters_hierarchy <- function(save_data = FALSE,
   bill32 <- icd9cm_billable[["32"]]
 
   billable_codes <- icd_get_billable.icd9(icd9cm_hierarchy[["code"]], short_code = TRUE)
-  billable_rows <- which(icd9cm_hierarchy[["code"]] %fin% billable_codes)
+  billable_rows <- which(icd9cm_hierarchy[["code"]] %in% billable_codes)
   title_rows <- which(icd9cm_hierarchy[["code"]] %nin% billable_codes)
   stopifnot(setdiff(c(billable_rows, title_rows), seq_along(icd9cm_hierarchy$code)) == integer(0))
   icd9cm_hierarchy[billable_rows, "short_desc"] <- bill32$short_desc
@@ -312,7 +315,7 @@ icd9cm_generate_chapters_hierarchy <- function(save_data = FALSE,
   icd9cm_hierarchy <- icd9cm_hierarchy[c("code", "short_desc", "long_desc", "three_digit",
                                          "major", "sub_chapter", "chapter")]
 
-  #TODO add 'billable' column
+  #SOMEDAY add 'billable' column
 
   # quick sanity checks - full tests in test-parse.R
   stopifnot(all(icd_is_valid.icd9(icd9cm_hierarchy[["code"]], short_code = TRUE)))
@@ -327,6 +330,9 @@ icd9cm_generate_chapters_hierarchy <- function(save_data = FALSE,
     stop("should not have any NA values in the ICD-9-CM flatten hierarchy data frame")
   }
   # nocov end
+
+  icd9cm_hierarchy[["short_desc"]] <- enc2utf8(icd9cm_hierarchy[["short_desc"]])
+  icd9cm_hierarchy[["long_desc"]] <- enc2utf8(icd9cm_hierarchy[["long_desc"]])
 
   if (save_data)
     save_in_data_dir("icd9cm_hierarchy") # nocov

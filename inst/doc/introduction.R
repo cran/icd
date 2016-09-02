@@ -3,7 +3,6 @@ suppressWarnings({
   suppressPackageStartupMessages({
     loadNamespace("knitr") # for opts_chunk only
     library(icd)
-    library(stringr)
     library(magrittr)
     library(utils)
     })

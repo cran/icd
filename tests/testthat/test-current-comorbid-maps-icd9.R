@@ -46,7 +46,7 @@ test_that("Elixhauser make sure all the children are listed in the saved data.",
   for (i in icd::icd9_map_quan_elix)
     expect_equal(icd_children.icd9(i, defined = FALSE, short_code = TRUE), icd_sort.icd9(i))
 })
-# TODO: icd_sort vs plain sort
+
 test_that("Quan Charlson make sure all the children are listed in the saved data.", {
   for (i in icd::icd9_map_quan_deyo)
     expect_equal_no_class_order(icd_children.icd9(i, defined = FALSE, short_code = TRUE), icd_sort.icd9(i))
@@ -99,9 +99,8 @@ test_that("ahrq icd9 mappings generated from the current generation code", {
     skip("data-raw/comformat2012-2013.txt must be downloaded with icd9_fetch_ahrq_sas")
 
   # same but from source data. Should be absolutely identical.
-  expect_identical(result <- icd9_parse_ahrq_sas(save_data = FALSE), icd9_map_ahrq)
-  expect_that(result, is_a("list"))
-  expect_true(length(result) == 30)
+  expect_identical(result <- icd9_parse_ahrq_sas(save_data = FALSE), icd::icd9_map_ahrq)
+  checkmate::expect_list(result, len = 30)
   expect_equivalent(icd_get_invalid.icd_comorbidity_map(icd::icd9_map_ahrq), list())
 
 })
@@ -111,9 +110,6 @@ test_that("Quan Charlson icd9 mappings are all
 
               if (is.null(icd9_fetch_quan_deyo_sas(offline = TRUE)))
                 skip("data-raw/ICD9_E_Charlson.sas must be downloaded with icd9_fetch_quan_deyo_sas")
-              # just test equivalence because we can test class and short vs
-              # decimal independently, and fastmatch adds an attribute during
-              # testing pointing to the hash table.
               expect_equivalent(icd9_map_quan_deyo, icd9_parse_quan_deyo_sas(save_data = FALSE))
               expect_equivalent(
                 icd_get_invalid.icd_comorbidity_map(icd9_map_quan_deyo, short_code = TRUE),
@@ -149,16 +145,16 @@ test_that("can condense the big lists of comorbidities without errors", {
 
   for (defined_codes in c(TRUE, FALSE)) {
     if (defined_codes) {
-      expect_warning(ahrq <- lapply(icd::icd9_map_ahrq, icd_condense.icd9, short_code = TRUE, defined = defined_codes))
-      expect_warning(qd <- lapply(icd::icd9_map_quan_deyo, icd_condense.icd9, short_code = TRUE, defined = defined_codes))
-      expect_warning(qe <- lapply(icd::icd9_map_quan_elix, icd_condense.icd9, short_code = TRUE, defined = defined_codes))
-      expect_warning(elix <- lapply(icd::icd9_map_elix, icd_condense.icd9, defined = defined_codes))
+      expect_warning(ahrq <- lapply(icd::icd9_map_ahrq[c(1, 30)], icd_condense.icd9, short_code = TRUE, defined = defined_codes))
+      expect_warning(qd <- lapply(icd::icd9_map_quan_deyo[c(1, 17)], icd_condense.icd9, short_code = TRUE, defined = defined_codes))
+      expect_warning(qe <- lapply(icd::icd9_map_quan_elix[c(1, 31)], icd_condense.icd9, short_code = TRUE, defined = defined_codes))
+      expect_warning(elix <- lapply(icd::icd9_map_elix[c(1, 31)], icd_condense.icd9, defined = defined_codes))
     }
     else {
-      expect_warning(ahrq <- lapply(icd::icd9_map_ahrq, icd_condense.icd9, short_code = TRUE, defined = defined_codes), regexp = NA)
-      expect_warning(qd <- lapply(icd::icd9_map_quan_deyo, icd_condense.icd9, short_code = TRUE, defined = defined_codes), regexp = NA)
-      expect_warning(qe <- lapply(icd::icd9_map_quan_elix, icd_condense.icd9, short_code = TRUE, defined = defined_codes), regexp = NA)
-      expect_warning(elix <- lapply(icd::icd9_map_elix, icd_condense.icd9, short_code = TRUE, defined = defined_codes), regexp = NA)
+      expect_warning(ahrq <- lapply(icd::icd9_map_ahrq[c(1, 30)], icd_condense.icd9, short_code = TRUE, defined = defined_codes), regexp = NA)
+      expect_warning(qd <- lapply(icd::icd9_map_quan_deyo[c(1, 17)], icd_condense.icd9, short_code = TRUE, defined = defined_codes), regexp = NA)
+      expect_warning(qe <- lapply(icd::icd9_map_quan_elix[c(1, 30)], icd_condense.icd9, short_code = TRUE, defined = defined_codes), regexp = NA)
+      expect_warning(elix <- lapply(icd::icd9_map_elix[c(1, 30)], icd_condense.icd9, short_code = TRUE, defined = defined_codes), regexp = NA)
     }
 
     expect_is(ahrq, class = "list")
@@ -565,12 +561,9 @@ test_that("disordered visit ids", {
 })
 
 test_that("diff comorbid works", {
-  # TODO: S3 classes for this
-  # list, but not list of character vectors
   expect_error(icd_diff_comorbid(bad_input, bad_input))
 
   # no warning or error for good data
-  # TODO: should be testing correct dispatch here, too, since map is a different class.
   expect_warning(
     utils::capture.output(
       res <- icd_diff_comorbid(icd::icd9_map_ahrq, icd9_map_elix, show = FALSE)
@@ -694,8 +687,8 @@ test_that("failing example", {
                      icd9 = c("441", "412.93", "044.9"))
   cmb <- icd9_comorbid_quan_deyo(mydf, short_code = FALSE, hierarchy = TRUE)
   expect_false("names" %in% names(attributes(cmb)))
-  icd_charlson(mydf, isShort = FALSE) # TODO: fix S3 classes ehre
-  icd_charlson(mydf, isShort = FALSE, return.df = TRUE)
+  icd_charlson(mydf, isShort = FALSE)
+  expect_is(icd_charlson(mydf, isShort = FALSE, return_df = TRUE), "data.frame")
   icd_charlson_from_comorbid(cmb)
 })
 
@@ -712,7 +705,7 @@ test_that("disordered visit_ids works by default", {
 })
 
 test_that("comorbidities created from source data frame coded as factors", {
-  v2 <- icd_wide_to_long(vermont_dx) # TODO: correct S3 method?
+  v2 <- icd_wide_to_long(vermont_dx)
   v2$visit_id <- as.factor(v2$visit_id)
   v2$icd_code <- as.factor(v2$icd_code)
 
@@ -722,6 +715,8 @@ test_that("comorbidities created from source data frame coded as factors", {
 })
 
 test_that("all AHRQ ICD-9 comorbidities are also in the ICD-10 maps, in same order", {
-  # TODO: similar for elix, deyo etc.
   expect_equal_no_icd(names(icd9_map_ahrq), names(icd10_map_ahrq))
+  expect_equal_no_icd(names(icd9_map_elix), names(icd10_map_elix))
+  expect_equal_no_icd(names(icd9_map_quan_elix), names(icd10_map_quan_elix))
+  expect_equal_no_icd(names(icd9_map_quan_deyo), names(icd10_map_quan_deyo))
 })

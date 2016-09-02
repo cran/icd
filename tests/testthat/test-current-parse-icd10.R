@@ -31,26 +31,26 @@ test_that("icd10 2016 flat file details are okay", {
 
   # check cols at a time, so I get better error feedback:
   col_names <- c("code", "billable", "short_desc", "long_desc", "three_digit",
-              "major", "sub_chapter", "chapter")
+                 "major", "sub_chapter", "chapter")
   expect_warning(res <- icd10cm_get_all_defined(save_data = FALSE), regexp = NA)
   expect_identical(colnames(res), col_names)
 
   # checkmate tests worked well here, but don't work with latest testthat
-  expect_true(is.character(res$code))
-  expect_true(is.logical(res$billable))
-  expect_true(is.character(res$short_desc))
-  expect_true(is.character(res$long_desc))
+  checkmate::expect_character(res$code)
+  checkmate::expect_logical(res$billable)
+  checkmate::expect_character(res$short_desc)
+  checkmate::expect_character(res$long_desc)
 
-  expect_true(is.character(icd::icd10cm2016$code))
-  expect_true(is.logical(icd::icd10cm2016$billable))
-  expect_true(is.character(icd::icd10cm2016$short_desc))
-  expect_true(is.character(icd::icd10cm2016$long_desc))
+  checkmate::expect_character(icd::icd10cm2016$code)
+  checkmate::expect_logical(icd::icd10cm2016$billable)
+  checkmate::expect_character(icd::icd10cm2016$short_desc)
+  checkmate::expect_character(icd::icd10cm2016$long_desc)
 
   for (n in c("three_digit", "major", "sub_chapter", "chapter")) {
-      expect_true(is.factor(res[[n]]))
-      expect_true(is.factor(icd::icd10cm2016[[n]]))
-      expect_identical(levels(res[[n]]), levels(icd::icd10cm2016[[n]]), info = paste("working on ", n))
-      expect_identical(res[[n]], icd::icd10cm2016[[n]], info = paste("working on ", n))
+    checkmate::expect_factor(res[[n]])
+    checkmate::expect_factor(icd::icd10cm2016[[n]])
+    expect_identical(levels(res[[n]]), levels(icd::icd10cm2016[[n]]), info = paste("working on ", n))
+    expect_identical(res[[n]], icd::icd10cm2016[[n]], info = paste("working on ", n))
   }
   expect_identical(res, icd::icd10cm2016)
 })
@@ -104,4 +104,14 @@ test_that("Y09 got picked up in sub-chapter parsing", {
   # Assult from X92-Y08, but has a hanging definition for Y09 with no enclosing
   # chapter. Will have to manually correct for this until fixed.
   expect_icd10_sub_chap_equal("Assault", "X92", "Y09")
+})
+
+test_that("chapter parsing for ICD-10 went okay", {
+  chap_lookup <- icd10_generate_chap_lookup()
+  expect_false(any(duplicated(chap_lookup$chap_major)))
+})
+
+test_that("sub-chapter parsing for ICD-10 went okay", {
+  sc_lookup <- icd10_generate_subchap_lookup()
+  expect_false(any(duplicated(sc_lookup$sc_major)))
 })

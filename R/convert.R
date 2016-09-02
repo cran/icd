@@ -103,8 +103,8 @@ icd_wide_to_long <- function(x,
                              icd_regex = c("icd", "diag", "dx_", "dx")) {
   assert_data_frame(x, min.rows = 1, min.cols = 2)
   assert_string(visit_name)
-  assert(checkmate::checkNull(icd_labels),
-         checkmate::checkCharacter(icd_labels, min.len = 1))
+  assert(check_null(icd_labels),
+         check_character(icd_labels, min.len = 1))
   assert_string(icd_name)
   assert_character(icd_regex, min.chars = 1, any.missing = FALSE, min.len = 1)
 
@@ -116,8 +116,8 @@ icd_wide_to_long <- function(x,
       re <- re - 1
     }
   }
-  checkmate::assert_character(icd_labels, any.missing = FALSE, min.chars = 1,
-                              min.len = 1, max.len = ncol(x) - 1)
+  assert_character(icd_labels, any.missing = FALSE, min.chars = 1,
+                   min.len = 1, max.len = ncol(x) - 1)
   stopifnot(all(icd_labels %in% names(x)))
 
   # could definitely do this with non-base functions, but this is quick enough
@@ -314,9 +314,9 @@ icd_short_to_decimal.icd9 <- function(x) {
 icd_short_to_decimal.icd10 <- function(x) {
   x <- trim(x)
   # todo: these could/should be seperate functions
-  out <- str_sub(x, 0, 3) # majors
-  minors <- str_sub(x, 4)
-  out[minors != ""] <- paste0(out, ".", minors)
+  out <- substr(x, 0, 3) # majors
+  minors <- substr(x, 4, 100L)
+  out[minors != ""] <- paste0(out[minors != ""], ".", minors[minors != ""])
   icd10(as.icd_decimal_diag(out)) # not as.icd10
 }
 

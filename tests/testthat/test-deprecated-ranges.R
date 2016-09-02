@@ -473,5 +473,4 @@ test_that("deprecated - sysdata.rda is okay", {
   expect_true(all(icd9NShortReal %in% icd9NShort))
   expect_true(all(icd9VShortReal %in% icd9VShort))
   expect_true(all(icd9EShortReal %in% icd9EShort))
-
 })

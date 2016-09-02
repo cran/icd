@@ -7,27 +7,26 @@ Description: Calculate comorbidities, Charlson scores, perform fast and accurate
     package enables a work flow from raw lists of ICD codes in hospital
     billing databases to comorbidities. ICD-9 and ICD-10 comorbidity mappings
     from Quan (Deyo and Elixhauser versions), Elixhauser and AHRQ included. This
-    package replaces 'icd9', which can now be uninstalled.
+    package replaces icd9, which can now be uninstalled.
 Classification/ACM-2012: Social and professional topics~Medical
         records, Applied computing~Health care information systems,
         Applied computing~Health informatics, Applied
         computing~Bioinformatics
-Version: 2.0.1
-Date: 2016-04-10
+Version: 2.1
+Date: 2016-08-30
 Authors@R: c(
     person(given = "Jack O.", family = "Wasey", role = c("aut", "cre", "cph"), email = "jack@jackwasey.com"),
     person(given = "William", family = "Murphy", role = "ctb", email = "WMurphy@eatright.org", comment = "Van Walraven scores"),
-    person("R Core Team", role = c("ctb", "cph"), comment = "m4 macro for OpenMP detection in configure"),
-    person("Kevin Ushey", role = c("ctb", "cph"), comment = "Fast factor creation, adapted from GPL-2 package fastmatch")
+    person("R Core Team", role = c("ctb", "cph"), comment = "m4 macro for OpenMP detection in configure")
     )
 Maintainer: Jack O. Wasey <jack@jackwasey.com>
 URL: https://github.com/jackwasey/icd
-Depends: R (>= 3.1.0)
-Imports: checkmate (>= 1.5.1), magrittr, stats, Rcpp (>= 0.12.3),
-        stringr, utils
+Depends: R (>= 3.2.0)
+Imports: checkmate (>= 1.7.0), magrittr, stats, Rcpp (>= 0.12.3), utils
 Suggests: knitr, RODBC, roxygen2 (>= 5.0.0), rmarkdown, testthat, xml2
 LazyData: true
 LazyDataCompression: xz
+ByteCompile: true
 BugReports: https://github.com/jackwasey/icd/issues
 License: GPL-3
 Copyright: See file (inst/)COPYRIGHTS
@@ -35,11 +34,9 @@ VignetteBuilder: knitr
 LinkingTo: Rcpp, testthat
 RoxygenNote: 5.0.1
 NeedsCompilation: yes
-Packaged: 2016-04-14 17:51:33 UTC; jack
+Packaged: 2016-09-02 10:35:44 UTC; waseyj
 Author: Jack O. Wasey [aut, cre, cph],
   William Murphy [ctb] (Van Walraven scores),
-  R Core Team [ctb, cph] (m4 macro for OpenMP detection in configure),
-  Kevin Ushey [ctb, cph] (Fast factor creation, adapted from GPL-2
-    package fastmatch)
+  R Core Team [ctb, cph] (m4 macro for OpenMP detection in configure)
 Repository: CRAN
-Date/Publication: 2016-04-15 08:33:03
+Date/Publication: 2016-09-02 23:45:32

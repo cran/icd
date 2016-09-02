@@ -12,6 +12,7 @@ icd10_comorbid_parent_search(x, map, visit_name = NULL,
 find ICD-10 comorbidities by checking parents
 }
 \examples{
+\dontrun{
 up <- uranium_pathology[1:50, ]
 stopifnot(identical(
 icd:::icd10_comorbid_parent_search_orig(up, icd10_map_ahrq,
@@ -21,11 +22,10 @@ icd:::icd10_comorbid_parent_search_use_cpp(up, icd10_map_ahrq,
   visit_name = "case", icd_name = "icd10",
   short_code = FALSE, short_map = TRUE, return_df = FALSE)
 ))
-\dontrun{
+
 library(microbenchmark)
-library(stringr)
 microbenchmark(substr("12345", 1, 4), substring("12345", 1, 4),
-               str_sub("12345", 1, 4), times = 1e5)
+               stringr::str_sub("12345", 1, 4), times = 1e5)
 # substr is fastest by a good margin
 
 microbenchmark(

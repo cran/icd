@@ -45,12 +45,15 @@
 #' library(magrittr, warn.conflicts = FALSE, quietly = TRUE)
 #' icd_explain(icd9_map_ahrq$CHF[1:3] %>% icd_condense)
 #' @return data frame, or list of data frames, with fields for ICD-9 code, name
-#'   and description
+#'   and description. There is no guarantee on the order of the returned
+#'   descriptions. \code{icd_explain_table} is designed to provide results in a
+#'   reliable order (when not condensing codes, at least).
 #' @export
 icd_explain <- function(...)
   UseMethod("icd_explain")
 
-#' @describeIn icd_explain Explain ICD codes from a character vector, guessing ICD version
+#' @describeIn icd_explain Explain ICD codes from a character vector, guessing
+#'   ICD version
 #' @export
 #' @keywords internal
 icd_explain.default <- function(x, short_code = icd_guess_short(x), condense = TRUE, brief = FALSE, warn = TRUE, ...) {
@@ -81,7 +84,7 @@ icd_explain.icd9 <- function(...) {
 #' @keywords internal
 icd_explain.icd9cm <- function(x, short_code = icd_guess_short(x),
                                condense = TRUE, brief = FALSE, warn = TRUE, ...) {
-  assert(checkmate::checkCharacter(x), checkmate::checkFactor(x))
+  assert(check_factor(x), check_character(x))
   assert_flag(short_code)
   assert_flag(condense)
   assert_flag(brief)
@@ -149,7 +152,7 @@ icd9_get_chapters <- function(x, short_code = icd_guess_short(x),
   # ICD-9 code, loop through each comorbidity and lookup code in the map for
   # that field, then add the factor level for the match. There should be 100%
   # matches.
-  assert(checkmate::checkCharacter(x), checkmate::checkFactor(x))
+  assert(check_factor(x), check_character(x))
   assert_flag(short_code)
   icd9 <- as_char_no_warn(x)
   majors <- icd_get_major.icd9(icd9, short_code)
@@ -175,13 +178,13 @@ icd9_get_chapters <- function(x, short_code = icd_guess_short(x),
     if (verbose)
       message("icd9_get_chapters: working on major ", majors[i], ", row ", i)
     for (chap_num in 1:length(icd::icd9_chapters)) {
-      if (majors[i] %fin% chap_lookup[[chap_num]]) {
+      if (majors[i] %in% chap_lookup[[chap_num]]) {
         out[i, "chapter"] <- names(icd::icd9_chapters)[chap_num]
         break
       }
     }
     for (subchap_num in 1:length(icd::icd9_sub_chapters)) {
-      if (majors[i] %fin% subchap_lookup[[subchap_num]]) {
+      if (majors[i] %in% subchap_lookup[[subchap_num]]) {
         out[i, "sub_chapter"] <- names(icd::icd9_sub_chapters)[subchap_num]
         break
       }

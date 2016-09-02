@@ -23,16 +23,20 @@
 #' directory, and copy to the given \code{save_path}
 #' @keywords internal file
 unzip_single <- function(url, file_name, save_path) {
+  assert_character(url, len = 1)
+  assert_character(file_name, len = 1)
+  assert_character(save_path, len = 1)
   zipfile <- tempfile()
   # using libcurl because it seems the internal method works inconsistently
-  if (capabilities("libcurl"))
+  curl_cap <- capabilities("libcurl")
+  if (length(curl_cap) > 0 && curl_cap)
     method <- "libcurl"
   else
     method <- "auto"
   dl_code <- utils::download.file(url = url, destfile = zipfile,
                                   quiet = TRUE, method = method, mode = "wb")
   stopifnot(dl_code == 0)
-  zipdir <- tempfile()
+  zipdir <- tempfile() # i do want tempfile, so I get an empty new directory
   dir.create(zipdir)
   utils::unzip(zipfile, exdir = zipdir)  # files="" so extract all
   files <- list.files(zipdir)
@@ -47,7 +51,7 @@ unzip_single <- function(url, file_name, save_path) {
     stopifnot(file_name %in% files)
 
   ret <- file.copy(file.path(zipdir, file_name), save_path, overwrite = TRUE)
-  unlink(file.path(zipdir, file_name))
+  unlink(zipdir, recursive = TRUE)
   ret
 }
 
@@ -98,9 +102,10 @@ unzip_to_data_raw <- function(url, file_name, offline = TRUE, verbose = FALSE) {
 
 #' @rdname unzip_to_data_raw
 #' @keywords internal file
-download_to_data_raw <- function(url,
-                                 file_name = str_extract(url, "[^/]*$"),
-                                 offline = TRUE) {
+download_to_data_raw <- function(
+  url,
+  file_name = regmatches(url, regexpr("[^/]*$", url)),
+  offline = TRUE) {
   assert_string(url)
   assert_string(file_name)
   assert_flag(offline)

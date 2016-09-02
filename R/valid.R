@@ -192,9 +192,7 @@ set_re_globals()
 #' @details Leading zeroes in the decimal form are not ambiguous. Although
 #'   integer ICD-9 codes could be intended by the user, there is a difference
 #'   between 100, 100.0, 100.00. Therefore a warning is given if a numeric value
-#'   is provided TODO: add default (when there is no class) which detected ICD-9
-#'   vs 10 if possible. TODO: use "short_code" or "long" attribute if available
-#'   to tighten validation, or guess if missing.
+#'   is provided.
 #' @section Class: S3 class of on object in R is just a vector. Attributes are
 #'   lost with manipulation, with the exception of class: therefore, elements of
 #'   the class vector are used to describe features of the data. If these are
@@ -227,6 +225,18 @@ icd_is_valid <- function(x, ...) {
   UseMethod("icd_is_valid")
 }
 
+icd_valid_worker <- function(x, whitespace_ok, regex, regex_no_ws = regex) {
+  assert_flag(whitespace_ok)
+  if (length(x) == 0)
+    return(logical())
+
+  assert(check_factor(x), check_character(x))
+  if (whitespace_ok)
+    na_to_false(grepl(re_just_ws(regex), x, perl = TRUE))
+  else
+    na_to_false(grepl(re_just(regex_no_ws), x, perl = TRUE))
+}
+
 #' @describeIn icd_is_valid_major Test whether an ICD code is of major type,
 #'   which at present assumes ICD-9 format. Converts to character than calls
 #'   \code{icd_is_valid.character}
@@ -246,18 +256,16 @@ icd_is_valid.default <- function(x, short_code = icd_guess_short(x), ...) {
 #' @keywords internal
 icd_is_valid.icd10 <- function(x, short_code = icd_guess_short(x),
                                whitespace_ok = TRUE, ...) {
-  assert_character(x)
   assert_flag(short_code)
-  assert_flag(whitespace_ok)
 
   # SOMEDAY: check whether code has 'year' attribute. This is maybe more for
   # testing 'realness' start with a broad regular expression
 
-  # TODO: test whether ICD-10-CM or WHO, if class not otherwise specified.
+  # SOMEDAY: test whether ICD-10-CM or WHO, if class not otherwise specified.
   if (short_code)
-    x %>% str_trim() %>% str_detect(re_just(re_icd10_short))
+    grepl(pattern = re_just(re_icd10_short), trim(x), perl = TRUE)
   else
-    x %>% str_trim() %>% str_detect(re_just(re_icd10_decimal))
+    grepl(pattern = re_just(re_icd10_decimal), trim(x), perl = TRUE)
 }
 
 #' @describeIn icd_is_valid Test whether generic ICD-10 code is valid
@@ -265,14 +273,7 @@ icd_is_valid.icd10 <- function(x, short_code = icd_guess_short(x),
 #' @keywords internal
 icd_is_valid.icd9 <- function(x, short_code = icd_guess_short(x),
                               whitespace_ok = TRUE, ...) {
-  assert(
-    checkmate::checkFactor(x),
-    checkmate::checkCharacter(x),
-    checkmate::checkClass(x, c("icd9")), # TODO: use icd9_classes
-    checkmate::checkClass(x, c("icd9cm"))
-  )
   assert_flag(short_code)
-  assert_flag(whitespace_ok)
   if (short_code)
     icd9_is_valid_short(x, whitespace_ok = whitespace_ok)
   else
@@ -280,92 +281,35 @@ icd_is_valid.icd9 <- function(x, short_code = icd_guess_short(x),
 }
 
 icd9_is_valid_decimal <- function(x, whitespace_ok = TRUE) {
-  assert(checkmate::checkFactor(x),
-         checkmate::checkCharacter(x),
-         checkmate::checkClass("icd9"),
-         checkmate::checkClass("icd9cm"))
-  assert_flag(whitespace_ok)
-  if (length(x) == 0)
-    return(logical())
-
-  if (whitespace_ok)
-    str_detect(as_char_no_warn(x), re_just_ws(re_icd9_decimal)) %>% na_to_false
-  else
-    str_detect(as_char_no_warn(x), re_just(re_icd9_decimal)) %>% na_to_false
+  icd_valid_worker(x, whitespace_ok, re_icd9_decimal)
 }
 
 icd9_is_valid_short <- function(x, whitespace_ok = TRUE) {
-  # if input doesn't satisfy these, then it is not just invalid, but deserves an
-  # error:
-  assert(
-    checkmate::checkFactor(x),
-    checkmate::checkCharacter(x),
-    checkmate::checkClass(x, c("icd9")),
-    checkmate::checkClass(x, c("icd9cm"))
-  )
-  assert_flag(whitespace_ok)
-
-  # TODO: do this everywhere or nowhere
-  if (length(x) == 0)
-    return(logical())
-
-  # as explained in details, a numeric short_code ID has different validity
-  # requirements than a string because of leading zeroes.
-
-  if (whitespace_ok)
-    str_detect(as_char_no_warn(x), re_just_ws(re_icd9_short)) %>% na_to_false
-  else
-    str_detect(as_char_no_warn(x), re_just(re_icd9_short)) %>% na_to_false
+  icd_valid_worker(x, whitespace_ok, re_icd9_short)
 }
 
 icd9_is_valid_short_n <- function(x, whitespace_ok = TRUE) {
-  assert_flag(whitespace_ok)
-  if (whitespace_ok)
-    str_detect(as_char_no_warn(x), re_just_ws(re_icd9_short_n)) %>% na_to_false
-  else
-    str_detect(as_char_no_warn(x), re_just(re_icd9_short_n)) %>% na_to_false
+  icd_valid_worker(x, whitespace_ok, re_icd9_short_n)
 }
 
 icd9_is_valid_short_v <- function(x, whitespace_ok = TRUE) {
-  assert_flag(whitespace_ok)
-  if (whitespace_ok)
-    str_detect(as_char_no_warn(x), re_just_ws(re_icd9_short_v)) %>% na_to_false
-  else
-    str_detect(as_char_no_warn(x), re_just(re_icd9_short_v)) %>% na_to_false
+  icd_valid_worker(x, whitespace_ok, re_icd9_short_v)
 }
 
 icd9_is_valid_short_e <- function(x, whitespace_ok = TRUE){
-  assert_flag(whitespace_ok)
-  if (whitespace_ok)
-    str_detect(as_char_no_warn(x), re_just_ws(re_icd9_short_e)) %>% na_to_false
-  else
-    str_detect(as_char_no_warn(x), re_just(re_icd9_short_e)) %>% na_to_false
+  icd_valid_worker(x, whitespace_ok, re_icd9_short_e)
 }
 
 icd9_is_valid_decimal_n <- function(x, whitespace_ok = TRUE) {
-  assert(checkmate::checkFactor(x), checkmate::checkCharacter(x))
-  assert_flag(whitespace_ok)
-  if (whitespace_ok)
-    str_detect(as_char_no_warn(x), re_just_ws(re_icd9_decimal_n)) %>% na_to_false
-  else
-    str_detect(as_char_no_warn(x), re_just(re_icd9_decimal_n)) %>% na_to_false
+  icd_valid_worker(x, whitespace_ok, re_icd9_decimal_n)
 }
 
 icd9_is_valid_decimal_v <- function(x, whitespace_ok = TRUE) {
-  assert_flag(whitespace_ok)
-  if (whitespace_ok)
-    str_detect(as_char_no_warn(x), re_just_ws(re_icd9_decimal_v)) %>% na_to_false
-  else
-    str_detect(as_char_no_warn(x), re_just(re_icd9_decimal_v)) %>% na_to_false
+  icd_valid_worker(x, whitespace_ok, re_icd9_decimal_v)
 }
 
 icd9_is_valid_decimal_e <- function(x, whitespace_ok = TRUE) {
-  assert_flag(whitespace_ok)
-  assert(checkmate::checkFactor(x), checkmate::checkCharacter(x))
-  if (whitespace_ok)
-    str_detect(as_char_no_warn(x), re_just_ws(re_icd9_decimal_e)) %>% na_to_false
-  else
-    str_detect(as_char_no_warn(x), re_just(re_icd9_decimal_e)) %>% na_to_false
+  icd_valid_worker(x, whitespace_ok, re_icd9_decimal_e)
 }
 
 #' Test whether an ICD code is major
@@ -381,12 +325,10 @@ icd_is_valid_major <- function(x, whitespace_ok = TRUE) {
 }
 
 #' @describeIn icd_is_valid_major Test whether an ICD code is of major type,
-#'   which at present assumes ICD-9 format
+#'   either ICD-9 or ICD-10
 #' @export
 #' @keywords internal
 icd_is_valid_major.default <- function(x, whitespace_ok = TRUE) {
-  assert_flag(whitespace_ok)
-  # check ICD-9 or ICD-10 majors: big regex, probably slow
   icd_is_valid_major.icd9(x, whitespace_ok) |
     icd_is_valid_major.icd10(x, whitespace_ok)
 }
@@ -395,51 +337,31 @@ icd_is_valid_major.default <- function(x, whitespace_ok = TRUE) {
 #' @export
 #' @keywords internal
 icd_is_valid_major.icd9 <- function(x, whitespace_ok = TRUE) {
-  assert_flag(whitespace_ok)
-  if (whitespace_ok)
-    str_detect(as_char_no_warn(x), re_just(re_icd9_major)) %>% na_to_false
-  else
-    str_detect(as_char_no_warn(x), re_just(re_icd9_major_bare)) %>% na_to_false
+  icd_valid_worker(x, whitespace_ok, re_icd9_major, re_icd9_major_bare)
 }
 
 #' @describeIn icd_is_valid_major Test whether an ICD-9 code is of major type.
 #' @export
 #' @keywords internal
 icd_is_valid_major.icd10 <- function(x, whitespace_ok = TRUE) {
-  assert_flag(whitespace_ok)
-  if (whitespace_ok)
-    str_detect(as_char_no_warn(x), re_just(re_icd10_major)) %>% na_to_false
-  else
-    str_detect(as_char_no_warn(x), re_just(re_icd10_major_bare)) %>% na_to_false
+  icd_valid_worker(x, whitespace_ok, re_icd10_major, re_icd10_major_bare)
 }
 
 #' @rdname icd_is_valid_major
 #' @keywords internal
 icd9_is_valid_major_n <- function(x, whitespace_ok = TRUE) {
-  assert_flag(whitespace_ok)
-  if (whitespace_ok)
-    str_detect(as_char_no_warn(x), re_just_ws(re_icd9_major_n)) %>% na_to_false
-  else
-    str_detect(as_char_no_warn(x), re_just(re_icd9_major_n)) %>% na_to_false
+  icd_valid_worker(x, whitespace_ok, re_icd9_major_n)
 }
 
 #' @rdname icd_is_valid_major
 #' @keywords internal
 icd9_is_valid_major_v <- function(x, whitespace_ok = TRUE) {
-  assert_flag(whitespace_ok)
-  if (whitespace_ok)
-    str_detect(as_char_no_warn(x), re_just_ws(re_icd9_major_v)) %>% na_to_false
-  else
-    str_detect(as_char_no_warn(x), re_just(re_icd9_major_v)) %>% na_to_false
+  icd_valid_worker(x, whitespace_ok, re_icd9_major_v)
 }
 #' @rdname icd_is_valid_major
 #' @keywords internal
 icd9_is_valid_major_e <- function(x, whitespace_ok = TRUE) {
-  assert_flag(whitespace_ok)
-  if (whitespace_ok)
-    str_detect(as_char_no_warn(x), re_just_ws(re_icd9_major_e)) %>% na_to_false
-  else
-    str_detect(as_char_no_warn(x), re_just(re_icd9_major_e)) %>% na_to_false
+  icd_valid_worker(x, whitespace_ok, re_icd9_major_e)
 }
 
 #' @describeIn icd_is_valid Validate a mapping of ICD codes to comorbidities.
@@ -449,7 +371,6 @@ icd_is_valid.icd_comorbidity_map <- function(x, short_code, ...) {
   assert_list(x, types = "character", any.missing = FALSE,
               min.len = 1, unique = TRUE, names = "named")
   assert_flag(short_code)
-  # TODO: warn/return the invalid labels?
   all(unlist(
     lapply(x, FUN = function(y) icd_is_valid(y, short_code = short_code)),
     use.names = FALSE
@@ -499,7 +420,7 @@ icd_get_valid.icd10 <- function(x, short_code = icd_guess_short(x)) {
 #' @export
 #' @keywords internal
 icd_get_valid.icd10cm <- function(x, short_code = icd_guess_short(x)) {
-  # TODO: make ICD-10-CM specific
+  # SOMEDAY: make ICD-10-CM specific (when WHO codes are acutally implemented)
   x[icd_is_valid.icd10(x, short_code = short_code)]
 }
 
@@ -562,13 +483,12 @@ icd_get_major <- function(x) {
 }
 
 #' @describeIn icd_get_major Get major part of an ICD-10 code
-#' @details For ICD-10, this is an initial implementation with
-#'   \code{\link{stringr}}. If speed needed, then can re-use C++ ICD-9 version:
-#'   just grabbing the first three characters, after all, and this is much
-#'   easier in ICD-10 then ICD-9
+#' @details For ICD-10, this is an initial implementation. If speed needed, then
+#'   can re-use C++ ICD-9 version: just grabbing the first three characters,
+#'   after all, and this is much easier in ICD-10 then ICD-9
 #' @keywords internal
 icd_get_major.icd10 <- function(x) {
-  x %>% str_trim %>% str_sub(1, 3)
+  substr(trim(x), 1L, 3L)
 }
 
 #' Check whether a code is major
@@ -603,7 +523,7 @@ icd_is_major.icd10 <- function(x) {
 #' @keywords internal
 icd_is_major.icd10cm <- function(x) {
   assert_character(x)
-  str_detect(x, re_just_ws(re_icd10cm_major))
+  grepl(re_just_ws(re_icd10cm_major), trim(x), perl = TRUE)
 }
 
 #' @describeIn icd_is_major check whether a code is an ICD-9 major

@@ -59,7 +59,7 @@ icd_sort.icd10 <- function(x, short_code = NULL, ...) {
 #' @keywords internal
 #' @export
 icd_sort.icd9 <- function(x, short_code = icd_guess_short(x), ...) {
-  assert(checkmate::checkFactor(x), checkmate::checkCharacter(x))
+  assert(check_factor(x), check_character(x))
   assert_flag(short_code)
 
   y <- if (short_code)
@@ -86,9 +86,9 @@ icd_sort.icd9 <- function(x, short_code = icd_guess_short(x), ...) {
 #' system.time(icd:::icd9_sort_cpp(x)) # vastly quicker
 #' system.time(icd:::icd9_order_short(x))
 #' \dontrun{
-#' # fastmatch is fractionally faster, but either is very slow
+#' # fastmatch was fractionally faster, but either is very slow
 #' library(microbenchmark)
-#' microbenchmark(icd9_order_short(x), icd9_order_short_fm(x), icd9_order_short_r(x), times = 10)
+#' microbenchmark(icd9_order_short(x), icd9_order_short_r(x), times = 10)
 #' # C++ method (which also ignores NA values) is 100x faster.
 #' }
 #' @return vector of integers with length of the non-NA values in \code{x}
@@ -99,18 +99,4 @@ icd9_order_short <- function(x) {
     x <- x[!is.na(x)]
   }
   icd9_order_cpp(x)
-}
-
-icd9_order_short_fm <- function(x) {
-  y <- x[order(icd9_add_leading_zeroes(x, short_code = TRUE))]
-  fmatch(
-    y[c(which(icd9_is_n(y)), which(icd9_is_v(y)), which(icd9_is_e(y)))],
-    x)
-}
-
-icd9_order_short_r <- function(x) {
-  y <- x[order(icd9_add_leading_zeroes(x, short_code = TRUE))]
-  match(
-    y[c(which(icd9_is_n(y)), which(icd9_is_v(y)), which(icd9_is_e(y)))],
-    x)
 }

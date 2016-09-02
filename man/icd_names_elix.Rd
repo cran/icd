@@ -16,6 +16,7 @@
 \alias{icd_names_ahrq_abbrev}
 \alias{icd_names_ahrq_htn}
 \alias{icd_names_ahrq_htn_abbrev}
+\alias{icd_names_cc}
 \alias{icd_names_charlson}
 \alias{icd_names_charlson_abbrev}
 \alias{icd_names_elix}

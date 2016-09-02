@@ -18,13 +18,11 @@
 context("deprecated billable code lists")
 
 test_that("billable codes are recreated", {
-  # can only do the test if we have all the flat files downloaded. TODO: on at
-  # least one of travis and wercker, downloading on the fly didn't seem to work
-  # from R. Someday may write function to download all online dependencies, and
-  # then travis or wercker could use this each time (whereas the function would
-  # only be needed occasionally for local testing)
+  # can only do the test if we have all the flat files downloaded. SOMEDAY may
+  # write function to download all online dependencies, and then travis or
+  # wercker could use this each time (whereas the function would only be needed
+  # occasionally for local testing)
   skip_flat_icd9_all_avail()
-  # TODO: run test if file is available, even if running in offline
   check_billable <- parse_leaf_descriptions_all(save_data = FALSE, offline = TRUE)
   skip_on_os(c("windows", "mac", "solaris"))
   for (ver in c("27", "28", "29", "30", "31", "32")) {
@@ -40,16 +38,6 @@ test_that("billable codes are recreated", {
 test_that("billable codes for expected versions exist", {
   expect_true(all(as.character(23:32) %in% names(icd9Billable)))
   expect_true(all(sapply(icd9Billable, is.data.frame)))
-})
-
-test_that("billable codes are all in order", {
-  skip_on_cran()
-  skip_slow_tests()
-  for (v in names(icd9Billable)) {
-    icd9 <- icd::icd9Billable[[v]][["icd9"]]
-    expect_identical(icd9, icd9SortShort(icd9),
-                     info = paste("version = ", v))
-  }
 })
 
 test_that("parsing 27 gives zero-padded digit icd9 codes", {

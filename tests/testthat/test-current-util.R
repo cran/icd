@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with icd. If not, see <http:#www.gnu.org/licenses/>.
 
-context("trim, strim, other utils")
+context("util")
 
 test_that("trim with empty inputs", {
   expect_equal(trim(character(0)), character(0))
@@ -151,4 +151,15 @@ test_that("good random ICD-9 codes are made", {
   expect_true(any(grepl(pattern = "^[0-9]{1,5}", rs)))
   expect_true(any(grepl(pattern = "^V.+", rs)))
   expect_true(any(grepl(pattern = "^E.+", rs)))
+})
+
+test_that("title case works", {
+  expect_identical(to_title_case("jack"), "Jack")
+  expect_identical(to_title_case("jack wasey"), "Jack Wasey")
+  expect_identical(to_title_case("a [HIV] b"), "A [HIV] B")
+  expect_identical(to_title_case("Arthropod-borne Viral Fevers And Viral Hemorrhagic Fevers"),
+                   "Arthropod-Borne Viral Fevers And Viral Hemorrhagic Fevers")
+  expect_identical(to_title_case("ill-defined"), "Ill-Defined")
+  expect_identical(to_title_case("body mass index [bmi]"), "Body Mass Index [Bmi]")
+  expect_identical(to_title_case("body mass index [BMI]"), "Body Mass Index [BMI]")
 })

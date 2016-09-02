@@ -82,6 +82,8 @@ as_char_no_warn <- function(x) {
 #' @keywords internal
 #' @examples
 #' \dontrun{
+#' requireNamespace("microbenchmark")
+#' requireNamespace("stringr")
 #' x <- random_string(25000);
 #' microbenchmark::microbenchmark(
 #'   gsub(x = x, pattern = "A", replacement = "", fixed = TRUE, useBytes = TRUE),
@@ -140,31 +142,41 @@ logical_to_binary <- function(x) {
 #' @param swap logical scalar, whether to swap the names and values. Default is
 #'   not to swap, so the first match becomes the name.
 #' @keywords internal
-str_pair_match <- function(string, pattern, pos, swap = FALSE, ...) {
-  assert_character(string, min.len = 1)
-  assert_string(pattern)
+str_pair_match <- function(string, pattern, pos, swap = FALSE, perl = TRUE, useBytes = TRUE) {
+  assert_character(string, min.len = 1L)
+  assert_string(pattern, min.chars = 5L)
   assert_flag(swap)
   pos_missing <- missing(pos)
   if (pos_missing)
     pos <- c(1, 2)
-  assert_integerish(pos, len = 2, lower = 1, any.missing = FALSE)
+  else
+    assert_integerish(pos, len = 2, lower = 1, any.missing = FALSE)
 
-  string %>% str_match(pattern) -> res_matches
+  result <- lapply(
+    string, function(x) unlist(
+      regmatches(
+        x = x,
+        m = regexec(
+          pattern = pattern,
+          text = x,
+          perl = perl,
+          useBytes = useBytes))
+    )[-1]
+  )
+  result <- result[vapply(result, function(x) length(x) != 0, logical(1))]
+  result <- do.call(rbind, result)
 
-  if (pos_missing && ncol(res_matches) > 3)
+  if (pos_missing && ncol(result) > max(pos))
     stop("the pair matching has three or more results but needed two.
           Use (?: to have a non-grouping regular expression parenthesis")
 
-  # with str_match, the first column is a redundant complete match of the
-  # whole pattern, so pos + 1 here:
-
-  out_names <- res_matches[, ifelse(swap, 2, 1) + 1]
+  out_names <- result[, ifelse(swap, 2, 1)]
   if (any(is.na(out_names))) {
     stop("didn't match some rows:", string[is.na(out_names)],
          call. = FALSE)
   }
 
-  out <- res_matches[, ifelse(swap, 1, 2) + 1]
+  out <- result[, ifelse(swap, 1, 2)]
   stopifnot(all(!is.na(out)))
   names(out) <- out_names
   out
@@ -262,18 +274,39 @@ swap_names_vals <- function(x) {
   x
 }
 
-# mimic the R CMD check test
-getNonASCII <- function(x)
-  x[isNonASCII(x)]
+#' mimic the R CMD check test
+#'
+#' \code{R CMD check} is quick to tell you where UTF-8 characters are not
+#' encoded, but gives no way of finding out which or where
+#' @examples
+#' \dontrun{
+#' sapply(icd9cm_hierarchy, icd:::get_non_ASCII)
+#' icd:::get_encodings(icd9cm_hierarchy)
+#' sapply(icd9cm_billable, icd:::get_non_ASCII)
+#' sapply(icd9cm_billable, icd:::get_encodings)
+#' }
+#' @keywords internal
+get_non_ASCII <- function(x)
+  x[is_non_ASCII(as_char_no_warn(x))]
 
-isNonASCII <- function(x)
-  is.na(iconv(x, from = "latin1", to = "ASCII"))
+#' @rdname get_non_ASCII
+#' @keywords internal
+is_non_ASCII <- function(x)
+  is.na(iconv(as_char_no_warn(x), from = "latin1", to = "ASCII"))
+
+#' @rdname get_non_ASCII
+#' @keywords internal
+get_encodings <- function(x) {
+  stopifnot(is.list(x) || is.data.frame(x))
+  sapply(x, function(y) unique(Encoding(as_char_no_warn(y))))
+}
 
 #' Fast Factor Generation
 #'
-#' This function generates factors more quickly, by leveraging
-#' \code{fastmatch}. The speed increase for ICD-9 codes is about
-#' 33% reduction for 10 million codes.
+#' This function generates factors more quickly, without leveraging
+#' \code{fastmatch}. The speed increase with \code{fastmatch} for ICD-9 codes
+#' was about 33% reduction for 10 million codes. SOMEDAY could be faster still
+#' using \code{Rcpp}, and a hashed matching algorithm.
 #'
 #' \code{NaN}s are converted to \code{NA} when used on numeric values. Extracted
 #' from https://github.com/kevinushey/Kmisc.git
@@ -311,24 +344,12 @@ isNonASCII <- function(x)
 #'   alphanumeric sorting will likely be completely wrong.
 #' @keywords internal manip
 factor_nosort <- function(x, levels = NULL, labels = levels) {
-  # sort may be pre-requisite for fastmatch
   if (is.factor(x)) return(x)
   if (is.null(levels)) levels <- unique.default(x)
-  suppressWarnings(f <- fmatch(x, levels))
+  suppressWarnings(f <- match(x, levels))
   levels(f) <- as.character(labels)
   class(f) <- "factor"
   f
-}
-
-#' Fast find which \code{x} are \emph{not} in \code{table}
-#'
-#' Uses \code{\link[fastmatch]{fmatch}} which creates hash table, and re-uses if
-#' \code{table} is re-used.
-#' @param x vector
-#' @param table vector
-#' @keywords internal
-`%fin%` <- function(x, table) {
-  fmatch(x, table, nomatch = 0L) > 0L
 }
 
 #' wrapper for \code{.Deprecated}
@@ -357,7 +378,7 @@ icd_deprecated <- function(...) {
 #' @name chapter_to_desc_range
 #' @keywords internal manip
 .chapter_to_desc_range <- function(x, re_major) {
-  assert_character(x, min.len = 1)
+  assert_character(x, min.len = 1L)
   assert_string(re_major)
 
   re_code_range <- paste0("(.*)[[:space:]]?\\((",
@@ -367,14 +388,14 @@ icd_deprecated <- function(...) {
   re_code_single <- paste0("(.*)[[:space:]]?\\((", re_major, ")\\)")
   mr <- str_match_all(x, re_code_range)
   ms <- str_match_all(x, re_code_single)
-  okr <- vapply(mr, length, integer(1)) == 4
-  oks <- vapply(ms, length, integer(1)) == 3
+  okr <- vapply(mr, length, integer(1)) == 4L
+  oks <- vapply(ms, length, integer(1)) == 3L
 
   if (!all(okr || oks))
     stop("Problem matching\n", x[!(okr || oks)], call. = FALSE)
   m <- ifelse(okr, mr, ms)
   out <- lapply(m, function(y) c(start = y[[3]], end = y[[length(y)]]))
-  names(out) <- vapply(m, function(y) y[[2]] %>% str_to_title %>% str_trim,
+  names(out) <- vapply(m, function(y) trim(to_title_case(y[[2]])),
                        FUN.VALUE = character(1))
   out
 }
@@ -403,12 +424,34 @@ named_list <- function(...) {
   x
 }
 
-fmatch <- function(x, table, nomatch = NA_integer_, incomparables = NULL) {
-  .Call("fmatch", PACKAGE = "icd", x, table, nomatch, incomparables)
-}
-
 # allows R 3.1 to work
 dir.exists <- function(paths) {
   x <- file.info(paths)$isdir
   !is.na(x) & x
+}
+
+# substitute for removed stringr function
+str_match_all <- function(x, pattern, perl = TRUE, useBytes = TRUE) {
+  x <- as.character(x)
+  regmatches(x, regexec(pattern, x, perl = perl, useBytes = useBytes))
+}
+
+#' str_extract replacement
+#' @keywords internal
+str_extract <- function(string, pattern) {
+  vapply(regmatches(string, regexec(pattern = pattern, text = string)),
+         FUN = `[[`, 1, FUN.VALUE = character(1L))
+}
+
+capitalize_first <- function(name) {
+  trim(paste0(toupper(substr(name, 1, 1)), substr(name, 2, nchar(name))))
+}
+
+to_title_case <- function(x) {
+  for (split_char in c(" ", "-", "[")) {
+    s <- strsplit(x, split_char, fixed = TRUE)[[1]]
+    x <- paste(toupper(substring(s, 1L, 1L)), substring(s, 2L),
+               sep = "", collapse = split_char)
+  }
+  x
 }

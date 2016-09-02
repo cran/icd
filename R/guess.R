@@ -55,12 +55,12 @@ icd_guess_version.factor <- function(x, short_code = NULL, ...) {
 #' @export
 #' @keywords internal
 icd_guess_version.character <- function(x, short_code = NULL, n = 10, ...) {
-  # TODO: this is too complicated, but tolerant of invalid codes. If we assume
+  # SOMEDAY: this is too complicated, but tolerant of invalid codes. If we assume
   # all the codes are valid ICD-9 or ICD-10, then we can just look for the first
   # code which starts with a number, which would be simpler and much faster.
 
   assert_character(x)
-  assert(checkmate::checkFlag(short_code), checkmate::checkNull(short_code))
+  assert(check_flag(short_code), check_null(short_code))
 
   x <- x[1:n]
 
@@ -130,8 +130,7 @@ icd_guess_version_update <- function(x, short_code = icd_guess_short(x)) {
 #' class of the returned data according to the guess.
 #' @return the input data with appropriate ICD class set
 #' @keywords internal
-icd_guess_short_update <- function(x, icd_name = get_icd_name(x),
-                                   short_code = icd_guess_short(x)) {
+icd_guess_short_update <- function(x, short_code = icd_guess_short(x)) {
   if (short_code)
     as.icd_short_diag(x)
   else

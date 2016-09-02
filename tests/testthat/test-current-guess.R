@@ -32,24 +32,25 @@ test_that("short_code is respected even if code is opposite", {
 })
 
 test_that("guess type from a data frame with no class set on column", {
-pts <- generate_random_pts(5)
-class(pts$code) <- "character"
+  pts <- generate_random_pts(5)
+  class(pts$code) <- "character"
 
-expect_true(icd_guess_short(pts))
+  expect_true(icd_guess_short(pts))
 
-no_pts <- structure(list(visit_id = integer(0),
-                         code = character(0),
-                         poa = structure(integer(0),
-                                         .Label = character(0), class = "factor")),
-                    .Names = c("visit_id", "code", "poa"), row.names = integer(0), class = "data.frame")
+  no_pts <- structure(list(visit_id = integer(0),
+                           code = character(0),
+                           poa = structure(integer(0),
+                                           .Label = character(0), class = "factor")),
+                      .Names = c("visit_id", "code", "poa"), row.names = integer(0), class = "data.frame")
 
-# no error?
-icd_guess_short(no_pts)
+  # no error?
+  icd_guess_short(no_pts)
 
 })
 
 test_that("guess on a zero length character vector works", {
- expect_true(is.logical(icd_guess_short(character(0))))
+  # we always give a true or false response even if we have no data
+  expect_logical(icd_guess_short(character(0)), len = 1L)
 })
 
 test_that("lists of ICD-10 decimal codes are identified correctly as decimal", {
@@ -74,4 +75,41 @@ test_that("guessing type of NA values defaults to short, and doesn't error", {
   expect_error(icd_guess_short(icd9cm(c(NA, TRUE))))
   expect_error(icd_guess_short(icd10(c(NA, TRUE))))
   expect_error(icd_guess_short(icd10cm(c(NA, TRUE))))
+})
+
+test_that("guess and update version", {
+  res <- icd_guess_version_update("1234", TRUE)
+  expect_true(is.icd9(res))
+  expect_false(is.icd10(res))
+
+  res <- icd_guess_version_update("12.34", FALSE)
+  expect_true(is.icd9(res))
+  expect_false(is.icd10(res))
+
+
+  res <- icd_guess_version_update("A010", TRUE)
+  expect_true(is.icd10(res))
+  expect_false(is.icd9(res))
+
+  res <- icd_guess_version_update("A01.0", FALSE)
+  expect_true(is.icd10(res))
+  expect_false(is.icd9(res))
+})
+
+test_that("guess short update", {
+  res <- icd_guess_short_update(as.icd9("1234"))
+  expect_true(is.icd_short_diag(res))
+  expect_false(is.icd_decimal_diag(res))
+
+  res <- icd_guess_short_update(as.icd9("12.34"))
+  expect_false(is.icd_short_diag(res))
+  expect_true(is.icd_decimal_diag(res))
+
+  res <- icd_guess_short_update(as.icd9("S1234"))
+  expect_true(is.icd_short_diag(res))
+  expect_false(is.icd_decimal_diag(res))
+
+  res <- icd_guess_short_update(as.icd9("S12.34"))
+  expect_false(is.icd_short_diag(res))
+  expect_true(is.icd_decimal_diag(res))
 })

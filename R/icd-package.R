@@ -81,9 +81,7 @@
 #' \url{http://www.hcup-us.ahrq.gov/toolssoftware/comorbidity/comorbidity.jsp}
 #' @concept ICD-9 ICD-10 comorbidity comorbidities
 #' @useDynLib icd
-#' @import Rcpp checkmate stringr
-#' @importFrom magrittr "%<>%" set_names extract2
+#' @import Rcpp checkmate
+#' @importFrom magrittr "%>%" "%<>%" set_names extract2
+#' @importFrom utils head tail read.fwf
 NULL
-
-# stringr imports and re-exports %>% so I don't get it from magrittr (otherwise
-# there is a check warning)

@@ -15,9 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with icd. If not, see <http:#www.gnu.org/licenses/>.
 
-# could also be done by test-all.R
-library("magrittr", quietly = TRUE, warn.conflicts = FALSE)
-
 local({
   do_slow_tests <- getOption("icd.do_slow_tests")
   if (is.null(do_slow_tests) || !do_slow_tests)
@@ -31,7 +28,7 @@ n <- 500
 np <- round(n / 20) # icd9 codes per patients
 
 random_short_icd9_codes <- as.character(floor(stats::runif(min = 10000, max = 99999, n = n)))
-random_sample_ahrq_codes <- sample(unname(c(icd::icd9_map_ahrq, recursive = TRUE)),
+random_sample_ahrq_codes <- sample(unname(c(icd9_map_ahrq, recursive = TRUE)),
                                    replace = TRUE, size = n)
 few_icd9_codes <- c("27801", "7208", "25001", "34400", "4011", "4011")
 
@@ -84,17 +81,23 @@ test_twenty <- structure(
   class = "data.frame")
 
 # first and last item from each AHRQ comorbidity:
-ahrq_end_codes <- c(lapply(icd::icd9_map_ahrq, head, n = 1),
-                    lapply(icd::icd9_map_ahrq, tail, n = 1)) %>%
-  unname %>%
-  unlist %>%
-  icd9
+icd9(
+  unlist(
+    unname(
+      c(lapply(icd::icd9_map_ahrq, head, n = 1),
+        lapply(icd::icd9_map_ahrq, tail, n = 1)
+      )
+    )
+  )
+) -> ahrq_end_codes
 
-ahrq_test_dat <- data.frame(
-  visit_id = rep("visit1", times = length(ahrq_end_codes)),
-  icd9 = ahrq_end_codes,
-  stringsAsFactors = FALSE
-) %>% as.icd_long_data
+ahrq_test_dat <- as.icd_long_data(
+  data.frame(
+    visit_id = rep("visit1", times = length(ahrq_end_codes)),
+    icd9 = ahrq_end_codes,
+    stringsAsFactors = FALSE
+  )
+)
 
 elix_end_codes <- unlist(unname(c(lapply(icd::elixComorbid, head, n = 1),
                                   lapply(icd::elixComorbid, tail, n = 1))))
@@ -149,3 +152,26 @@ pts_invalid_mix <- icd_long_data(
   icd9 = icd9(c("27801", "invalides", "25001")),
   poa = factor(c("Y", "N", "Y")),
   stringsAsFactors = FALSE)
+
+###
+# Sample datasets for HCC tests
+# 4 patients, some with ICDs that do not exist in CC crosswalk
+# One of the patients with multiple visit dates, all valid ICDs
+hcc_test_simple <- icd_long_data(
+  visit_name = c("1", "2", "3", "4", "4"),
+  icd_name = c("20084", "1742", "30410", "41514", "95893"),
+  date = as.Date(c("2011-01-01", "2011-01-02", "2011-01-03",
+    "2011-01-04", "2011-01-04")))
+
+# Only one record
+hcc_test_single <- icd_long_data(
+  visit_name = c("1"),
+  icd_name = c("20084"),
+  date = as.Date(c("2011-01-01")))
+
+# Mix of valid and invalid ICD Codes
+hcc_test_invalid <- icd_long_data(
+  visit_name = c("1", "2", "3", "4", "4"),
+  icd_name = c("20084", "174242", "aB30410", "41514", "95893"),
+  date = as.Date(c("2011-01-01", "2011-01-02", "2011-01-03",
+    "2011-01-04", "2011-01-04")))

@@ -23,6 +23,25 @@
 #include "manip.h"
 #include <Rcpp.h>
 
+//' Convert major and minor vectors to single code
+//'
+//' In debug mode, will check that major and minor are same length.
+//' @template major
+//' @template minor
+//' @template isShort
+//' @examples
+//' \dontrun{
+//' n <- 5
+//' majors <- as.character(sample(1:999, n, replace = TRUE))
+//' minors <- as.character(sample(0:99, n, replace = TRUE))
+//' microbenchmark::microbenchmark(
+//'   icd9MajMinToCode(majors, minors, TRUE),
+//'   icd9MajMinToCodeStd(majors, minors, TRUE),
+//'   times = 3
+//' )
+//' }
+//' # std method vastly quicker, e.g. x100 when n=5000
+//' @keywords internal manip
 // [[Rcpp::export]]
 Rcpp::CharacterVector icd9MajMinToCode(const Rcpp::CharacterVector major,
                                        const Rcpp::CharacterVector minor, bool isShort) {
@@ -30,31 +49,27 @@ Rcpp::CharacterVector icd9MajMinToCode(const Rcpp::CharacterVector major,
   Rcpp::Rcout << "icd9MajMinToCode: major.size() = " << major.size()
               << " and minor.size() = " << minor.size() << "\n";
 #endif
-
+#ifdef ICD_DEBUG
   if (major.size() != minor.size())
     Rcpp::stop("major and minor lengths differ");
-
-#ifdef ICD_DEBUG_TRACE
-  Rcpp::Rcout << "major and minor are the same?\n";
 #endif
 
-  Rcpp::CharacterVector out; // wish I could reserve space for this
+  std::vector<std::string> out(major.size());
+  std::vector<char> out_is_na(major.size()); // boolean in char
   Rcpp::CharacterVector::const_iterator j = major.begin();
   Rcpp::CharacterVector::const_iterator n = minor.begin();
 
   for (; j != major.end() && n != minor.end(); ++j, ++n) {
     Rcpp::String mjrelem = *j;
-    if (mjrelem == NA_STRING) {
-      out.push_back(NA_STRING);
+    if (Rcpp::CharacterVector::is_na(*j)) {
+      out_is_na[std::distance(major.begin(), j)] = 1;
       continue;
     }
-    // work around Rcpp bug with push_front: convert to string just for this
-    // TODO: try to do this with C string instead
     const char* smj_c = mjrelem.get_cstring();
     std::string smj = std::string(smj_c);
     switch (strlen(smj_c)) {
     case 0:
-      out.push_back(NA_STRING);
+      out_is_na[std::distance(major.begin(), j)] = 1;
       continue;
     case 1:
       if (!icd9IsASingleVE(smj_c)) {
@@ -70,24 +85,28 @@ Rcpp::CharacterVector icd9MajMinToCode(const Rcpp::CharacterVector major,
       // default: // major is 3 (or more) chars already
     }
     Rcpp::String mnrelem = *n;
-    if (mnrelem == NA_STRING) {
-      //out.push_back(mjrelem);
-      out.push_back(smj);
-      continue;
+    if (Rcpp::CharacterVector::is_na(*n)) {
+      mnrelem = "";
     }
-    // this can probably be done more quickly:
-    //std::string smj(mjrelem);
     if (!isShort && mnrelem != "") {
       smj.append(".");
     }
     smj.append(mnrelem);
-    out.push_back(smj);
-
+    out[std::distance(major.begin(), j)] = smj;
   }
-  // ?slow step somewhere around here, with use of Rcpp::String, maybe in the wrapping? Maybe in the multiple push_back calls
-
-  //return wrap(out);
-  return out;
+  Rcpp::CharacterVector r_out = Rcpp::wrap(out);
+#ifdef ICD_DEBUG_TRACE
+  Rcpp::Rcout << "NA loop size: " << out_is_na.size() << "\n";
+#endif
+  for (std::vector<char>::iterator i = out_is_na.begin(); i != out_is_na.end(); ++i) {
+#ifdef ICD_DEBUG_TRACE
+    Rcpp::Rcout << "NA loop: " << std::distance(out_is_na.begin(), i) << "\n";
+#endif
+    if (*i == 0)
+      continue;
+    r_out[std::distance(out_is_na.begin(), i)] = NA_STRING;
+  }
+  return r_out;
 }
 
 // [[Rcpp::export]]
@@ -97,11 +116,13 @@ Rcpp::CharacterVector icd9MajMinToShort(const Rcpp::CharacterVector major,
   Rcpp::Rcout << "icd9MajMinToShort: major.size() = " << major.size()
               << " and minor.size() = " << minor.size() << "\n";
 #endif
+#ifdef ICD_DEBUG
   if ((major.size() != 1 && major.size() != minor.size())
         || (major.size() == 1 && minor.size() == 0)) {
     Rcpp::stop(
       "icd9MajMinToShort, length of majors and minors must be equal, unless majors length is one.");
   }
+#endif
   if (major.size() == 1) {
 #ifdef ICD_DEBUG_TRACE
     Rcpp::Rcout << "icd9MajMinToShort: major.size() = 1\n";
@@ -163,7 +184,7 @@ Rcpp::List icd9ShortToPartsCpp(const Rcpp::CharacterVector icd9Short, const Rcpp
       continue;
     }
 
-    std::string s(thisShort.get_cstring()); // TODO maybe better to use as?
+    std::string s(thisShort.get_cstring());
     s = strimCpp(s); // in place or rewrite?
     std::string::size_type sz = s.size();
 
@@ -269,10 +290,9 @@ Rcpp::List icd9DecimalToPartsCpp(const Rcpp::CharacterVector icd9Decimal, const 
       minors.push_back(NA_STRING);
       continue;
     }
-    // TODO: Rcpp::Rcpp::String doesn't implement many functions, so using STL. A FAST way
-    // would be to use Rcpp::String's function get_cstring, and recode the trim
-    // functions to take const char *. This would avoid the type change AND be
-    // faster trimming.
+    // SOMEDAY, a faster way might be to use Rcpp::String's function
+    // get_cstring, and recode the trim functions to take const char *. This
+    // would avoid the type change AND may trim faster.
     std::string thiscode = Rcpp::as<std::string>(*it);
     thiscode = strimCpp(thiscode); // This updates 'thisccode' by reference, no copy
     std::size_t pos = thiscode.find(".");
@@ -319,10 +339,6 @@ Rcpp::List icd10DecimalToPartsCpp(const Rcpp::CharacterVector x, const Rcpp::Str
       minors.push_back(NA_STRING);
       continue;
     }
-    // TODO: Rcpp::Rcpp::String doesn't implement many functions, so using STL. A FAST way
-    // would be to use Rcpp::String's function get_cstring, and recode the trim
-    // functions to take const char *. This would avoid the type change AND be
-    // faster trimming.
     std::string thiscode = Rcpp::as<std::string>(*it);
     thiscode = strimCpp(thiscode); // This updates 'thisccode' by reference, no copy
     std::size_t pos = thiscode.find(".");
@@ -359,10 +375,6 @@ Rcpp::CharacterVector icd9DecimalToShort(
     Rcpp::String strna = x[i]; // need to copy here? does it copy?
     if (strna == NA_STRING || strna == "")
       continue;
-    // TODO: Rcpp::String doesn't implement many functions, so using STL. A FAST way
-    // might be to use Rcpp::String's function get_cstring, and recode the trim
-    // functions to take const char *. This would avoid the type change AND be
-    // faster trimming.
     const char * thiscode_cstr = strna.get_cstring();
     std::string thiscode(thiscode_cstr);
     thiscode = trimLeftCpp(thiscode);

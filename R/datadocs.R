@@ -57,7 +57,10 @@ NULL
 #' hierarchy, each chapter containing sets of codes which span multiple
 #' three-digit 'major' codes, and in some cases also span codes across two
 #' alphabetic initial characters. E.g. Chapter I spans A00 to B99.
-#' @details TODO: confirm that ICD-10-CM is identical to ICD-10 at this level
+#'
+#' 2017 ICD-10-CM does not have any U codes (codes for special purposes).
+#' U00-U49 - Provisional assignment of new diseases of uncertain etiology or
+#' emergency use U82-U85 - Resistance to antimicrobial and anti-neoplastic drugs
 #' @source http://apps.who.int/classifications/icd10/browse/2016/en
 #' @format list with chapter names stored in list names, each with two element
 #'   named character vector with start and end codes.
@@ -77,7 +80,6 @@ NULL
 #'   two element named character vector with start and end codes.
 #' @name icd10_sub_chapters
 NULL
-
 
 #' Latest ICD-9-CM diagnosis codes, in flat \code{data.frame} format
 #'
@@ -136,6 +138,7 @@ NULL
 #' @format list of character vectors
 #' @source
 #' \url{http://www.hcup-us.ahrq.gov/toolssoftware/comorbidity/comorbidity.jsp}
+#' \url{http://www.hcup-us.ahrq.gov/toolssoftware/comorbidityicd10/comorbidity_icd10.jsp}
 #' @name icd9_map_ahrq
 #' @aliases ahrqComorbid ahrq icd10_map_ahrq
 NULL
@@ -195,8 +198,8 @@ NULL
 #' @keywords datasets
 #' @format list of character vectors, each named by co-morbidity
 #' @references Sharabiani, Mansour T. A., Paul Aylin, and Alex Bottle.
-#'   "Systematic Review of Comorbidity Indices for Administrative Data." Medical
-#'   Care December 2012 50, no. 12 (2012): 1109-18.
+#'   "Systematic Review of Comorbidity Indices for Administrative Data."
+#' 	 Medical Care December 2012 50, no. 12 (2012): 1109-18.
 #'   doi:10.1097/MLR.0b013e31825f64d0.
 #'   \url{http://www.ncbi.nlm.nih.gov/pubmed/22929993}
 #'
@@ -205,6 +208,32 @@ NULL
 #'   January 1998 36, no. 1 (1998): 8-27.
 #' @name icd9_map_elix
 #' @aliases elixComorbid icd10_map_elix
+NULL
+
+#' Medicare Hierarchical Condition Categories
+#'
+#' Medicare HCC model was developed to use current year diagnoses and demographics
+#' predict current year healthcare expenditure. This classification has been used
+#' for additional risk adjustment models. ICD codes are first assigned to numeric
+#' Condition Categories (CCs). A hierarchy rule is then applied so that each patient
+#' is coded for only the most severe of the Condition Categories in a group. For example,
+#' if a patient has metastatic lung cancer, they will only be assigned the CC
+#' for "Metastatic Cancer and Acute Leukemia", and will not be assigned the
+#' CC for "Lung and other Severe Cancers". Once the hierarchy rules are applied, the codes
+#' are referred to as HCCs. This mapping can change over time. It remained the same from
+#' 2007-10
+#' @docType data
+#' @keywords datasets
+#' @format \code{dataframe} with 3 columns (\code{icd_code}, \code{cc}, and \code{year})
+#' @references Pope, Gregory C., et al.
+#'   "Diagnostic cost group hierarchical condition category models for Medicare risk adjustment."
+#'   Health Economics Research, Inc. Waltham, MA (2000).
+#'   \url{https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Reports/Downloads/Pope_2000_2.pdf}
+#'
+#'   Risk Adjustment, Centers for Medicare and Medicaid Services
+#'   \url{https://www.cms.gov/Medicare/Health-Plans/MedicareAdvtgSpecRateStats/Risk-Adjustors.html}
+#' @name icd9_map_hcc
+#' @aliases icd9_map_cc icd10_map_cc icd_map_cc_hcc
 NULL
 
 #' Comorbidity names
@@ -231,7 +260,7 @@ NULL
 #'   icd_names_quan_elix icd_names_quan_elix_abbrev icd_names_quan_elix_htn
 #'   icd_names_quan_elix_htn_abbrev icd_names_ahrq icd_names_ahrq_abbrev
 #'   icd_names_ahrq_htn icd_names_ahrq_htn_abbrev icd_names_charlson
-#'   icd_names_charlson_abbrev elixComorbidNames elixComorbidNamesAbbrev
+#'   icd_names_charlson_abbrev icd_names_cc elixComorbidNames elixComorbidNamesAbbrev
 #'   elixComorbidNamesHtn elixComorbidNamesHtnAbbrev quanElixComorbidNames
 #'   quanElixComorbidNamesAbbrev quanElixComorbidNamesHtn
 #'   quanElixComorbidNamesHtnAbbrev ahrqComorbidNames ahrqComorbidNamesAbbrev

@@ -120,14 +120,6 @@ context("icd9ShortToPartsCpp") {
   }
 }
 
-// context("Rcpp exports") {
-//   test_that("Rcpp exports are valid") {
-//
-//     int i = icd_RcppExport_validate("icd");
-//     expect_that(i > 0);
-//   }
-// }
-
 context("parallel debug") {
   test_that("debug parallel runs without error") {
     debug_parallel();
@@ -257,6 +249,7 @@ context("fast int to string") {
 
 }
 
+#ifdef ICD_DEBUG
 context("MajMin to code") {
   test_that("differing lengths gives error") {
     Rcpp::CharacterVector mj = Rcpp::CharacterVector::create("100");
@@ -278,6 +271,7 @@ context("MajMin to code") {
     expect_error(icd9MajMinToCode(mj, mn, true));
   }
 }
+#endif
 
 context("add leading zeroes to major") {
   test_that("when major len is 0, result is empty") {

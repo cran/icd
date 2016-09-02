@@ -55,14 +55,7 @@ icd9PoaChoices <- icd_poa_choices
 #' For ICD-10 codes, this method, it relies on exact matching, but not every of
 #' billions of possible ICD-10/ICD-10-CM codes are included in the mappings, so
 #' it will likely give incomplete results, without searching for parents of the
-#' input codes until a match is found in the map. TODO: this is incomplete! For
-#' ICD-10, there are two look-up methods. The classic look-up, as used for ICD-9
-#' codes, assumes any possible code is available to match in the comorbidity
-#' map. However, for ICD-10-CM, there are too many possible codes, specifying
-#' subsequent encounters, laterality, etc., etc., so this is too bulky. However
-#' for some mappings, there are exact definitions, e.g. AHRQ seems to specify
-#' everything (for a given ICD-10-CM year)
-#'
+#' input codes until a match is found in the map.
 #' @param map list (or name of a list if character vector of length one is given
 #'   as argument) of the comorbidities with each top-level list item containing
 #'   a vector of decimal ICD-9 codes. This is in the form of a list, with the
@@ -89,6 +82,13 @@ icd9PoaChoices <- icd_poa_choices
 #'   pts <- icd_long_data(visit_name = c("2", "1", "2", "3", "3"),
 #'                    icd9 = c("39891", "40110", "09322", "41514", "39891"))
 #'   icd_comorbid(pts, icd9_map_ahrq, short_code = TRUE) # visit_name is now sorted
+#'   pts <- icd_long_data(
+#'              visit_name = c("1", "2", "3", "4", "4"),
+#'              icd_name = c("20084", "1742", "30410", "41514", "95893"),
+#'              date = as.Date(c("2011-01-01", "2011-01-02", "2011-01-03",
+#'                "2011-01-04", "2011-01-04")))
+#'   pt_hccs <- icd_comorbid_hcc(pts, date_name = "date")
+
 #' @export
 icd_comorbid <- function(x, map, ...) {
   ver <- icd_guess_version.character(map[[1]])
@@ -127,12 +127,12 @@ icd10_comorbid <- function(x,
   assert_data_frame(x, min.cols = 2, col.names = "unique")
   assert_list(map, any.missing = FALSE, min.len = 1, unique = TRUE, names = "unique")
 
-  assert(checkmate::checkString(visit_name), checkmate::checkNull(visit_name))
-  assert(checkmate::checkString(icd_name), checkmate::checkNull(icd_name))
+  assert(check_string(visit_name), check_null(visit_name))
+  assert(check_string(icd_name), check_null(icd_name))
   visit_name <- get_visit_name(x, visit_name)
   icd_name <- get_icd_name(x, icd_name)
   assert_string(visit_name)
-  assert(checkmate::checkFlag(short_code), checkmate::checkNull(short_code))
+  assert(check_flag(short_code), check_null(short_code))
   assert_flag(short_map)
 
   if (is.null(icd_name))
@@ -149,6 +149,7 @@ icd10_comorbid <- function(x,
 #' find ICD-10 comorbidities by checking parents
 #'
 #' @examples
+#' \dontrun{
 #' up <- uranium_pathology[1:50, ]
 #' stopifnot(identical(
 #' icd:::icd10_comorbid_parent_search_orig(up, icd10_map_ahrq,
@@ -158,11 +159,10 @@ icd10_comorbid <- function(x,
 #'   visit_name = "case", icd_name = "icd10",
 #'   short_code = FALSE, short_map = TRUE, return_df = FALSE)
 #' ))
-#' \dontrun{
+#'
 #' library(microbenchmark)
-#' library(stringr)
 #' microbenchmark(substr("12345", 1, 4), substring("12345", 1, 4),
-#'                str_sub("12345", 1, 4), times = 1e5)
+#'                stringr::str_sub("12345", 1, 4), times = 1e5)
 #' # substr is fastest by a good margin
 #'
 #' microbenchmark(
@@ -198,46 +198,6 @@ icd10_comorbid_parent_search <- function(
                                        short_map = short_map, return_df = return_df, ...)
 }
 
-icd10_comorbid_parent_search_str <- function(
-  x,
-  map,
-  visit_name = NULL,
-  icd_name = get_icd_name(x),
-  short_code = icd_guess_short(x, icd_name = icd_name),
-  short_map = icd_guess_short(map),
-  return_df = FALSE, ...) {
-
-  if (!short_code)
-    x[[icd_name]] <- icd_decimal_to_short.icd10(x[[icd_name]])
-
-  icd_codes <- x[[icd_name]]
-
-  # for each icd code
-  just_cmb <- vapply(icd_codes, FUN.VALUE = logical(length(map)), FUN = function(y) {
-    # look it up in each comorbidity, but TODO: once we have a comorbidity for
-    # one patient, we don't need to search within it again
-
-    char_count <- nchar(as.character(y)):3
-    vapply(names(map), FUN.VALUE = logical(1),
-           FUN = function(cmb) {
-             # and if not found, slice off last char of test string
-             for (n in char_count) {
-               if (!is.na(fmatch(substr(y, 1, n), map[[cmb]])))
-                 return(TRUE)
-             }
-             FALSE
-           })
-  })
-
-  res <- aggregate(x = t(just_cmb), by = x[visit_name], FUN = any)
-  if (return_df)
-    return(res)
-
-  out <- as.matrix(res[-1])
-  rownames(out) <- res[[1]]
-  out
-}
-
 icd10_comorbid_parent_search_use_cpp <- function(x,
                                                  map,
                                                  visit_name = NULL,
@@ -260,151 +220,6 @@ icd10_comorbid_parent_search_use_cpp <- function(x,
   out
 }
 
-icd10_comorbid_parent_search_all_at_once <- function(x,
-                                                     map,
-                                                     visit_name = NULL,
-                                                     icd_name = get_icd_name(x),
-                                                     short_code = icd_guess_short(x, icd_name = icd_name),
-                                                     short_map = icd_guess_short(map),
-                                                     return_df = FALSE, ...) {
-
-  if (!short_code)
-    x[[icd_name]] <- icd_decimal_to_short.icd10(x[[icd_name]])
-
-  icd_codes <- x[[icd_name]]
-
-  # for each icd code
-  just_cmb <- vapply(icd_codes, FUN.VALUE = logical(length(map)), FUN = function(y) {
-    # look it up in each comorbidity, but TODO: once we have a comorbidity for
-    # one patient, we don't need to search within it again
-
-
-    char_count <- nchar(as.character(y)):3
-    vapply(names(map), FUN.VALUE = logical(1),
-           FUN = function(cmb) {
-             # and if not found, slice off last char of test string
-             perms_to_match <- vapply(char_count:3, substr, x = y, start = 1, FUN.VALUE = character(1))
-             any(fmatch(perms_to_match, map[[cmb]], nomatch = 0L) != 0)
-           })
-  })
-
-  res <- aggregate(x = t(just_cmb), by = x[visit_name], FUN = any)
-  if (return_df)
-    return(res)
-
-  out <- as.matrix(res[-1])
-  rownames(out) <- res[[1]]
-  out
-}
-
-icd10_comorbid_parent_search_no_loop <- function(x,
-                                                 map,
-                                                 visit_name = NULL,
-                                                 icd_name = get_icd_name(x),
-                                                 short_code = icd_guess_short(x, icd_name = icd_name),
-                                                 short_map = icd_guess_short(map),
-                                                 return_df = FALSE, ...) {
-
-  if (!short_code)
-    x[[icd_name]] <- icd_decimal_to_short.icd10(x[[icd_name]])
-
-  icd_codes <- x[[icd_name]]
-
-  # TODO: unclear whether the hash map is retained by fastmatch: "The first
-  # match against a table results in a hash table to be computed from the table.
-  # This table is then attached as the '.match.hash' attribute of the table so
-  # that it can be re-used on subsequent calls to fmatch with the same table."
-  # May need to pre-compute this when building package. May still be faster even
-  # if calculating hash map each time.
-
-  # for each icd code
-  just_cmb <- vapply(icd_codes, FUN.VALUE = logical(length(map)), FUN = function(y) {
-    # look it up in each comorbidity, but TODO: once we have a comorbidity for
-    # one patient, we don't need to search within it again
-
-    vapply(names(map), FUN.VALUE = logical(1),
-           FUN = function(cmb) {
-             # instead of loop, just declare the substring length
-             if (!is.na(fmatch(substr(y, 1, 10), map[[cmb]]))) return(TRUE)
-             if (!is.na(fmatch(substr(y, 1, 9), map[[cmb]]))) return(TRUE)
-             if (!is.na(fmatch(substr(y, 1, 8), map[[cmb]]))) return(TRUE)
-             if (!is.na(fmatch(substr(y, 1, 7), map[[cmb]]))) return(TRUE)
-             if (!is.na(fmatch(substr(y, 1, 6), map[[cmb]]))) return(TRUE)
-             if (!is.na(fmatch(substr(y, 1, 5), map[[cmb]]))) return(TRUE)
-             if (!is.na(fmatch(substr(y, 1, 4), map[[cmb]]))) return(TRUE)
-             if (!is.na(fmatch(substr(y, 1, 3), map[[cmb]]))) return(TRUE)
-             FALSE
-           })
-  })
-
-  res <- aggregate(x = t(just_cmb), by = x[visit_name], FUN = any)
-  if (return_df)
-    return(res)
-
-  out <- as.matrix(res[-1])
-  rownames(out) <- res[[1]]
-  out
-}
-
-icd10_comorbid_parent_search_orig <- function(x,
-                                              map,
-                                              visit_name = NULL,
-                                              icd_name = get_icd_name(x),
-                                              short_code = icd_guess_short(x, icd_name = icd_name),
-                                              short_map = icd_guess_short(map),
-                                              return_df = FALSE, ...) {
-
-  if (!short_code)
-    x[[icd_name]] <- icd_decimal_to_short.icd10(x[[icd_name]])
-
-  icd_codes <- x[[icd_name]]
-
-  # for each icd code
-  just_cmb <- vapply(icd_codes, FUN.VALUE = logical(length(map)), FUN = function(y) {
-    # look it up in each comorbidity, but TODO: once we have a comorbidity for
-    # one patient, we don't need to search within it again
-
-
-    char_count <- nchar(as.character(y)):3
-    vapply(names(map), FUN.VALUE = logical(1),
-           FUN = function(cmb) {
-             # and if not found, slice off last char of test string
-             for (n in char_count) {
-               if (!is.na(fmatch(str_sub(y, 1, n), map[[cmb]])))
-                 return(TRUE)
-             }
-             FALSE
-           })
-  })
-
-  res <- aggregate(x = t(just_cmb), by = x[visit_name], FUN = any)
-  if (return_df)
-    return(res)
-
-  out <- as.matrix(res[-1])
-  rownames(out) <- res[[1]]
-  out
-}
-
-#' find ICD-10 comorbidities without checking parent matches
-#'
-#' @keywords internal
-icd10_comorbid_no_parent_search <- function(x,
-                                            map,
-                                            visit_name = NULL,
-                                            icd_name = get_icd_name(x),
-                                            short_code = icd_guess_short(x, icd_name = icd_name),
-                                            short_map = icd_guess_short(map[[1]]),
-                                            return_df = FALSE, ...) {
-
-  # confirm class is ICD-9 so we dispatch correctly. The class may not be set if
-  # the S3 method was called directly.
-  if (!is.icd10(x[[icd_name]])) x[[icd_name]] <- icd10(x[[icd_name]]) # no as.icd10
-  icd_comorbid_common(x, map, visit_name, icd_name,
-                      short_code, short_map, return_df, ...)
-
-}
-
 #' @describeIn icd_comorbid Get comorbidities from \code{data.frame} of ICD-9
 #'   codes
 #' @export
@@ -417,8 +232,8 @@ icd9_comorbid <- function(x,
                           return_df = FALSE, ...) {
   assert_data_frame(x, min.cols = 2, col.names = "unique")
   assert_list(map, any.missing = FALSE, min.len = 1, unique = TRUE, names = "unique")
-  assert(checkmate::checkString(visit_name), checkmate::checkNull(visit_name))
-  assert(checkmate::checkString(icd_name), checkmate::checkNull(icd_name))
+  assert(check_string(visit_name), check_null(visit_name))
+  assert(check_string(icd_name), check_null(icd_name))
   visit_name <- get_visit_name(x, visit_name)
   icd_name <- get_icd_name(x, icd_name)
   assert_string(visit_name)
@@ -451,8 +266,8 @@ icd_comorbid_common <- function(x,
                                 return_df = FALSE, ...) {
   assert_data_frame(x, min.cols = 2, col.names = "unique")
   assert_list(map, any.missing = FALSE, min.len = 1, unique = TRUE, names = "unique")
-  assert(checkmate::checkString(visit_name), checkmate::checkNull(visit_name))
-  assert(checkmate::checkString(icd_name), checkmate::checkNull(icd_name))
+  assert(check_string(visit_name), check_null(visit_name))
+  assert(check_string(icd_name), check_null(icd_name))
   visit_name <- get_visit_name(x, visit_name)
   icd_name <- get_icd_name(x, icd_name)
   assert_string(visit_name)
@@ -588,6 +403,153 @@ icd10_comorbid_quan_deyo <- function(x, ..., abbrev_names = TRUE, hierarchy = TR
   apply_hier_quan_deyo(cbd, abbrev_names = abbrev_names, hierarchy = hierarchy)
 }
 
+#' @rdname icd_comorbid
+#' @export
+icd9_comorbid_hcc <- function(x,
+                              date_name = "date",
+                              visit_name = NULL,
+                              icd_name = NULL
+                              ) {
+  assert_data_frame(x, min.cols = 3, col.names = "unique")
+  assert(checkString(visit_name), checkNull(visit_name))
+  assert(checkString(icd_name), checkNull(icd_name))
+  visit_name <- get_visit_name(x, visit_name)
+  icd_name <- get_icd_name(x, icd_name)
+  assert_string(date_name)
+  assert_string(visit_name)
+  assert_string(icd_name)
+
+  # Add column for year
+  x$year <- as.numeric(format(x[[date_name]], "%Y"))
+
+  # merge CCs to patient data based on ICD and year drop ICD info
+  x <- merge(x, icd::icd9_map_cc, all.x = TRUE)
+
+  # Drop missing CC and convert to numeric
+  # Not all ICDs resolve to a CC by definition
+  x <- x[!is.na(x$cc), ]
+  x$cc <- as.numeric(x$cc)
+
+  # keep id, date, and cc columns only, reorder
+  x <- x[, c(visit_name, date_name, "year", "cc")]
+
+  # Keep only unique records
+  # Multiple ICDs for a patient can resolve to same CC
+  x <- unique(x)
+
+  # Import hierarchy mappings, and duplicate the ifcc column
+  # needed for future matching
+  hierarchy <- icd::icd_map_cc_hcc
+  hierarchy$cc <- hierarchy$ifcc
+
+  # Merge hierarchy rules with patient data
+  x <- merge(x, hierarchy, all.x = TRUE)
+
+  # Create a list of dataframes that contain the CCs that will be zeroed out
+  todrop <- list()
+  for (i in 1:6) {
+    todrop[[i]] <- x[!is.na(x$ifcc), c(3, 4, 5 + i)]
+  }
+
+  # Rename all dataframes in list to same column names
+  # rbind into a single dataframe
+  todrop <- lapply(1:length(todrop), function(x) {
+    names(todrop[[x]]) <- c(visit_name, date_name, "cc")
+    return(todrop[[x]])
+    }
+  )
+  todrop <- do.call(rbind, todrop)
+
+  # Remove all NAs from CC field
+  todrop <- todrop[!is.na(todrop$cc), ]
+
+  # Set flag for all of the CCs to be dropped
+  todrop$todrop <- TRUE
+
+  # Merge drop flags with patient data
+  x <- merge(x, todrop, all.x = TRUE)
+
+  # Drop flagged patients and keep columns of interest
+  x <- x[is.na(x$todrop), ]
+  x <- x[, c(visit_name, date_name, "cc")]
+  names(x) <- c(visit_name, date_name, "hcc")
+  x
+}
+
+#' @rdname icd_comorbid
+#' @export
+icd10_comorbid_hcc <- function(x,
+                              date_name = "date",
+                              visit_name = NULL,
+                              icd_name = NULL) {
+  assert_data_frame(x, min.cols = 3, col.names = "unique")
+  assert(checkString(visit_name), checkNull(visit_name))
+  assert(checkString(icd_name), checkNull(icd_name))
+  visit_name <- get_visit_name(x, visit_name)
+  icd_name <- get_icd_name(x, icd_name)
+  assert_string(date_name)
+  assert_string(visit_name)
+  assert_string(icd_name)
+
+  # Add column for year
+  x$year <- as.numeric(format(x[[date_name]], "%Y"))
+
+  # merge CCs to patient data based on ICD and year drop ICD info
+  x <- merge(x, icd::icd10_map_cc, all.x = TRUE)
+
+  # Drop missing CC and convert to numeric
+  # Not all ICDs resolve to a CC by definition
+  x <- x[!is.na(x$cc), ]
+  x$cc <- as.numeric(x$cc)
+
+  # keep id, date, and cc columns only, reorder
+  x <- x[, c(visit_name, date_name, "year", "cc")]
+
+  # Keep only unique records
+  # Multiple ICDs for a patient can resolve to same CC
+  x <- unique(x)
+
+  # Import hierarchy mappings, and duplicate the ifcc column
+  # needed for future matching
+  hierarchy <- icd::icd_map_cc_hcc
+  hierarchy$cc <- icd::icd_map_cc_hcc$ifcc
+
+  # Merge hierarchy rules with patient data
+  x <- merge(x, hierarchy, all.x = TRUE)
+
+  # Create a list of dataframes that contain the CCs that will be zeroed out
+  todrop <- list()
+  for (i in 1:6) {
+    todrop[[i]] <- x[!is.na(x$ifcc), c(3, 4, 5 + i)]
+  }
+
+  # Rename all dataframes in list to same column names
+  # rbind into a single dataframe
+  todrop <- lapply(1:length(todrop), function(x) {
+    names(todrop[[x]]) <- c(visit_name, date_name, "cc")
+    return(todrop[[x]])
+    }
+  )
+  todrop <- do.call(rbind, todrop)
+
+  # Remove all NAs from CC field
+  todrop <- todrop[!is.na(todrop$cc), ]
+
+  # Set flag for all of the CCs to be dropped
+  todrop$todrop <- TRUE
+
+  # Merge drop flags with patient data
+  x <- merge(x, todrop, all.x = TRUE)
+
+  # Drop flagged patients and keep columns of interest
+  x <- x[is.na(x$todrop), ]
+  x <- x[, c(visit_name, date_name, "cc")]
+  names(x) <- c(visit_name, date_name, "hcc")
+  x
+}
+
+#' @rdname icd_comorbid
+#' @export
 icd_comorbid_ahrq <- function(x, icd_name = get_icd_name(x), ...) {
   ver <- icd_guess_version.data.frame(x, icd_name = icd_name)
   if (ver == "icd9")
@@ -598,6 +560,8 @@ icd_comorbid_ahrq <- function(x, icd_name = get_icd_name(x), ...) {
     stop("could not guess the ICD version using icd_name = ", icd_name)
 }
 
+#' @rdname icd_comorbid
+#' @export
 icd_comorbid_elix <- function(x, icd_name = get_icd_name(x), ...) {
   ver <- icd_guess_version.data.frame(x, icd_name = icd_name)
   if (ver == "icd9")
@@ -608,6 +572,8 @@ icd_comorbid_elix <- function(x, icd_name = get_icd_name(x), ...) {
     stop("could not guess the ICD version using icd_name = ", icd_name)
 }
 
+#' @rdname icd_comorbid
+#' @export
 icd_comorbid_quan_elix <- function(x, icd_name = get_icd_name(x), ...) {
   ver <- icd_guess_version.data.frame(x, icd_name = icd_name)
   if (ver == "icd9")
@@ -618,12 +584,37 @@ icd_comorbid_quan_elix <- function(x, icd_name = get_icd_name(x), ...) {
     stop("could not guess the ICD version using icd_name = ", icd_name)
 }
 
+#' @rdname icd_comorbid
+#' @export
 icd_comorbid_quan_deyo <- function(x, icd_name = get_icd_name(x), ...) {
   ver <- icd_guess_version.data.frame(x, icd_name = icd_name)
   if (ver == "icd9")
     icd9_comorbid_quan_deyo(x, icd_name = icd_name, ...)
   else if (ver == "icd10")
     icd10_comorbid_quan_deyo(x, icd_name = icd_name, ...)
+  else
+    stop("could not guess the ICD version using icd_name = ", icd_name)
+}
+
+#' @details Applying CMS Hierarchical Condition Categories
+#'   \code{icd_comorbid_hcc} functions differently from the rest of the
+#'   comorbidity assignment functions. This is because CMS publishes a specific
+#'   ICD to Condition Category mapping including all child ICDs. In addition,
+#'   while these mappings were the same for 2007-2012, after 2013 there are
+#'   annual versions. In addition, there is a many:many linkage between ICD and
+#'   Condition Categories (CC). Once CCs are assigned, a series of hierarchy
+#'   rules (which can also change annually) are applied to create HCCs.
+#' @rdname icd_comorbid
+#' @param date column representing,  the date each record took place, as in each
+#'   year there is a different ICD9/10 to CC mapping). This is only necessary
+#'   for HCC mappings.
+#' @export
+icd_comorbid_hcc <- function(x, icd_name = get_icd_name(x), ...) {
+  ver <- icd_guess_version.data.frame(x, icd_name = icd_name)
+  if (ver == "icd9")
+    icd9_comorbid_hcc(x, icd_name = icd_name, ...)
+  else if (ver == "icd10")
+    icd10_comorbid_hcc(x, icd_name = icd_name, ...)
   else
     stop("could not guess the ICD version using icd_name = ", icd_name)
 }

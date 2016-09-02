@@ -39,22 +39,22 @@ Features
 --------
 
 -   find comorbidities of patients based on admission or discharge ICD-9 or ICD-10 codes, e.g. Cancer, Heart Disease
-    -   several standard mappings of ICD-9 codes to comorbidities are included (Quan, Deyo, Elixhauser, AHRQ)
-    -   very fast assignment of ICD-9 codes to comorbidities (using C and C++ internally, with automatic parallel execution using OpenMP when available), assigning millions of comorbidities in a few seconds
+    -   several standard mappings of ICD codes to comorbidities are included (Quan, Deyo, Elixhauser, AHRQ)
+    -   very fast assignment of ICD codes to comorbidities (using C and C++ internally, with automatic parallel execution using OpenMP when available), assigning millions of comorbidities in a few seconds
 -   Charlson and Van Walraven score calculations
 -   validation of ICD codes from different annual revisions of ICD-9-CM and ICD-10-CM
 -   summarizing ICD codes into groups, and to human-readable descriptions
 -   correct conversion between different representations of ICD codes, with and without a decimal points, leading and trailing characters (this is not trivial for ICD-9-CM). ICD-9 to ICD-10 conversion is left as an exercise for the user!
--   comprehensive test suite to increase confidence in accurate processing of ICD-9 codes
+-   comprehensive test suite to increase confidence in accurate processing of ICD codes
 
 New since last CRAN release:
 ----------------------------
 
 -   major new release, version 2.0, with addition of ICD-10 processing, and therefore renaming to `icd`
--   functions simplified so they apply to ICD-9 and ICD-10, e.g. `icd9ComorbidAhrq` becomes `icd_comorbid_ahrq`, and the input data is used to guess whether the codes are ICD-9 or ICD-10, and whether they are decimal format.
+-   functions simplified so they apply to ICD-9 and ICD-10, e.g. `icd9ComorbidAhrq` becomes `icd_comorbid_ahrq` (alongside `icd9_comorbid_ahrq` and `icd10_comorbid_ahrq` which skip the step to guess the ICD version).
 -   major update to all function names following [Hadley Wickham](http://adv-r.had.co.nz/Style.html), [google](https://google.github.io/styleguide/Rguide.xml) and [lintr](https://github.com/jimhester/lintr).
 -   All function and variable names with *camelCase* are now deprecated in favor of *snake\_case*. SnakeCase function names still work, but will give deprecated warnings (which can be muted)
--   use of basic S3 classes to allow users the option of distinguishing the type of their data. E.g. `icd9(c("0010", "0011"))` defines two ICD-9 codes, `icd10cm(c("A01", "A011"))` defines two ICD-10-CM codes (which are implicitly ICD-10 codes also). This can be extended to add other variants, such as ICD-10 WHO (work in progress), and national variations.
+-   use of basic S3 classes to allow users the option of distinguishing the type of their data. E.g. `as.icd9(c("0010", "0011"))` defines two ICD-9 codes, `as.icd10cm(c("A01", "A011"))` defines two ICD-10-CM codes (which are implicitly ICD-10 codes also). This can be extended to add other variants, such as ICD-10 WHO (work in progress), and national variations.
 -   see NEWS.md, vignettes and github [changelog](https://github.com/jackwasey/icd/commits/master) for more details
 
 Introduction
@@ -148,7 +148,6 @@ Install
 The latest version is available in [github icd](https://github.com/jackwasey/icd), and can be installed with:
 
 ``` r
-    install.packages("magrittr") # recommended, but not required
     install.packages("devtools")
     devtools::install_github("jackwasey/icd")
 ```
@@ -169,10 +168,6 @@ Doing the parsing requires additional dependencies, which are not gratuitously i
 One of the strengths of this package is a thorough test suite, including over 10,000 lines of testing code.
 
     find tests -type f -exec cat '{}' + | wc -l
-    10098
+    10910
 
 A better metric of testing and code quality is code coverage, for which [codecov](https://codecov.io/github/jackwasey/icd) and [coveralls](https://coveralls.io/github/jackwasey/icd) are used. The automated [wercker](https://app.wercker.com/#applications/5609d41e71f137d02f0a1069) builds report test coverage results to [codecov](https://codecov.io/github/jackwasey/icd), whereas the [travis](https://travis-ci.org/jackwasey/icd) builds report coverage to [coveralls](https://coveralls.io/github/jackwasey/icd). The parsing code is a significant chunk of code, and may or may not be included in the automated builds depending on whether the source data is available. With the data available, test coverage is &gt;95%.
-
-### Wercker build status
-
-[![wercker status](https://app.wercker.com/status/158c843e8218371b23d1e44072770e92/m/master "wercker status")](https://app.wercker.com/project/bykey/158c843e8218371b23d1e44072770e92)

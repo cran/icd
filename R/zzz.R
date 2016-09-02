@@ -37,7 +37,7 @@ citation(package = \"icd\")
 The new 'icd' package contains tested versions of all the deprecated function names which overlap with those in the old
 'icd9' package, e.g. 'icd9ComorbidAhrq'. It is strongly recommended to run the command:
 
-            remove.packages(\"icd9\")", immediate. = TRUE, call. = FALSE)
+            remove.packages(\"icd9\")")
 
   if (!is.null(getOption("icd9.threads")))
     packageStartupMessage("icd9.threads is deprecated, use icd.threads to control OpenMP")
@@ -90,7 +90,6 @@ release_questions <- function() {
     "Are all public S3 classes all exported? use devtools::missing_s3()",
     "use LLVM scan build by adding 'scan-build before compiler path in .R/Makevars",
     # testing and compilation and different platforms:
-    "Have you run with testthat <= and > 0.11.0?",
     "Have you run autoreconf before building and testing?",
     "Has config.h.win been updated to reflect latest configure.ac results?",
     "Are there skipped tests which should be run?",

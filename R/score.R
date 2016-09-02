@@ -68,7 +68,10 @@ icd_charlson <- function(x, visit_name = NULL,
   UseMethod("icd_charlson")
 }
 
-#' @describeIn icd_charlson Charlson scores from data frame of visits and ICD-9 codes
+#' @describeIn icd_charlson Charlson scores from data frame of visits and ICD-9
+#'   codes. ICD-10 Charlson can be calculated simply by getting the Charlson
+#'   (e.g. Quan Deyo) comorbidities, then calling
+#'   \code{icd_charlson_from_comorbid}.
 #' @export
 icd_charlson.data.frame <- function(x, visit_name = NULL,
                                     scoring_system = c("original", "charlson", "quan"),
@@ -76,7 +79,7 @@ icd_charlson.data.frame <- function(x, visit_name = NULL,
                                     stringsAsFactors = getOption("stringsAsFactors"), # nolint
                                     ...) {
   assert_data_frame(x, min.rows = 0, min.cols = 2, col.names = "named")
-  assert(checkmate::checkNull(visit_name), checkmate::checkString(visit_name))
+  assert(check_null(visit_name), check_string(visit_name))
   assert_flag(return_df)
   assert_flag(stringsAsFactors) # nolint
   visit_name <- get_visit_name(x, visit_name)
@@ -98,8 +101,8 @@ icd_charlson.data.frame <- function(x, visit_name = NULL,
 icd_charlson_from_comorbid <- function(x, visit_name = NULL, hierarchy = FALSE,
                                        scoring_system = c("original", "charlson", "quan")) {
   assert(
-    checkmate::checkDataFrame(x, min.rows = 0, min.cols = 2, col.names = "named"),
-    checkmate::checkMatrix(x, min.rows = 0, min.cols = 2, col.names = "named")
+    checkDataFrame(x, min.rows = 0, min.cols = 2, col.names = "named"),
+    checkMatrix(x, min.rows = 0, min.cols = 2, col.names = "named")
   )
   stopifnot(ncol(x) - is.data.frame(x) == 17)
   if (match.arg(scoring_system) == "quan")
@@ -200,7 +203,7 @@ icd_count_codes <- function(x, visit_name = get_visit_name(x), return_df = FALSE
 icd_count_comorbid <- function(x, visit_name = get_visit_name(x), return_df = FALSE) {
   assert_string(visit_name)
   assert_flag(return_df)
-  assert(checkmate::checkDataFrame(x), checkmate::checkMatrix(x))
+  assert(checkDataFrame(x), checkMatrix(x))
   res <- apply(x[, names(x) %nin% visit_name],
                MARGIN = 1,
                FUN = sum)
@@ -257,7 +260,7 @@ icd_count_codes_wide <- function(x,
 #' van Walraven Elixhauser score is calculated from the Quan revision of
 #' Elixhauser's ICD-9 mapping. This function allows for the hierarchical
 #' exclusion of less severe versions of comorbidities when their more severe
-#' version is also present via the \code{heirarchy} argument. For the Elixhauser
+#' version is also present via the \code{hierarchy} argument. For the Elixhauser
 #' comorbidities, this is diabetes v. complex diabetes and solid tumor v.
 #' metastatic tumor
 #' @param x data frame containing a column of visit or patient identifiers, and
@@ -300,7 +303,7 @@ icd_van_walraven.data.frame <- function(x, visit_name = NULL, return_df = FALSE,
                                         stringsAsFactors = getOption("stringsAsFactors"), # nolint
                                         ...) {
   assert_data_frame(x, min.rows = 0, min.cols = 2, col.names = "named")
-  assert(checkmate::checkNull(visit_name), checkmate::checkString(visit_name))
+  assert(check_null(visit_name), check_string(visit_name))
   assert_flag(return_df)
   assert_flag(stringsAsFactors) # nolint
   visit_name <- get_visit_name(x, visit_name)
@@ -322,8 +325,8 @@ icd_van_walraven.data.frame <- function(x, visit_name = NULL, return_df = FALSE,
 #'   flagged.
 #' @export
 icd_van_walraven_from_comorbid <- function(x, visit_name = NULL, hierarchy = FALSE) {
-  assert(checkmate::checkDataFrame(x), checkmate::checkMatrix(x))
-  assert(checkmate::checkNull(visit_name), checkmate::checkString(visit_name))
+  assert(checkDataFrame(x), checkMatrix(x))
+  assert(check_null(visit_name), check_string(visit_name))
   assert_flag(hierarchy)
   stopifnot(ncol(x) - is.data.frame(x) == 30)
   weights <- c(7, 5, -1, 4, 2, 0, 7, 6, 3, 0, 0, 0, 5, 11, 0, 0,

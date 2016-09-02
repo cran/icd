@@ -4,16 +4,23 @@
 \alias{icd10_comorbid}
 \alias{icd10_comorbid_ahrq}
 \alias{icd10_comorbid_elix}
+\alias{icd10_comorbid_hcc}
 \alias{icd10_comorbid_quan_deyo}
 \alias{icd10_comorbid_quan_elix}
 \alias{icd9ComorbidShortCpp}
 \alias{icd9_comorbid}
 \alias{icd9_comorbid_ahrq}
 \alias{icd9_comorbid_elix}
+\alias{icd9_comorbid_hcc}
 \alias{icd9_comorbid_quan_deyo}
 \alias{icd9_comorbid_quan_elix}
 \alias{icd_comorbid}
+\alias{icd_comorbid_ahrq}
 \alias{icd_comorbid_common}
+\alias{icd_comorbid_elix}
+\alias{icd_comorbid_hcc}
+\alias{icd_comorbid_quan_deyo}
+\alias{icd_comorbid_quan_elix}
 \title{Find comorbidities from ICD-9 codes.}
 \usage{
 icd9ComorbidShortCpp(icd9df, icd9Mapping, visitId, icd9Field, threads = 8L,
@@ -49,6 +56,22 @@ icd9_comorbid_quan_deyo(x, ..., abbrev_names = TRUE, hierarchy = TRUE)
 icd10_comorbid_quan_deyo(x, ..., abbrev_names = TRUE, hierarchy = TRUE)
 
 icd10_comorbid_quan_deyo(x, ..., abbrev_names = TRUE, hierarchy = TRUE)
+
+icd9_comorbid_hcc(x, date_name = "date", visit_name = NULL,
+  icd_name = NULL)
+
+icd10_comorbid_hcc(x, date_name = "date", visit_name = NULL,
+  icd_name = NULL)
+
+icd_comorbid_ahrq(x, icd_name = get_icd_name(x), ...)
+
+icd_comorbid_elix(x, icd_name = get_icd_name(x), ...)
+
+icd_comorbid_quan_elix(x, icd_name = get_icd_name(x), ...)
+
+icd_comorbid_quan_deyo(x, icd_name = get_icd_name(x), ...)
+
+icd_comorbid_hcc(x, icd_name = get_icd_name(x), ...)
 }
 \arguments{
 \item{aggregate}{single logical value, if \code{TRUE}, then take (possible
@@ -100,6 +123,10 @@ which case the shorter human-readable names stored in e.g.
 \item{hierarchy}{single logical value that defaults to \code{TRUE}, in which
 case the hierarchy defined for the mapping is applied. E.g. in Elixhauser,
 you can't have uncomplicated and complicated diabetes both flagged.}
+
+\item{date}{column representing,  the date each record took place, as in each
+year there is a different ICD9/10 to CC mapping). This is only necessary
+for HCC mappings.}
 }
 \description{
 \link{Rcpp} approach to comorbidity assignment with OpenMP and
@@ -117,13 +144,7 @@ Charlson Score, etc., the rules should be applied.
 For ICD-10 codes, this method, it relies on exact matching, but not every of
 billions of possible ICD-10/ICD-10-CM codes are included in the mappings, so
 it will likely give incomplete results, without searching for parents of the
-input codes until a match is found in the map. TODO: this is incomplete! For
-ICD-10, there are two look-up methods. The classic look-up, as used for ICD-9
-codes, assumes any possible code is available to match in the comorbidity
-map. However, for ICD-10-CM, there are too many possible codes, specifying
-subsequent encounters, laterality, etc., etc., so this is too bulky. However
-for some mappings, there are exact definitions, e.g. AHRQ seems to specify
-everything (for a given ICD-10-CM year)
+input codes until a match is found in the map.
 
 There is a change in behavior from previous versions. The visit_name
   column is (implicitly) sorted by using std::set container. Previously, the
@@ -141,6 +162,15 @@ The common comorbidity calculation code does not depend on ICD type.
 but do not themselves have a class: therefore, the S3 mechanism for dispatch is not suitable. I may add a wrapper function which
 looks inside a \code{data.frame} of comorbidities, and dispatches to the appropriate function, but right now the user must
 call the \code{icd9_} or \code{icd10_} prefixed function directly.
+
+Applying CMS Hierarchical Condition Categories
+  \code{icd_comorbid_hcc} functions differently from the rest of the
+  comorbidity assignment functions. This is because CMS publishes a specific
+  ICD to Condition Category mapping including all child ICDs. In addition,
+  while these mappings were the same for 2007-2012, after 2013 there are
+  annual versions. In addition, there is a many:many linkage between ICD and
+  Condition Categories (CC). Once CCs are assigned, a series of hierarchy
+  rules (which can also change annually) are applied to create HCCs.
 }
 \section{Functions}{
 \itemize{
@@ -153,6 +183,12 @@ codes
   pts <- icd_long_data(visit_name = c("2", "1", "2", "3", "3"),
                    icd9 = c("39891", "40110", "09322", "41514", "39891"))
   icd_comorbid(pts, icd9_map_ahrq, short_code = TRUE) # visit_name is now sorted
+  pts <- icd_long_data(
+             visit_name = c("1", "2", "3", "4", "4"),
+             icd_name = c("20084", "1742", "30410", "41514", "95893"),
+             date = as.Date(c("2011-01-01", "2011-01-02", "2011-01-03",
+               "2011-01-04", "2011-01-04")))
+  pt_hccs <- icd_comorbid_hcc(pts, date_name = "date")
 }
 \keyword{internal}
 

@@ -118,7 +118,7 @@ test_that("deprecated - short to decimal bad input", {
   expect_equal_no_icd(icd9ShortToDecimal(NA), NA_character_)
   # NA is not character type, so expect error.
   expect_equal_no_icd(icd9ShortToDecimal(c("000000", "0ab1bc2d")),
-               c(NA_character_, NA_character_))
+                      c(NA_character_, NA_character_))
 })
 
 test_that("deprecated - icd9 short to major part, E codes", {
@@ -178,12 +178,12 @@ test_that("deprecated - running short to decimal conversion before and after exp
           })
 
 test_that("deprecated - parts to decimal", {
-  expect_that(icd9PartsToDecimal(data.frame(major = "100", minor = NA)), testthat::equals("100"))
-  expect_that(icd9PartsToDecimal(data.frame(major = "100", minor = "")), testthat::equals("100"))
-  expect_that(icd9PartsToDecimal(data.frame(major = "100", minor = "1")), testthat::equals("100.1"))
-  expect_that(icd9MajMinToDecimal("100", NA), testthat::equals("100"))
-  expect_that(icd9MajMinToDecimal("100", ""), testthat::equals("100"))
-  expect_that(icd9MajMinToDecimal("100", "1"), testthat::equals("100.1"))
+  expect_equal(icd9PartsToDecimal(data.frame(major = "100", minor = NA)), "100")
+  expect_equal(icd9PartsToDecimal(data.frame(major = "100", minor = "")), "100")
+  expect_equal(icd9PartsToDecimal(data.frame(major = "100", minor = "1")), "100.1")
+  expect_equal(icd9MajMinToDecimal("100", NA), "100")
+  expect_equal(icd9MajMinToDecimal("100", ""), "100")
+  expect_equal(icd9MajMinToDecimal("100", "1"), "100.1")
 })
 
 test_that("deprecated - parts to short invalid inputs", {
@@ -239,35 +239,10 @@ test_that("deprecated - parts to short V code inputs", {
   expect_equal(icd9MajMinToShort("V01", c("", NA)), c("V01", "V01"))
 })
 
-test_that("deprecated - icd9 parts to short: don't allow cycling.", {
-  expect_error(icd9MajMinToShort(c("123", "34", "56"), c("1", "20")))
-  # causes hang only when compiled with MinGW GCC 4.9 in Rtools 3.2 on 64 bit
-  expect_error(icd9MajMinToShort(c("123", "34"), c("1", "20", "45")))
-})
-
-test_that("deprecated - Windows Rtools 3.2 hang test - also triggers bug #75", {
-  expect_error(icd9MajMinToShort(c("123", "34"), c("1", "20", "45")))
-  # see Rcpp issue #276.
-})
-
 test_that("deprecated - icd9 parts to short form V and E input, mismatched lengths", {
   expect_equal(icd9MajMinToShort(10L, "20"), "01020")
   expect_equal(icd9MajMinToShort("V10", c("0", "1")), c("V100", "V101"))
   expect_equal(icd9MajMinToShort("V01", c("0", "1")), c("V010", "V011"))
-})
-
-icd9ChaptersToMap <- icd9_chapters_to_map
-
-test_that("deprecated - convert list of icd-9 ranges (e.g. chapter definitions to comorbidity map)", {
-  skip_slow_tests()
-  ooe <- data.frame(visitId = sprintf("pt%02d", seq_along(one_of_each)), icd9 = one_of_each)
-
-  test_map <- icd9ChaptersToMap(icd::icd9Chapters)
-  cmb <- icd9Comorbid(icd9df = ooe, isShort = FALSE, icd9Mapping = test_map,
-                      isShortMapping = TRUE, return.df = TRUE)
-  cmbcmp <- unname(as.matrix(logical_to_binary(cmb)[-1]))
-  expmat <- diag(nrow = length(ooe$icd9))
-  expect_equivalent(cmbcmp, expmat)
 })
 
 # some functions are only called via C++ (at present), so the path through
