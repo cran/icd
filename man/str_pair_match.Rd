@@ -4,8 +4,7 @@
 \alias{str_pair_match}
 \title{Match pairs of strings to get named vector}
 \usage{
-str_pair_match(string, pattern, pos, swap = FALSE, perl = TRUE,
-  useBytes = TRUE)
+str_pair_match(string, pattern, pos, swap = FALSE, ...)
 }
 \arguments{
 \item{string}{vector of strings}
@@ -25,4 +24,3 @@ Match a character vector against a regular expression with at least two
 parenthetic groupings, returning named vector.
 }
 \keyword{internal}
-

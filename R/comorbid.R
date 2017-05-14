@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with icd. If not, see <http:#www.gnu.org/licenses/>.
 
+utils::globalVariables(c(
+  "icd9_map_ahrq", "icd9_map_elix", "icd9_map_quan_deyo", "icd9_map_quan_elix",
+  "icd10_map_ahrq", "icd10_map_elix", "icd10_map_quan_deyo", "icd10_map_quan_elix"))
+
 #' Present-on-admission flags
 #'
 #' See \link{icd_filter_poa} for more details.
@@ -23,11 +27,6 @@
 #'   icd_poa_choices
 #' @export
 icd_poa_choices <- c("yes", "no", "notYes", "notNo")
-
-#' @rdname icd_poa_choices
-#' @details \code{icd9PoaChoices} is deprecated. Use \code{icd_poa_choices}.
-#' @export
-icd9PoaChoices <- icd_poa_choices
 
 #' @rdname icd_in_reference_code
 #' @export
@@ -172,7 +171,7 @@ icd10_comorbid <- function(x,
 #'   icd10_comorbid_parent_search_use_cpp(uranium_pathology, icd10_map_ahrq,
 #'     visit_name = "case", icd_name = "icd10",
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
-#'   icd10_comorbid_parent_search_all_at_once(uranium_pathology, icd10_map_ahrq,
+#'   icd10_comorbid_parent_search_all(uranium_pathology, icd10_map_ahrq,
 #'     visit_name = "case", icd_name = "icd10",
 #'     short_code = FALSE, short_map = TRUE, return_df = FALSE),
 #'   icd10_comorbid_parent_search_no_loop(uranium_pathology, icd10_map_ahrq,
@@ -320,7 +319,9 @@ icd_comorbid_common <- function(x,
   threads <- getOption("icd.threads", getOmpCores())
   chunk_size <- getOption("icd.chunk_size", 256L)
   omp_chunk_size <- getOption("icd.omp_chunk_size", 1L)
-  mat <- icd9ComorbidShortCpp(icd9df = x, icd9Mapping = map, visitId = visit_name, icd9Field = icd_name, threads = threads, chunk_size = chunk_size, omp_chunk_size = omp_chunk_size, aggregate = TRUE) # nolint
+  mat <- icd9ComorbidShortCpp(icd9df = x, icd9Mapping = map, visitId = visit_name,
+                              icd9Field = icd_name, threads = threads, chunk_size = chunk_size,
+                              omp_chunk_size = omp_chunk_size, aggregate = TRUE) # nolint
 
   if (return_df) {
     if (visit_was_factor)
@@ -337,69 +338,72 @@ icd_comorbid_common <- function(x,
 }
 
 #' @rdname icd_comorbid
-#' @details \code{data.frame}s of patient data may have columns within them which are of class \code{icd9}, \code{icd10} etc.,
-#' but do not themselves have a class: therefore, the S3 mechanism for dispatch is not suitable. I may add a wrapper function which
-#' looks inside a \code{data.frame} of comorbidities, and dispatches to the appropriate function, but right now the user must
-#' call the \code{icd9_} or \code{icd10_} prefixed function directly.
+#' @details \code{data.frame}s of patient data may have columns within them
+#'   which are of class \code{icd9}, \code{icd10} etc., but do not themselves
+#'   have a class: therefore, the S3 mechanism for dispatch is not suitable. I
+#'   may add a wrapper function which looks inside a \code{data.frame} of
+#'   comorbidities, and dispatches to the appropriate function, but right now
+#'   the user must call the \code{icd9_} or \code{icd10_} prefixed function
+#'   directly.
 #' @export
 icd9_comorbid_ahrq <- function(x, ..., abbrev_names = TRUE, hierarchy = TRUE) {
-  cbd <- icd9_comorbid(x, map = icd::icd9_map_ahrq, short_map = TRUE, ...)
+  cbd <- icd9_comorbid(x, map = icd9_map_ahrq, short_map = TRUE, ...)
   apply_hier_ahrq(cbd, abbrev_names = abbrev_names, hierarchy = hierarchy)
 }
 
 #' @rdname icd_comorbid
 #' @export
 icd10_comorbid_ahrq <- function(x, ..., abbrev_names = TRUE, hierarchy = TRUE) {
-  cbd <- icd10_comorbid(x, map = icd::icd10_map_ahrq, short_map = TRUE, ...)
+  cbd <- icd10_comorbid(x, map = icd10_map_ahrq, short_map = TRUE, ...)
   apply_hier_ahrq(cbd, abbrev_names = abbrev_names, hierarchy = hierarchy)
 }
 
 #' @rdname icd_comorbid
 #' @export
 icd9_comorbid_elix <- function(x, ..., abbrev_names = TRUE, hierarchy = TRUE) {
-  cbd <- icd9_comorbid(x, map = icd::icd9_map_elix, short_map = TRUE, ...)
+  cbd <- icd9_comorbid(x, map = icd9_map_elix, short_map = TRUE, ...)
   apply_hier_elix(cbd, abbrev_names = abbrev_names, hierarchy = hierarchy)
 }
 
 #' @rdname icd_comorbid
 #' @export
 icd10_comorbid_elix <- function(x, ..., abbrev_names = TRUE, hierarchy = TRUE) {
-  cbd <- icd10_comorbid(x, map = icd::icd10_map_elix, short_map = TRUE, ...)
+  cbd <- icd10_comorbid(x, map = icd10_map_elix, short_map = TRUE, ...)
   apply_hier_elix(cbd, abbrev_names = abbrev_names, hierarchy = hierarchy)
 }
 
 #' @rdname icd_comorbid
 #' @export
 icd9_comorbid_quan_elix <- function(x, ..., abbrev_names = TRUE, hierarchy = TRUE) {
-  cbd <- icd9_comorbid(x, map = icd::icd9_map_quan_elix, short_map = TRUE, ...)
+  cbd <- icd9_comorbid(x, map = icd9_map_quan_elix, short_map = TRUE, ...)
   apply_hier_quan_elix(cbd, abbrev_names = abbrev_names, hierarchy = hierarchy)
 }
 
 #' @rdname icd_comorbid
 #' @export
 icd10_comorbid_quan_elix <- function(x, ..., abbrev_names = TRUE, hierarchy = TRUE) {
-  cbd <- icd10_comorbid(x, map = icd::icd10_map_quan_elix, short_map = TRUE, ...)
+  cbd <- icd10_comorbid(x, map = icd10_map_quan_elix, short_map = TRUE, ...)
   apply_hier_quan_elix(cbd, abbrev_names = abbrev_names, hierarchy = hierarchy)
 }
 
 #' @rdname icd_comorbid
 #' @export
 icd9_comorbid_quan_deyo <- function(x, ..., abbrev_names = TRUE, hierarchy = TRUE) {
-  cbd <- icd9_comorbid(x, map = icd::icd9_map_quan_deyo, short_map = TRUE, ...)
+  cbd <- icd9_comorbid(x, map = icd9_map_quan_deyo, short_map = TRUE, ...)
   apply_hier_quan_deyo(cbd, abbrev_names = abbrev_names, hierarchy = hierarchy)
 }
 
 #' @rdname icd_comorbid
 #' @export
 icd10_comorbid_quan_deyo <- function(x, ..., abbrev_names = TRUE, hierarchy = TRUE) {
-  cbd <- icd10_comorbid(x, map = icd::icd10_map_quan_deyo, short_map = TRUE, ...)
+  cbd <- icd10_comorbid(x, map = icd10_map_quan_deyo, short_map = TRUE, ...)
   apply_hier_quan_deyo(cbd, abbrev_names = abbrev_names, hierarchy = hierarchy)
 }
 
 #' @rdname icd_comorbid
 #' @export
 icd10_comorbid_quan_deyo <- function(x, ..., abbrev_names = TRUE, hierarchy = TRUE) {
-  cbd <- icd10_comorbid(x, map = icd::icd10_map_quan_deyo, short_map = TRUE, ...)
+  cbd <- icd10_comorbid(x, map = icd10_map_quan_deyo, short_map = TRUE, ...)
   apply_hier_quan_deyo(cbd, abbrev_names = abbrev_names, hierarchy = hierarchy)
 }
 
@@ -409,7 +413,7 @@ icd9_comorbid_hcc <- function(x,
                               date_name = "date",
                               visit_name = NULL,
                               icd_name = NULL
-                              ) {
+) {
   assert_data_frame(x, min.cols = 3, col.names = "unique")
   assert(checkString(visit_name), checkNull(visit_name))
   assert(checkString(icd_name), checkNull(icd_name))
@@ -456,7 +460,7 @@ icd9_comorbid_hcc <- function(x,
   todrop <- lapply(1:length(todrop), function(x) {
     names(todrop[[x]]) <- c(visit_name, date_name, "cc")
     return(todrop[[x]])
-    }
+  }
   )
   todrop <- do.call(rbind, todrop)
 
@@ -479,9 +483,9 @@ icd9_comorbid_hcc <- function(x,
 #' @rdname icd_comorbid
 #' @export
 icd10_comorbid_hcc <- function(x,
-                              date_name = "date",
-                              visit_name = NULL,
-                              icd_name = NULL) {
+                               date_name = "date",
+                               visit_name = NULL,
+                               icd_name = NULL) {
   assert_data_frame(x, min.cols = 3, col.names = "unique")
   assert(checkString(visit_name), checkNull(visit_name))
   assert(checkString(icd_name), checkNull(icd_name))
@@ -528,7 +532,7 @@ icd10_comorbid_hcc <- function(x,
   todrop <- lapply(1:length(todrop), function(x) {
     names(todrop[[x]]) <- c(visit_name, date_name, "cc")
     return(todrop[[x]])
-    }
+  }
   )
   todrop <- do.call(rbind, todrop)
 
@@ -599,11 +603,12 @@ icd_comorbid_quan_deyo <- function(x, icd_name = get_icd_name(x), ...) {
 #' @details Applying CMS Hierarchical Condition Categories
 #'   \code{icd_comorbid_hcc} functions differently from the rest of the
 #'   comorbidity assignment functions. This is because CMS publishes a specific
-#'   ICD to Condition Category mapping including all child ICDs. In addition,
-#'   while these mappings were the same for 2007-2012, after 2013 there are
-#'   annual versions. In addition, there is a many:many linkage between ICD and
-#'   Condition Categories (CC). Once CCs are assigned, a series of hierarchy
-#'   rules (which can also change annually) are applied to create HCCs.
+#'   ICD to Condition Category mapping including all child ICD codes. In
+#'   addition, while these mappings were the same for 2007-2012, after 2013
+#'   there are annual versions. In addition, there is a many:many linkage
+#'   between ICD and Condition Categories (CC). Once CCs are assigned, a series
+#'   of hierarchy rules (which can also change annually) are applied to create
+#'   HCCs.
 #' @rdname icd_comorbid
 #' @param date column representing,  the date each record took place, as in each
 #'   year there is a different ICD9/10 to CC mapping). This is only necessary
@@ -653,7 +658,6 @@ apply_hier_elix <- function(x, abbrev_names = TRUE, hierarchy = TRUE) {
   x
 }
 
-
 #' @rdname apply_hier
 #' @keywords internal manip
 apply_hier_quan_elix <- function(cbd, abbrev_names = TRUE, hierarchy = TRUE) {
@@ -698,9 +702,9 @@ apply_hier_quan_deyo <- function(cbd, abbrev_names = TRUE, hierarchy = TRUE) {
     cbd[cbd[, "LiverSevere"] > 0, "LiverMild"] <- FALSE
   }
   if (abbrev_names)
-    colnames(cbd)[cr(cbd)] <- icd::charlsonComorbidNamesAbbrev
+    colnames(cbd)[cr(cbd)] <- icd::icd_names_charlson_abbrev
   else
-    colnames(cbd)[cr(cbd)] <- icd::charlsonComorbidNames
+    colnames(cbd)[cr(cbd)] <- icd::icd_names_charlson
 
   cbd
 }

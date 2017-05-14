@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -51,8 +51,7 @@ icd_is_defined.icd9 <- function(x, short_code = icd_guess_short(x),
   if (billable)
     icd_is_billable.icd9cm(short_code = TRUE, as_char_no_warn(x))
   else
-    icd9_add_leading_zeroes(short_code = TRUE, as_char_no_warn(x)) %in%
-    icd::icd9cm_hierarchy[["code"]]
+    x %in% icd::icd9cm_hierarchy[["code"]]
 }
 
 #' @describeIn icd_is_defined Same for ICD-10-CM
@@ -69,7 +68,7 @@ icd_is_defined.icd10cm <- function(x, short_code = icd_guess_short(x),
   if (billable)
     icd_is_billable.icd10cm(x, short_code = short_code)
   else
-    match(x, icd::icd10cm2016[["code"]], nomatch = nomatch, ...) > 0L
+    match(x, icd10cm2016[["code"]], nomatch = nomatch, ...) > 0L
 }
 
 #' @describeIn icd_is_defined Same for ICD-10, temporarily using ICD-10-CM until
@@ -184,7 +183,7 @@ icd_is_billable.icd9cm <- function(x, short_code = icd_guess_short(x),
   assert_string(icd9cm_edition)
   if (!short_code)
     x <- icd_decimal_to_short.icd9(x)
-  match(x, icd::icd9cm_billable[[icd9cm_edition]][["code"]], nomatch = nomatch, ...) > 0L
+  match(x, icd9cm_billable[[icd9cm_edition]][["code"]], nomatch = nomatch, ...) > 0L
 }
 
 #' @describeIn icd_is_billable Which of the given ICD codes are leaf nodes in

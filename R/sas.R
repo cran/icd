@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -54,7 +54,7 @@ sas_format_extract <- function(sas_lines) {
 
   # put each VALUE declaration in a vector element
   all_sas_assignments <- str_match_all(
-    x = sas_lines,
+    string = sas_lines,
     pattern = "^V(?:ALUE|alue)[[:space:]]+([[:graph:]]+)[[:space:]]+(.+)[[:space:]]*$"
   ) %>% lapply(`[`, c(2, 3))
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -32,7 +32,9 @@ icd_update_everything <- function() {
   # up already saved files from previous steps. It can take hours to complete,
   # but only needs to be done rarely. This is only intended to be run from
   # development tree, not as installed package
-  generate_sysdata()
+
+  icd_generate_sysdata()
+
   load(file.path("R", "sysdata.rda"))
 
   generate_spelling()
@@ -41,30 +43,43 @@ icd_update_everything <- function() {
   message("Parsing plain text billable codes to create icd9cm_billable list of
                        data frames with descriptions of billable codes only.
                        No dependencies on other data.")
-  parse_leaf_descriptions_all(save_data = TRUE) # nolint
+  parse_leaf_descriptions_all(save_data = TRUE, offline = FALSE) # nolint
   load(system.file("data", "icd9cm_billable.RData", package = "icd"))
 
   message("Parsing comorbidity mappings from SAS and text sources.
                        (Make sure lookup files are updated first.)
                        Depends on icd9cm_hierarchy being updated.")
   # ICD 9
-  icd9_parse_ahrq_sas(save_data = TRUE)
-  icd9_parse_quan_deyo_sas(save_data = TRUE)
+  icd9_parse_ahrq_sas(save_data = TRUE, offline = FALSE)
+  icd9_parse_quan_deyo_sas(save_data = TRUE, offline = FALSE)
   icd9_parse_cc(save_data = TRUE)
   icd9_generate_map_quan_elix(save_data = TRUE)
   icd9_generate_map_elix(save_data = TRUE)
   # ICD 10
-  icd10_parse_ahrq_sas(save_data = TRUE)
+  icd10_parse_ahrq_sas(save_data = TRUE, offline = FALSE)
   icd10_parse_cc(save_data = TRUE)
   icd10_generate_map_quan_elix(save_data = TRUE)
   icd10_generate_map_quan_deyo(save_data = TRUE)
   icd10_generate_map_elix(save_data = TRUE)
-  icd10cm_get_all_defined(save_data = TRUE)
-  icd10cm_extract_sub_chapters(save_data = TRUE)
+  icd10cm_get_all_defined(save_data = TRUE, offline = FALSE)
+  icd10cm_extract_sub_chapters(save_data = TRUE, offline = FALSE)
 
-  # reload the newly saved data before generating chapters and deprecated data
-  icd9cm_generate_chapters_hierarchy(save_data = TRUE, verbose = FALSE) # depends on icd9cm_billable
-  generate_deprecated_data(save_data = TRUE)
+  # reload the newly saved data before generating chapters.
+  # depends on icd9cm_billable
+  icd9cm_generate_chapters_hierarchy(save_data = TRUE, offline = FALSE, verbose = FALSE)
+}
+
+# quick sanity checks - full tests of icd9cm_hierarchy in test-parse.R
+icd9cm_hierarchy_sanity <- function(icd9cm_hierarchy) {
+  stopifnot(all(icd_is_valid.icd9(icd9cm_hierarchy[["code"]], short_code = TRUE)))
+  if (!any(sapply(icd9cm_hierarchy, is.na)))
+    return()
+  print(colSums(sapply(icd9cm_hierarchy, is.na)))
+  print(icd9cm_hierarchy[which(is.na(icd9cm_hierarchy$major)), ])
+  print(icd9cm_hierarchy[which(is.na(icd9cm_hierarchy$three_digit)), ])
+  print(icd9cm_hierarchy[which(is.na(icd9cm_hierarchy$sub_chapter))[1:10], ]) # just top ten
+  print(icd9cm_hierarchy[which(is.na(icd9cm_hierarchy$chapter)), ])
+  stop("should not have any NA values in the ICD-9-CM flatten hierarchy data frame")
 }
 # nocov end
 
@@ -108,6 +123,7 @@ parse_leaf_descriptions_all <- function(save_data = TRUE, offline = TRUE) {
 
   if (save_data)
     save_in_data_dir(icd9cm_billable)
+
   invisible(icd9cm_billable)
 }
 
@@ -257,85 +273,71 @@ parse_leaf_desc_icd9cm_v27 <- function(offline = TRUE) {
 #' description, and short and long descriptions. Currently this is specifically
 #' for the 2011 ICD-9-CM after which there have been minimal changes.
 #' Thankfully, ICD-10-CM has machine readable data available.
+#'
+#' TODO Someday add 'billable' column, and make consistent ICD-9 and ICD-10 lookup
+#' tables
 #' @template save_data
 #' @template verbose
 #' @template offline
 #' @keywords internal
 icd9cm_generate_chapters_hierarchy <- function(save_data = FALSE,
-                                               verbose = FALSE, offline = TRUE) {
+                                               verbose = FALSE, offline = TRUE,
+                                               perl = TRUE, useBytes = TRUE) {
   assert_flag(save_data)
   assert_flag(verbose)
   assert_flag(offline)
 
-  message("get column of ICD-9 codes, up to the three digit headings. ~10s")
-  icd9_rtf <- parse_rtf_year(year = "2011",
-                             save_data = FALSE,
-                             verbose = verbose, offline = offline)
-
-  message("slow step of building icd9 chapters hierarchy from 2011 RTF. ~10s")
-  chaps <- icd9_get_chapters(x = icd9_rtf$code,
-                             short_code = TRUE,
-                             verbose = verbose)
+  icd9_rtf <- rtf_parse_year(year = "2011", perl = perl, useBytes = useBytes,
+                             save_data = FALSE, verbose = verbose, offline = offline)
+  chaps <- icd9_get_chapters(x = icd9_rtf$code, short_code = TRUE, verbose = verbose)
 
   # could also get some long descs from more recent billable lists, but not
   # older ones which only have short descs
-  icd9cm_hierarchy <- cbind(
+  out <- cbind(
     data.frame("code" = icd9_rtf$code,
                "long_desc" = icd9_rtf$desc,
                stringsAsFactors = FALSE),
     # the following can and should be factors:
-    chaps
-  )
+    chaps)
 
   # fix congenital abnormalities not having sub-chapter defined: (this might be
   # easier to do when parsing the chapters themselves...)
-  icd9cm_hierarchy <- fixSubchapterNa(icd9cm_hierarchy, 740, 759)
+  out <- fixSubchapterNa(out, "740", "759")
   # and hematopoietic organs
-  icd9cm_hierarchy <- fixSubchapterNa(icd9cm_hierarchy, 280, 289)
+  out <- fixSubchapterNa(out, "280", "289")
 
   # insert the short descriptions from the billable codes text file. Where there
   # is no short description, e.g. for most Major codes, or intermediate codes,
   # just copy the long description over.
   bill32 <- icd9cm_billable[["32"]]
 
-  billable_codes <- icd_get_billable.icd9(icd9cm_hierarchy[["code"]], short_code = TRUE)
-  billable_rows <- which(icd9cm_hierarchy[["code"]] %in% billable_codes)
-  title_rows <- which(icd9cm_hierarchy[["code"]] %nin% billable_codes)
-  stopifnot(setdiff(c(billable_rows, title_rows), seq_along(icd9cm_hierarchy$code)) == integer(0))
-  icd9cm_hierarchy[billable_rows, "short_desc"] <- bill32$short_desc
+  billable_codes <- icd_get_billable.icd9(out[["code"]], short_code = TRUE)
+  billable_rows <- which(out[["code"]] %in% billable_codes)
+  title_rows <- which(out[["code"]] %nin% billable_codes)
+  stopifnot(setdiff(c(billable_rows, title_rows), seq_along(out$code)) == integer(0))
+  out[billable_rows, "short_desc"] <- bill32$short_desc
   # for rows without a short description (i.e. titles, non-billable),
   # useexisting long desc
-  icd9cm_hierarchy[title_rows, "short_desc"] <- icd9cm_hierarchy[title_rows, "long_desc"]
+  out[title_rows, "short_desc"] <- out[title_rows, "long_desc"]
   # the billable codes list (where available) currently has better long
   # descriptions than the RTF parse. For previous years, there is no long desc
   # in billable, so careful when updating this.
-  icd9cm_hierarchy[billable_rows, "long_desc"] <- bill32$long_desc
+  out[billable_rows, "long_desc"] <- bill32$long_desc
 
   # now put the short description in the right column position
-  icd9cm_hierarchy <- icd9cm_hierarchy[c("code", "short_desc", "long_desc", "three_digit",
-                                         "major", "sub_chapter", "chapter")]
+  out <- out[c("code", "short_desc", "long_desc", "three_digit",
+               "major", "sub_chapter", "chapter")]
 
-  #SOMEDAY add 'billable' column
+  out[["short_desc"]] <- enc2utf8(out[["short_desc"]])
+  out[["long_desc"]] <- enc2utf8(out[["long_desc"]])
 
-  # quick sanity checks - full tests in test-parse.R
-  stopifnot(all(icd_is_valid.icd9(icd9cm_hierarchy[["code"]], short_code = TRUE)))
-  # nocov start
-  if (any(sapply(icd9cm_hierarchy, is.na))) {
-    #diagnose NAs
-    print(colSums(sapply(icd9cm_hierarchy, is.na)))
-    print(icd9cm_hierarchy[which(is.na(icd9cm_hierarchy$major)), ])
-    print(icd9cm_hierarchy[which(is.na(icd9cm_hierarchy$three_digit)), ])
-    print(icd9cm_hierarchy[which(is.na(icd9cm_hierarchy$sub_chapter))[1:10], ]) # just top ten
-    print(icd9cm_hierarchy[which(is.na(icd9cm_hierarchy$chapter)), ])
-    stop("should not have any NA values in the ICD-9-CM flatten hierarchy data frame")
-  }
-  # nocov end
+  icd9cm_hierarchy_sanity(out)
+  icd9cm_hierarchy <- icd9cm_hierarchy_hotfix(out)
 
-  icd9cm_hierarchy[["short_desc"]] <- enc2utf8(icd9cm_hierarchy[["short_desc"]])
-  icd9cm_hierarchy[["long_desc"]] <- enc2utf8(icd9cm_hierarchy[["long_desc"]])
-
+  print(environment())
   if (save_data)
-    save_in_data_dir("icd9cm_hierarchy") # nocov
+    save_in_data_dir(icd9cm_hierarchy) # nocov
+
   invisible(icd9cm_hierarchy)
 }
 
@@ -357,5 +359,27 @@ fixSubchapterNa <- function(x, start, end) {
   new_subs[congenital] <- congenital_title
   new_levels <- append(levels(x$sub_chapter), congenital_title, previous_sub_pos)
   x$sub_chapter <- factor(new_subs, new_levels)
+  x
+}
+
+#' fix some \code{RTF} parsing errors
+#'
+#' These are relevant to the most recent ICD-9-CM code sets, not the older
+#' historic versions. There will be no further updates, so this is reasonable.
+#' @keywords internal manip
+icd9cm_hierarchy_hotfix <- function(x) {
+  x %<>% .icd9cm_hierarchy_hotfix_both("0381", "Staphylococcal septicemia")
+  x %<>% .icd9cm_hierarchy_hotfix_both("7806", "Fever and other psychological disturbances of temperature regulation")
+  x %<>% .icd9cm_hierarchy_hotfix_both("737", "Curvature of spine")
+  x %<>% .icd9cm_hierarchy_hotfix_both("3451", "Generalized convulsive epilepsy")
+  x %<>% .icd9cm_hierarchy_hotfix_both("414", "Other forms of chronic ischemic heart disease")
+  x %<>% .icd9cm_hierarchy_hotfix_both("4140", "Coronary atherosclerosis")
+  x %<>% .icd9cm_hierarchy_hotfix_both("4141", "Aneurysm and dissection of heart")
+  x
+}
+
+.icd9cm_hierarchy_hotfix_both <- function(x, code, desc) {
+  x[x[["code"]] == code, "short_desc"] <- desc
+  x[x[["code"]] == code, "long_desc"] <- desc
   x
 }

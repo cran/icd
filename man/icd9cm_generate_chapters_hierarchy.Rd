@@ -5,7 +5,7 @@
 \title{generate ICD-9-CM hierarchy}
 \usage{
 icd9cm_generate_chapters_hierarchy(save_data = FALSE, verbose = FALSE,
-  offline = TRUE)
+  offline = TRUE, perl = TRUE, useBytes = TRUE)
 }
 \arguments{
 \item{save_data}{single logical value, if \code{TRUE} will save the generated
@@ -23,5 +23,8 @@ description, and short and long descriptions. Currently this is specifically
 for the 2011 ICD-9-CM after which there have been minimal changes.
 Thankfully, ICD-10-CM has machine readable data available.
 }
+\details{
+TODO Someday add 'billable' column, and make consistent ICD-9 and ICD-10 lookup
+tables
+}
 \keyword{internal}
-

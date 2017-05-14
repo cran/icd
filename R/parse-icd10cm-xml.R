@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -27,26 +27,27 @@
 #' putative sub-chapter.
 #' @template save_data
 #' @keywords internal
-icd10cm_extract_sub_chapters <- function(save_data = FALSE) {
+icd10cm_extract_sub_chapters <- function(save_data = FALSE, offline = TRUE) {
   assert_flag(save_data)
-  requireNamespace("xml2")
-  f_info <- icd10cm_get_xml_file()
+  f_info <- icd10cm_get_xml_file(offline = offline)
+  stopifnot(!is.null(f_info))
   j <- xml2::read_xml(f_info$file_path)
 
   # using magrittr::equals and extract because I don't want to import them. See
   # \code{icd-package.R} for what is imported. No harm in being explicit, since
   # :: will do an implicit requireNamespace.
-  j %>% xml2::xml_children() %>%
+  xml2::xml_children(j) %>%
     xml2::xml_name() %>%
     magrittr::equals("chapter") -> chapter_indices
   # could do xpath, but harder to loop
-  j %>% xml2::xml_children() %>% magrittr::extract(chapter_indices) -> chaps
+  xml2::xml_children(j) %>%
+    magrittr::extract(chapter_indices) -> chaps
 
   icd10_sub_chapters <- list()
   for (chap in chaps) {
-    chap %>% xml2::xml_children() -> c_kids
-    c_kids %>% xml2::xml_name() %>% magrittr::equals("section") -> subchap_indices
-    c_kids %>% magrittr::extract(subchap_indices) -> subchaps
+    c_kids <- chap %>% xml2::xml_children()
+    subchap_indices <- xml2::xml_name(c_kids) == "section"
+    subchaps <- c_kids[subchap_indices]
 
     for (subchap in subchaps) {
       subchap  %>%
@@ -77,5 +78,6 @@ icd10cm_extract_sub_chapters <- function(save_data = FALSE) {
   } #chapters
   if (save_data)
     save_in_data_dir(icd10_sub_chapters)
+
   invisible(icd10_sub_chapters)
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -14,6 +14,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with icd. If not, see <http:#www.gnu.org/licenses/>.
+
+# save this in package environment so it doesn't need to be done on the fly
+.have_regexec_perl <- "perl" %in% names(as.list(regexec))
 
 #' Trim leading and trailing white space from a single string
 #'
@@ -44,23 +47,6 @@ trim <- function(x) {
   nax <- is.na(x)
   x[!nax] <- .Call("icd_trimCpp", PACKAGE = "icd", as.character(x[!nax]))
   x
-}
-
-#' convert to character vector without warning
-#' @param x vector, typically numeric or a factor
-#' @return character vector
-#' @keywords internal
-as_char_no_warn <- function(x) {
-  if (is.character(x))
-    return(x)
-  old <- options(warn = -1)
-  on.exit(options(old))
-  if (is.integer(x))
-    fastIntToStringRcpp(x)
-  if (is.factor(x))
-    levels(x)[x]
-  else
-    as.character(x)
 }
 
 "%nin%" <- function(x, table) {
@@ -129,6 +115,19 @@ logical_to_binary <- function(x) {
   x
 }
 
+#' \code{regexec} which accepts \code{perl} argument even in older R
+#'
+#' TODO: deprecate this as we won't support ancient R versions indefinitely.
+#' @keywords internal
+regexec32 <- function(pattern, text, ...) {
+  dots <- list(...)
+  dots[["pattern"]] <- pattern
+  dots[["text"]] <- text
+  if (!.have_regexec_perl)
+    dots[["perl"]] <- NULL
+  do.call(regexec, dots)
+}
+
 #' Match pairs of strings to get named vector
 #'
 #' Match a character vector against a regular expression with at least two
@@ -142,44 +141,37 @@ logical_to_binary <- function(x) {
 #' @param swap logical scalar, whether to swap the names and values. Default is
 #'   not to swap, so the first match becomes the name.
 #' @keywords internal
-str_pair_match <- function(string, pattern, pos, swap = FALSE, perl = TRUE, useBytes = TRUE) {
+str_pair_match <- function(string, pattern, pos, swap = FALSE, ...) {
   assert_character(string, min.len = 1L)
   assert_string(pattern, min.chars = 5L)
   assert_flag(swap)
   pos_missing <- missing(pos)
   if (pos_missing)
-    pos <- c(1, 2)
+    pos <- c(1L, 2L)
   else
-    assert_integerish(pos, len = 2, lower = 1, any.missing = FALSE)
+    assert_integerish(pos, len = 2L, lower = 1L, any.missing = FALSE)
 
-  result <- lapply(
-    string, function(x) unlist(
-      regmatches(
-        x = x,
-        m = regexec(
-          pattern = pattern,
-          text = x,
-          perl = perl,
-          useBytes = useBytes))
-    )[-1]
+  res <- lapply(string,
+                function(x) unlist(
+                  regmatches(x = x, m = regexec32(pattern = pattern, text = x, ...))
+                )[-1]
   )
-  result <- result[vapply(result, function(x) length(x) != 0, logical(1))]
-  result <- do.call(rbind, result)
 
-  if (pos_missing && ncol(result) > max(pos))
-    stop("the pair matching has three or more results but needed two.
+  res <- res[vapply(res, function(x) length(x) != 0, logical(1))]
+  res <- do.call(rbind, res)
+
+  if (pos_missing && ncol(res) > max(pos))
+    stop("the pair matching has three or more ress but needed two.
           Use (?: to have a non-grouping regular expression parenthesis")
 
-  out_names <- result[, ifelse(swap, 2, 1)]
-  if (any(is.na(out_names))) {
+  out_names <- res[, ifelse(swap, 2L, 1L)]
+  if (any(is.na(out_names)))
     stop("didn't match some rows:", string[is.na(out_names)],
          call. = FALSE)
-  }
 
-  out <- result[, ifelse(swap, 1, 2)]
+  out <- res[, ifelse(swap, 1L, 2L)]
   stopifnot(all(!is.na(out)))
-  names(out) <- out_names
-  out
+  setNames(out, out_names)
 }
 
 #' Get or guess the name of the visit ID column
@@ -274,9 +266,9 @@ swap_names_vals <- function(x) {
   x
 }
 
-#' mimic the R CMD check test
+#' mimic the \code{R CMD check} test
 #'
-#' \code{R CMD check} is quick to tell you where UTF-8 characters are not
+#' \code{R CMD check} is quick to tell you where \code{UTF-8} characters are not
 #' encoded, but gives no way of finding out which or where
 #' @examples
 #' \dontrun{
@@ -299,75 +291,6 @@ is_non_ASCII <- function(x)
 get_encodings <- function(x) {
   stopifnot(is.list(x) || is.data.frame(x))
   sapply(x, function(y) unique(Encoding(as_char_no_warn(y))))
-}
-
-#' Fast Factor Generation
-#'
-#' This function generates factors more quickly, without leveraging
-#' \code{fastmatch}. The speed increase with \code{fastmatch} for ICD-9 codes
-#' was about 33% reduction for 10 million codes. SOMEDAY could be faster still
-#' using \code{Rcpp}, and a hashed matching algorithm.
-#'
-#' \code{NaN}s are converted to \code{NA} when used on numeric values. Extracted
-#' from https://github.com/kevinushey/Kmisc.git
-#'
-#' These feature from base R are missing: \code{exclude = NA, ordered =
-#' is.ordered(x), nmax = NA}
-#' @author Kevin Ushey, adapted by Jack Wasey
-#' @param x An object of atomic type \code{integer}, \code{numeric},
-#'   \code{character} or \code{logical}.
-#' @param levels An optional character vector of levels. Is coerced to the same
-#'   type as \code{x}. By default, we compute the levels as
-#'   \code{sort(unique.default(x))}.
-#' @param labels A set of labels used to rename the levels, if desired.
-#' @param na.last If \code{TRUE} and there are missing values, the last level is
-#'   set as \code{NA}; otherwise; they are removed.
-#' @examples
-#' \dontrun{
-#' pts <- icd:::random_unordered_patients(1e7)
-#' u <- unique.default(pts$code)
-#' # this shows that stringr (which uses stringi) sort takes 50% longer than
-#' # built-in R sort.
-#' microbenchmark::microbenchmark(sort(u), str_sort(u))
-#'
-#' # this shows that \code{factor_} is about 50% faster than \code{factor} for
-#' # big vectors of strings
-#'
-#' # without sorting is much faster:
-#' microbenchmark::microbenchmark(factor(pts$code),
-#'                                # factor_(pts$code),
-#'                                factor_nosort(pts$code),
-#'                                times = 25)
-#' }
-#' @details I don't think there is any requirement for factor levels to be
-#'   sorted in advance, especially not for ICD-9 codes where a simple
-#'   alphanumeric sorting will likely be completely wrong.
-#' @keywords internal manip
-factor_nosort <- function(x, levels = NULL, labels = levels) {
-  if (is.factor(x)) return(x)
-  if (is.null(levels)) levels <- unique.default(x)
-  suppressWarnings(f <- match(x, levels))
-  levels(f) <- as.character(labels)
-  class(f) <- "factor"
-  f
-}
-
-#' wrapper for \code{.Deprecated}
-#'
-#' Don't show warnings when using deprecated code. This allows people to
-#' continue using their \code{icd9} code without any modifications, and without
-#' flooding the user with warnings.
-#' @param ... arguments passed to \code{.Deprecated}
-#' @examples
-#' \dontrun{
-#' # turn off all deprecated warnings for this package
-#' options("icd.warn_deprecated" = FALSE)
-#' }
-#' @keywords internal
-icd_deprecated <- function(...) {
-  opt <- getOption("icd.warn_deprecated")
-  if (!(is.null(opt) || !opt))
-    .Deprecated(...)
 }
 
 #' Parse a (sub)chapter text description with parenthesised range
@@ -418,28 +341,36 @@ na_to_false <- function(x) {
   x
 }
 
+#' make a list using input argument names as names
+#' @param ... arguments whose names become list item names, and values become
+#'   the values in the list
+#' @keywords internal
 named_list <- function(...) {
   x <- list(...)
   names(x) <- as.character(match.call()[-1])
   x
 }
 
-# allows R 3.1 to work
+# allows R 3.1 to work. TODO: obsolete
 dir.exists <- function(paths) {
   x <- file.info(paths)$isdir
   !is.na(x) & x
 }
 
-# substitute for removed stringr function
-str_match_all <- function(x, pattern, perl = TRUE, useBytes = TRUE) {
-  x <- as.character(x)
-  regmatches(x, regexec(pattern, x, perl = perl, useBytes = useBytes))
+#' return all matches for regular expression
+#'
+#' \code{perl} is taken out if not supported, allows compatibility with older
+#' versions of R. TODO: check for newer \code{stringr} function to do this.
+#' @keywords internal
+str_match_all <- function(string, pattern, ...) {
+  string <- as.character(string)
+  regmatches(x = string, m = regexec32(pattern = pattern, text = string, ...))
 }
 
-#' str_extract replacement
+#' TODO does \code{stringr} do this?
 #' @keywords internal
-str_extract <- function(string, pattern) {
-  vapply(regmatches(string, regexec(pattern = pattern, text = string)),
+str_extract <- function(string, pattern, ...) {
+  vapply(regmatches(x = string, m = regexec32(pattern = pattern, text = string, ...)),
          FUN = `[[`, 1, FUN.VALUE = character(1L))
 }
 

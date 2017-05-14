@@ -7,13 +7,13 @@ Description: Calculate comorbidities, Charlson scores, perform fast and accurate
     package enables a work flow from raw lists of ICD codes in hospital
     billing databases to comorbidities. ICD-9 and ICD-10 comorbidity mappings
     from Quan (Deyo and Elixhauser versions), Elixhauser and AHRQ included. This
-    package replaces icd9, which can now be uninstalled.
+    package replaces 'icd9', which should be uninstalled.
 Classification/ACM-2012: Social and professional topics~Medical
         records, Applied computing~Health care information systems,
         Applied computing~Health informatics, Applied
         computing~Bioinformatics
-Version: 2.1
-Date: 2016-08-30
+Version: 2.2
+Date: 2017-05-01
 Authors@R: c(
     person(given = "Jack O.", family = "Wasey", role = c("aut", "cre", "cph"), email = "jack@jackwasey.com"),
     person(given = "William", family = "Murphy", role = "ctb", email = "WMurphy@eatright.org", comment = "Van Walraven scores"),
@@ -21,7 +21,7 @@ Authors@R: c(
     )
 Maintainer: Jack O. Wasey <jack@jackwasey.com>
 URL: https://github.com/jackwasey/icd
-Depends: R (>= 3.2.0)
+Depends: R (>= 3.3.0)
 Imports: checkmate (>= 1.7.0), magrittr, stats, Rcpp (>= 0.12.3), utils
 Suggests: knitr, RODBC, roxygen2 (>= 5.0.0), rmarkdown, testthat, xml2
 LazyData: true
@@ -32,11 +32,11 @@ License: GPL-3
 Copyright: See file (inst/)COPYRIGHTS
 VignetteBuilder: knitr
 LinkingTo: Rcpp, testthat
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 NeedsCompilation: yes
-Packaged: 2016-09-02 10:35:44 UTC; waseyj
+Packaged: 2017-05-07 17:55:06 UTC; jack
 Author: Jack O. Wasey [aut, cre, cph],
   William Murphy [ctb] (Van Walraven scores),
   R Core Team [ctb, cph] (m4 macro for OpenMP detection in configure)
 Repository: CRAN
-Date/Publication: 2016-09-02 23:45:32
+Date/Publication: 2017-05-15 00:10:19 UTC

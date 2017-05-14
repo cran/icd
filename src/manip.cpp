@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2016  Jack O. Wasey
+// Copyright (C) 2014 - 2017  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -22,13 +22,13 @@
 #include "convert.h"
 
 // [[Rcpp::export]]
-Rcpp::String icd9AddLeadingZeroesMajorSingle(Rcpp::String major) {
-	if (major == NA_STRING) {
+Rcpp::String icd9AddLeadingZeroesMajorSingle(Rcpp::String mjr) {
+	if (mjr == NA_STRING) {
 		return (NA_STRING);
 	}
-	std::string m(major);
-	if (!icd9IsASingleVE(major.get_cstring())) {
-		switch (strlen(major.get_cstring())) {
+	std::string m(mjr);
+	if (!icd9IsASingleVE(mjr.get_cstring())) {
+		switch (strlen(mjr.get_cstring())) {
 		case 0:
 			return (NA_STRING);
 		case 1:
@@ -39,7 +39,7 @@ Rcpp::String icd9AddLeadingZeroesMajorSingle(Rcpp::String major) {
 			return (m);
 		}
 	} else {
-		switch (strlen(major.get_cstring())) {
+		switch (strlen(mjr.get_cstring())) {
 		case 1:
 			return (NA_STRING);
 		case 2:
@@ -108,8 +108,8 @@ std::string icd9AddLeadingZeroesMajorSingleStd(std::string m) {
 }
 
 // [[Rcpp::export(icd9_add_leading_zeroes_major)]]
-Rcpp::CharacterVector icd9AddLeadingZeroesMajor(Rcpp::CharacterVector major) {
-	return Rcpp::sapply(major, icd9AddLeadingZeroesMajorSingle);
+CV icd9AddLeadingZeroesMajor(CV mjr) {
+	return Rcpp::sapply(mjr, icd9AddLeadingZeroesMajorSingle);
 }
 
 //' @title Add leading zeroes to incomplete ICD-9 codes
@@ -135,18 +135,18 @@ Rcpp::CharacterVector icd9AddLeadingZeroesMajor(Rcpp::CharacterVector major) {
 //' }
 //' @keywords internal manip
 // [[Rcpp::export(icd9_add_leading_zeroes_cpp)]]
-Rcpp::CharacterVector icd9AddLeadingZeroes(Rcpp::CharacterVector x, bool short_code) {
+CV icd9AddLeadingZeroes(CV x, bool short_code) {
   if (short_code) {
   // a shortcut for when short codes is just to add the appropriate leading
   // zeros when the total length is <3. Even then decimal may be quicker by
   // converting from short than calculating by parts.
     Rcpp::List parts = icd9ShortToPartsCpp(x, "");
-    parts["major"] = icd9AddLeadingZeroesMajor(parts["major"]);
+    parts["mjr"] = icd9AddLeadingZeroesMajor(parts["mjr"]);
     return icd9PartsToShort(parts);
   }
   else {
     Rcpp::List parts = icd9DecimalToPartsCpp(x);
-    parts["major"] = icd9AddLeadingZeroesMajor(parts["major"]);
+    parts["mjr"] = icd9AddLeadingZeroesMajor(parts["mjr"]);
     return icd9PartsToDecimal(parts);
   }
 }

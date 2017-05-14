@@ -2,7 +2,9 @@
 #include "is.h"
 #include "manip.h"
 #include "util.h"
+#include "appendMinor.h"
 #include "convert.h"
+#include "convert_alt.h"
 #include "../inst/include/icd.h"
 #include "config.h"
 #ifdef HAVE_TESTTHAT_H
@@ -17,7 +19,7 @@ context("C++ Catch") {
 
 context("internal 'is' functions") {
   test_that("is n") {
-    std::vector<std::string> v;
+    VecStr v;
     v.push_back("10");
     v.push_back("0");
     v.push_back("10.");
@@ -36,7 +38,7 @@ context("internal 'is' functions") {
   }
 
   test_that("is v") {
-    std::vector<std::string> v;
+    VecStr v;
     v.push_back("V10");
     v.push_back("V0");
     v.push_back("V10.");
@@ -55,7 +57,7 @@ context("internal 'is' functions") {
   }
 
   test_that("is e basic") {
-    std::vector<std::string> v;
+    VecStr v;
     v.push_back("E999");
     v.push_back("E0");
     v.push_back("E999.");
@@ -73,49 +75,33 @@ context("internal 'is' functions") {
   }
 }
 
-context("get OMP max threads") {
-  test_that("max threads give a semi-sensible number") {
-    int i = getOmpMaxThreads();
-    expect_true(i >= 0);
-    debug_parallel();
-  }
-}
-
-context("get OMP current threads") {
-  test_that("threads give a semi-sensible number") {
-    int i = getOmpThreads();
-    expect_true(i >= 0);
-    debug_parallel();
-  }
-}
-
 context("icd9ShortToPartsCpp") {
   test_that("icd9ShortToPartsCpp gives NA value") {
     Rcpp::List out = icd9ShortToPartsCpp("E12345678", "");
 
-    Rcpp::CharacterVector j = out["major"];
-    Rcpp::CharacterVector n = out["minor"];
+    CV j = out["mjr"];
+    CV n = out["mnr"];
 
-    expect_true(Rcpp::CharacterVector::is_na(j[0]));
-    expect_true(Rcpp::CharacterVector::is_na(n[0]));
+    expect_true(CV::is_na(j[0]));
+    expect_true(CV::is_na(n[0]));
 
   }
 
   test_that("icd9ShortToPartsCpp multiple inptus gives multiple NA values") {
-    Rcpp::CharacterVector cv = Rcpp::CharacterVector::create("E3417824921",
+    CV cv = CV::create("E3417824921",
                                                              "E375801347",
                                                              "E8319473422");
     Rcpp::List out = icd9ShortToPartsCpp(cv, "");
 
-    Rcpp::CharacterVector j = out["major"];
-    Rcpp::CharacterVector n = out["minor"];
+    CV j = out["mjr"];
+    CV n = out["mnr"];
 
-    expect_true(Rcpp::CharacterVector::is_na(j[0]));
-    expect_true(Rcpp::CharacterVector::is_na(n[0]));
-    expect_true(Rcpp::CharacterVector::is_na(j[1]));
-    expect_true(Rcpp::CharacterVector::is_na(n[1]));
-    expect_true(Rcpp::CharacterVector::is_na(j[2]));
-    expect_true(Rcpp::CharacterVector::is_na(n[2]));
+    expect_true(CV::is_na(j[0]));
+    expect_true(CV::is_na(n[0]));
+    expect_true(CV::is_na(j[1]));
+    expect_true(CV::is_na(n[1]));
+    expect_true(CV::is_na(j[2]));
+    expect_true(CV::is_na(n[2]));
 
   }
 }
@@ -146,7 +132,7 @@ context("random data") {
   }
 
   test_that("random N codes") {
-    std::vector<std::string> n = icd9RandomShortN(1);
+    VecStr n = icd9RandomShortN(1);
     expect_true(n.size() == 1);
     expect_true(n[0].substr(0, 1) != "E");
     expect_true(n[0].substr(0, 1) != "V");
@@ -156,7 +142,7 @@ context("random data") {
   }
 
   test_that("random V codes") {
-    std::vector<std::string> v = icd9RandomShortV(1);
+    VecStr v = icd9RandomShortV(1);
     expect_true(v.size() == 1);
     expect_true(v[0].substr(0, 1) == "V");
 
@@ -169,7 +155,7 @@ context("random data") {
   }
 
   test_that("random E codes") {
-    std::vector<std::string> e = icd9RandomShortE(1);
+    VecStr e = icd9RandomShortE(1);
     expect_true(e.size() == 1);
     expect_true(e[0].substr(0, 1) == "E");
 
@@ -181,93 +167,32 @@ context("random data") {
   }
 
   test_that("random any code") {
-    std::vector<std::string> c = icd9RandomShort(1);
+    VecStr c = icd9RandomShort(1);
     expect_true(c.size() == 1);
     expect_true(c[0].size() >= 3);
     expect_true(c[0].size() <= 5);
   }
 }
 
-context("valgrind hooks") {
-  test_that("start callgrind") {
-    int i = valgrindCallgrindStart(false);
-    expect_true(i == 0);
-  }
-
-  test_that("stop callgrind") {
-    int i = valgrindCallgrindStop();
-    expect_true(i == 0);
-  }
-}
-
-context("fast int to string") {
-  test_that("Rcpp version works") {
-    Rcpp::IntegerVector iv;
-    iv = Rcpp::IntegerVector::create(1);
-    expect_true(Rcpp::as<std::string>(fastIntToStringRcpp(iv)) == "1");
-
-    iv = Rcpp::IntegerVector::create(9);
-    expect_true(Rcpp::as<std::string>(fastIntToStringRcpp(iv)) == "9");
-
-    iv = Rcpp::IntegerVector::create(123456);
-    expect_true(Rcpp::as<std::string>(fastIntToStringRcpp(iv)) == "123456");
-
-    iv = Rcpp::IntegerVector::create(2, 33, 444, 5555, 66666, 123456);
-    Rcpp::CharacterVector cv = Rcpp::CharacterVector::create("2", "33", "444", "5555", "66666", "123456");
-    expect_true(Rcpp::is_true(Rcpp::all(fastIntToStringRcpp(iv) == cv)));
-
-  }
-
-  // duplicated code...
-  test_that("std version works") {
-    std::vector<int> iv;
-    iv.push_back(1);
-    std::vector<std::string> cv;
-    cv.push_back("1");
-    expect_true(fastIntToStringStd(iv) == cv);
-
-    iv[0] = 9;
-    cv[0] = "9";
-    expect_true(fastIntToStringStd(iv) == cv);
-
-    iv[0] = 123456;
-    cv[0] = "123456";
-    expect_true(fastIntToStringStd(iv) == cv);
-
-    iv.push_back(2);
-    iv.push_back(33);
-    iv.push_back(444);
-    iv.push_back(5555);
-    iv.push_back(66666);
-    cv.push_back("2");
-    cv.push_back("33");
-    cv.push_back("444");
-    cv.push_back("5555");
-    cv.push_back("66666");
-    expect_true(fastIntToStringStd(iv) == cv);
-  }
-
-}
-
 #ifdef ICD_DEBUG
 context("MajMin to code") {
   test_that("differing lengths gives error") {
-    Rcpp::CharacterVector mj = Rcpp::CharacterVector::create("100");
-    Rcpp::CharacterVector mn = Rcpp::CharacterVector::create("01");
-    Rcpp::CharacterVector rs = Rcpp::CharacterVector::create("10001");
+    CV mj = CV::create("100");
+    CV mn = CV::create("01");
+    CV rs = CV::create("10001");
     expect_true(Rcpp::is_true(Rcpp::all(icd9MajMinToCode(mj, mn, true) == rs)));
 
-    mj = Rcpp::CharacterVector::create("101", "102");
-    mn = Rcpp::CharacterVector::create("01", "02");
-    rs = Rcpp::CharacterVector::create("10101", "10202");
+    mj = CV::create("101", "102");
+    mn = CV::create("01", "02");
+    rs = CV::create("10101", "10202");
     expect_true(Rcpp::is_true(Rcpp::all(icd9MajMinToCode(mj, mn, true) == rs)));
 
-    mj = Rcpp::CharacterVector::create("100");
-    mn = Rcpp::CharacterVector::create("01", "02");
+    mj = CV::create("100");
+    mn = CV::create("01", "02");
     expect_error(icd9MajMinToCode(mj, mn, true));
 
-    mn = Rcpp::CharacterVector::create("01", "02");
-    mj = Rcpp::CharacterVector::create("100", "101", "102");
+    mn = CV::create("01", "02");
+    mj = CV::create("100", "101", "102");
     expect_error(icd9MajMinToCode(mj, mn, true));
   }
 }

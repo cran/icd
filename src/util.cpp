@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2016  Jack O. Wasey
+// Copyright (C) 2014 - 2017  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -18,7 +18,6 @@
 // [[Rcpp::interfaces(r, cpp)]]
 #include "util.h"
 #include "local.h"
-#include <Rcpp.h>
 #include <vector>
 #include <string>
 #ifdef ICD_OPENMP
@@ -58,15 +57,15 @@ std::string strimCpp(std::string s) {
 }
 
 // [[Rcpp::export]]
-std::vector<std::string> trimCpp(std::vector<std::string> sv) {
-  for (std::vector<std::string>::iterator i = sv.begin(); i != sv.end(); ++i)
+VecStr trimCpp(VecStr sv) {
+  for (VecStr::iterator i = sv.begin(); i != sv.end(); ++i)
     *i = strimCpp(*i);
   return sv;
 }
 
 #ifdef ICD_DEBUG
-void printCharVec(Rcpp::CharacterVector cv) {
-  for (Rcpp::CharacterVector::iterator i=cv.begin(); i!=cv.end(); ++i) {
+void printCharVec(CV cv) {
+  for (CV::iterator i=cv.begin(); i!=cv.end(); ++i) {
     Rcpp::String s = *i;
     Rcpp::Rcout << s.get_cstring() << " ";
   }
@@ -125,7 +124,7 @@ Rcpp::NumericVector randomMajorCpp(int	n) {
 //' @rdname icd9RandomShort
 //' @keywords internal
 // [[Rcpp::export]]
-std::vector<std::string> icd9RandomShortN(std::vector<std::string>::size_type n = 5) {
+VecStr icd9RandomShortN(VecStr::size_type n = 5) {
   VecStr out(n);
   std::vector<double> randoms = Rcpp::as<std::vector<double> >(Rcpp::runif(n, 0, 99999));
   char buffer[6];
@@ -139,7 +138,7 @@ std::vector<std::string> icd9RandomShortN(std::vector<std::string>::size_type n 
 //' @rdname icd9RandomShort
 //' @keywords internal
 // [[Rcpp::export]]
-std::vector<std::string> icd9RandomShortV(std::vector<std::string>::size_type n = 5) {
+VecStr icd9RandomShortV(VecStr::size_type n = 5) {
   VecStr out(n);
   std::vector<double> randoms = Rcpp::as<std::vector<double> >(Rcpp::runif(n, 0, 9999));
   char buffer[6];
@@ -153,7 +152,7 @@ std::vector<std::string> icd9RandomShortV(std::vector<std::string>::size_type n 
 //' @rdname icd9RandomShort
 //' @keywords internal
 // [[Rcpp::export]]
-std::vector<std::string> icd9RandomShortE(std::vector<std::string>::size_type n = 5) {
+VecStr icd9RandomShortE(VecStr::size_type n = 5) {
   VecStr out(n);
   std::vector<double> randoms = Rcpp::as<std::vector<double> >(Rcpp::runif(n, 0, 9999));
   char buffer[6];
@@ -170,7 +169,7 @@ std::vector<std::string> icd9RandomShortE(std::vector<std::string>::size_type n 
 //' the number
 //' @keywords internal
 // [[Rcpp::export]]
-std::vector<std::string> icd9RandomShort(std::vector<std::string>::size_type n = 5) {
+VecStr icd9RandomShort(VecStr::size_type n = 5) {
 
   VecStr out(n);
   std::vector<double> randoms = Rcpp::as<std::vector<double> >(Rcpp::runif(n, 0, 99999));
@@ -192,54 +191,6 @@ std::vector<std::string> icd9RandomShort(std::vector<std::string>::size_type n =
     default:
       {} // never here
     }
-    out[i] = buffer;
-  }
-  return out;
-}
-
-//' Fast convert integer vector to character vector
-//'
-//' Fast conversion from integer vector to character vector using C++
-//' @param x vector of integers
-//' @param bufferSize int if any input strings are longer than this number
-//'   (default 16) there will be memory errors. No checks done for speed.
-//' @examples
-//' \dontrun{
-//' pts <- generate_random_pts(1e7)
-//' # conclusion: buffer size matters little (so default to be more generous),
-//' # and Rcpp version fastest.
-//' microbenchmark::microbenchmark(fastIntToStringStd(pts$visit_id, buffer = 8),
-//'                                fastIntToStringStd(pts$visit_id, buffer = 16),
-//'                                fastIntToStringStd(pts$visit_id, buffer = 64),
-//'                                fastIntToStringRcpp(pts$visit_id, buffer = 8),
-//'                                fastIntToStringRcpp(pts$visit_id, buffer = 16),
-//'                                fastIntToStringRcpp(pts$visit_id, buffer = 64),
-//'                                as.character(pts$visit_id),
-//'                                asCharacterNoWarn(pts$visit_id), times = 5)
-//' }
-//' @rdname fastIntToString
-//' @keywords internal
-// [[Rcpp::export]]
-std::vector<std::string> fastIntToStringStd(std::vector<int> x) {
-  std::vector<std::string>::size_type len = x.size();
-  std::vector<std::string> out(len);
-  char buffer[64];
-  for (std::vector<double>::size_type i = 0; i != len; ++i) {
-    sprintf(buffer, "%u", x[i]);
-    out[i] = buffer;
-  }
-  return out;
-}
-
-
-//' @rdname fastIntToString
-// [[Rcpp::export]]
-Rcpp::CharacterVector fastIntToStringRcpp(Rcpp::IntegerVector x) {
-  size_t len = x.size();
-  Rcpp::CharacterVector out(len);
-  char buffer[64];
-  for (size_t i = 0; i != len; ++i) {
-    sprintf(buffer, "%u", x[i]);
     out[i] = buffer;
   }
   return out;
@@ -298,7 +249,7 @@ bool icd9ComparePair(pas a, pas b) {
 }
 
 // [[Rcpp::export(icd9_sort_cpp)]]
-std::vector<std::string> icd9SortCpp(std::vector<std::string> x) {
+VecStr icd9SortCpp(VecStr x) {
   std::sort(x.begin(), x.end(), icd9CompareStrings);
   return x;
 }
@@ -307,7 +258,7 @@ std::vector<std::string> icd9SortCpp(std::vector<std::string> x) {
 std::size_t getSecondPlusOne(const std::pair<std::string, std::size_t>& p) { return p.second + 1; }
 
 // [[Rcpp::export(icd9_order_cpp)]]
-std::vector<std::size_t> icd9OrderCpp(std::vector<std::string> x) {
+std::vector<std::size_t> icd9OrderCpp(VecStr x) {
 
   std::vector<std::pair<std::string, std::size_t> > vp;
   std::vector<std::size_t> out;
@@ -320,3 +271,13 @@ std::vector<std::size_t> icd9OrderCpp(std::vector<std::string> x) {
   std::transform(vp.begin(), vp.end(), std::back_inserter(out), getSecondPlusOne);
   return out;
 }
+
+// //[[Rcpp::export]]
+// CV env_to_vec_flip(Rcpp::Environment env) {
+//   CV out(Rf_length(env.ls(true)));
+// for (CV::iterator i; i != out.end(); ++i) {
+//   out[env[*i]] = *i;
+// }
+// return
+// }
+

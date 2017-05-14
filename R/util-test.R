@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -29,7 +29,7 @@ skip_slow_tests <- function(msg = "skipping slow test") {
 }
 
 rtf_year_ok <- function(year) {
-  !is.null(fetch_rtf_year(year, offline = TRUE))
+  !is.null(rtf_fetch_year(year, offline = TRUE))
 }
 
 skip_on_no_rtf <- function(test_year) {
@@ -81,7 +81,8 @@ skip_flat_icd9_avail_all <- function() {
 expect_equal_no_icd <- function(object, expected, ...) {
   class(object) <- class(object)[class(object) %nin% icd_all_classes]
   class(expected) <- class(expected)[class(expected) %nin% icd_all_classes]
-  eval(bquote(testthat::expect_equivalent(.(object), .(expected), ...)))
+  # may wrap wtih eval and bquote, but this can fail mysteriously
+  testthat::expect_equivalent(object, expected, ...)
 }
 
 expect_equal_no_class_order <- function(object, expected, ...) {
@@ -114,12 +115,12 @@ expect_chap_equal <- function(x, start, end, ver_chaps, ...) {
 
 #' @rdname expect_chap_equal
 expect_icd10_sub_chap_equal <- function(x, start, end, ...) {
-  eval(bquote(expect_chap_equal(.(x), .(start), .(end), ver_chaps = icd::icd10_sub_chapters, ...)))
+  eval(bquote(expect_chap_equal(.(x), .(start), .(end), ver_chaps = icd10_sub_chapters, ...)))
 }
 
 #' @rdname expect_chap_equal
 expect_icd9_sub_chap_equal <- function(x, start, end, ...) {
-  eval(bquote(expect_chap_equal(.(x), .(start), .(end), ver_chaps = icd::icd9_sub_chapters, ...)))
+  eval(bquote(expect_chap_equal(.(x), .(start), .(end), ver_chaps = icd9_sub_chapters, ...)))
 }
 
 expect_icd9_major_equals <- function(x, code, ...) {
@@ -156,19 +157,19 @@ expect_chap_missing <- function(x, ver_chaps, info = NULL, label = NULL, ...) {
 }
 
 expect_icd9_sub_chap_missing <- function(x, ...) {
-  eval(bquote(expect_chap_missing(.(x), ver_chaps = icd::icd9_sub_chapters, ...)))
+  eval(bquote(expect_chap_missing(.(x), ver_chaps = icd9_sub_chapters, ...)))
 }
 
 expect_icd9_chap_missing <- function(x, ...) {
-  eval(bquote(expect_chap_missing(.(x), ver_chaps = icd::icd9_chapters, ...)))
+  eval(bquote(expect_chap_missing(.(x), ver_chaps = icd9_chapters, ...)))
 }
 
 expect_icd10_sub_chap_missing <- function(x, ...) {
-  eval(bquote(expect_chap_missing(.(x), ver_chaps = icd::icd10_sub_chapters, ...)))
+  eval(bquote(expect_chap_missing(.(x), ver_chaps = icd10_sub_chapters, ...)))
 }
 
 expect_icd10_chap_missing <- function(x, ...) {
-  eval(bquote(expect_chap_missing(.(x), ver_chaps = icd::icd10_chapters, ...)))
+  eval(bquote(expect_chap_missing(.(x), ver_chaps = icd10_chapters, ...)))
 }
 
 #' expect that a chapter with given title exists, case-insensitive
@@ -181,26 +182,26 @@ expect_chap_present <- function(x, ver_chaps, info = NULL, label = NULL, ...) {
 #' @rdname expect_chap_present
 #' @keywords internal debugging
 expect_icd9_sub_chap_present <- function(x, info = NULL, label = NULL, ...) {
-  eval(bquote(expect_chap_present(.(x), ver_chaps = icd::icd9_sub_chapters,
+  eval(bquote(expect_chap_present(.(x), ver_chaps = icd9_sub_chapters,
                                   info = info, label = label, ...)))
 }
 
 #' @rdname expect_chap_present
 #' @keywords internal debugging
 expect_icd9_chap_present <- function(x, ...) {
-  eval(bquote(expect_chap_present(.(x), ver_chaps = icd::icd9_chapters, ...)))
+  eval(bquote(expect_chap_present(.(x), ver_chaps = icd9_chapters, ...)))
 }
 
 #' @rdname expect_chap_present
 #' @keywords internal debugging
 expect_icd10_sub_chap_present <- function(x, ...) {
-  eval(bquote(expect_chap_present(.(x), ver_chaps = icd::icd10_sub_chapters, ...)))
+  eval(bquote(expect_chap_present(.(x), ver_chaps = icd10_sub_chapters, ...)))
 }
 
 #' @rdname expect_chap_present
 #' @keywords internal debugging
 expect_icd10_chap_present <- function(x, ...) {
-  eval(bquote(expect_chap_present(.(x), ver_chaps = icd::icd10_chapters, ...)))
+  eval(bquote(expect_chap_present(.(x), ver_chaps = icd10_chapters, ...)))
 }
 
 expect_icd9_only_chap <- function(x, ...) {
@@ -306,7 +307,7 @@ generate_random_unordered_pts <- function(num_patients = 50000, dz_per_patient =
 #' @rdname generate_random_short_icd9
 #' @keywords internal debugging datagen
 generate_random_short_ahrq_icd9 <- function(n = 50000) {
-  sample(unname(unlist(icd::icd9_map_ahrq)), size = n, replace = TRUE)
+  sample(unname(unlist(icd9_map_ahrq)), size = n, replace = TRUE)
 }
 
 #' generate random strings
@@ -329,17 +330,14 @@ random_string <- function(n, max_chars = 4) {
 #' @keywords internal debugging
 show_test_options <- function() {
   print(options("icd.do_slow_tests"))
-  print(options("icd.warn_deprecated"))
 }
 
 # nocov start
 
 #' Set test options to do everything
 #'
-#' Default without setting options is for slow and online tests to be skipped,
-#' and warnings to be generated for deprecated functions. This function
-#' explicitly sets options to do slow and online tests, and not to warn for
-#' deprecated functions. This is intended for local testing.
+#' Default without setting options is for slow tests to be skipped. This
+#' function explicitly sets options to do slow tests.
 #' @keywords internal debugging
 set_full_test_options <- function() {
 
@@ -348,27 +346,20 @@ set_full_test_options <- function() {
 
   message("now setting full test options")
   options("icd.do_slow_tests" = TRUE)
-  options("icd.warn_deprecated" = FALSE)
   show_test_options()
 }
 # nocov end
 
 #' Set-up test options
 #'
-#' Checks shell environment for whether to do slow or online tests.
-#' Checks whether we should warn for deprecated functions (usually not
-#' when testing). If \code{covr} is detected (an option is set), then
-#' we may be in a sub-process and not see any shell environment or options
-#' from the calling process, so try to set slow tests on and warnings off.
+#' Checks shell environment for whether to do slow or online tests. If
+#' \code{covr} is detected (an option is set), then we may be in a sub-process
+#' and not see any shell environment or options from the calling process, so try
+#' to set slow tests on and warnings off.
 #' @keywords internal debugging
 setup_test_check <- function() {
 
-  # basic defaults if nothing else is set: skip slow and online tests and warn
-  # deprecated
-  if (is.null(options("icd.do_slow_tests")))
-    options("icd.do_slow_tests" = FALSE)
-  if (is.null(options("icd.warn_deprecated")))
-    options("icd.warn_deprecated" = TRUE)
+  options("icd.do_slow_tests" = isTRUE(options("icd.do_slow_tests")))
 
   # covr runs tests in a completely different R process, so seem like options are not
   # preserved.. An alternative might be to add an expression to be run to covr
@@ -378,7 +369,6 @@ setup_test_check <- function() {
     show_test_options()
     if (!is.null(getOption("icd.do_slow_tests")))
       options("icd.do_slow_tests" = TRUE)
-    options("icd.warn_deprecated" = FALSE)
     show_test_options()
 
     # also try to turn off all other warnings, e.g. testthat 'info' deprecation.
@@ -389,12 +379,6 @@ setup_test_check <- function() {
     message("environment variable ICD_SLOW_TESTS found to be true, so doing slow tests")
     options("icd.do_slow_tests" = TRUE)
   }
-  # nocov start
-  if (identical(tolower(Sys.getenv("ICD_WARN_DEPRECATED")), "true")) {
-    message("environment variable ICD_WARN_DEPRECATE found to be true, so warning for deprecated icd9 function use")
-    options("icd.warn_deprecated" = TRUE)
-  }
-  # nocov end
 }
 
 #' run \code{testtthat::test_check} with a Perl regular expression filter

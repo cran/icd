@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2016  Jack O. Wasey
+// Copyright (C) 2014 - 2017  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -16,12 +16,8 @@
 // along with icd. If not, see <http://www.gnu.org/licenses/>.
 
 // [[Rcpp::interfaces(r, cpp)]]
-#include "class.h"
-#include "local.h"
+#include "attr.h"
 #include <Rcpp.h>
-#include <vector>
-#include <string>
-#include <Rinternals.h>
 
 //' Set ICD short-form diagnosis code attribute
 //'
@@ -50,7 +46,6 @@
 //' # Rcpp cleverer than R, and doesn't return a copy of the data
 //' }
 //' @keywords internal attribute
-//' @rdname as.icd_short_diag
 // [[Rcpp::export(.attr_decimal_diag)]]
 void setDecimalDiag(Rcpp::RObject& x, bool value = true) {
   x.attr("icd_short_diag") = !value;
@@ -62,21 +57,22 @@ void setDecimalDiag(Rcpp::RObject& x, bool value = true) {
 void setShortDiag(Rcpp::RObject& x, bool value = true) {
   x.attr("icd_short_diag") = value;
 }
-
-//' @rdname as.icd_short_diag
-//' @keywords attribute
-//' @export
-// [[Rcpp::export(as.icd_short_diag)]]
-Rcpp::RObject asShortDiag(Rcpp::RObject& x, bool value = true) {
-  x.attr("icd_short_diag") = value;
-  return x;
-}
-
-//' @rdname as.icd_short_diag
-//' @keywords attribute
-//' @export
-// [[Rcpp::export(as.icd_decimal_diag)]]
-Rcpp::RObject asDecimalDiag(Rcpp::RObject& x, bool value = true) {
-  x.attr("icd_short_diag") = !value;
-  return x;
-}
+// modification in-place is supposedly a bug (email from Tomas Kalibera)
+//
+// //' @rdname as.icd_short_diag
+// //' @keywords attribute
+// //' @export
+// // [[Rcpp::export(as.icd_short_diag)]]
+// Rcpp::RObject asShortDiag(Rcpp::RObject& x, bool value = true) {
+//   x.attr("icd_short_diag") = value;
+//   return x;
+// }
+//
+// //' @rdname as.icd_short_diag
+// //' @keywords attribute
+// //' @export
+// // [[Rcpp::export(as.icd_decimal_diag)]]
+// Rcpp::RObject asDecimalDiag(Rcpp::RObject& x, bool value = true) {
+//   x.attr("icd_short_diag") = !value;
+//   return x;
+// }

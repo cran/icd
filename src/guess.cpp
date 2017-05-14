@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2016  Jack O. Wasey
+// Copyright (C) 2014 - 2017  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -73,10 +73,10 @@ bool guessShortCompleteCpp(SEXP x_,
 
 // [[Rcpp::export]]
 bool guessShortPlusFactorCpp(SEXP x_, int n) {
-  Rcpp::CharacterVector x;
+  CV x;
   switch(TYPEOF(x_)) {
   case STRSXP: {
-    x = Rcpp::as<Rcpp::CharacterVector>(x_);
+    x = Rcpp::as<CV>(x_);
     break;
   }
   case INTSXP: {

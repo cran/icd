@@ -13,7 +13,7 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 <!--
-Copyright (C) 2014 - 2016  Jack O. Wasey
+Copyright (C) 2014 - 2017  Jack O. Wasey
 
 This file is part of icd.
 
@@ -57,14 +57,9 @@ patients_icd9 <- data.frame(
 ## Introduction
 
 <!-- _TODO: update with first paragraph from DESCRIPTION_ -->
-
-Calculate comorbidities, Charlson scores, perform fast and accurate
-validation, conversion, manipulation, filtering and comparison of ICD-9 and
-ICD-10 codes. Common ambiguities and code formats are handled. This
-package enables a work flow from raw lists of ICD codes in hospital
-billing databases to comorbidities. ICD-9 and ICD-10 comorbidity mappings
-from Quan (Deyo and Elixhauser versions), Elixhauser and AHRQ included. This
-package replaces 'icd9', which can now be uninstalled.
+```{r pkgdesc, results='asis', echo = FALSE}
+cat(packageDescription("icd")$Description)
+```
 
 When calculating which patients have which comorbidities, the data are typically structured in long or wide formats:
 ```{r show data formats, echo=TRUE}
@@ -135,6 +130,7 @@ Vectors of codes, data frames and matrices can have a class set. Conflicting cla
 df <- data.frame(i9 = as.icd9(c("100", "001")), 
                  i10 = as.icd10(c("Z771", "Z87820")))
 
+# demonstrate that an error is thrown for trying to do this:
 try(df %>% as.icd9 %>% as.icd10)
 ```
 
@@ -165,12 +161,12 @@ icd_is_valid(c("1", "001", "100", "123456", "003.21"), short_code = TRUE)
 These functions generate syntactically valid ICD-9 codes, without including parent codes when the range limit would subset the parent. E.g. `"100.99" %i9da% "101.01"` does not include `100` or `100.0`, both of which imply larger subsets than requested by the range command (i.e. every code up to `100.99`). The shorter forms `%i9s%` and `%i9d%` return only *real* codes (i.e. listed in the CMS definitions as either three-digit codes or diagnoses), whereas `%i9sa%` and `%i9da%` return all possible syntactically valid ICD-9 codes:
 ```{r ranges}
 # get all possible codes
-"003" %i9sa% "0033" %>% head(9) # show first 9 of 111 values
+#"003" %i9sa% "0033" %>% head(9) # show first 9 of 111 values
 # just get the ones which correspond to diagnoses (keeping the 3-digit chapters)
-"494" %i9s% "4941"
+#"494" %i9s% "4941"
 
-"10099" %i9sa% "10101"
-"V10" %i9da% "V10.02"
+#"10099" %i9sa% "10101"
+#"V10" %i9da% "V10.02"
 "E987" %i9da% "E988.1"
 
 # can't range between different types:
@@ -206,7 +202,7 @@ icd_children("481")
 By adding `defined = TRUE`, all syntactically valid ICD-9 codes are returned, even if not defined by CMS as diagnoses. This is relevant because of minor coding errors, or coding in a different year to the master list. A planned feature is to allow testing of an ICD-9 code against the valid codes for the year it was entered, but at present only the 2014 master list is used. This means that some older valid codes may no longer be on the list. However, there have been very few changes to ICD-9-CM in the last five years with ICD-10-CM in the wings.
 ```{r all children}
 # first ten possible ICD-9 child codes from 391
-icd_children("391", onlyReal = FALSE)[1:10]
+icd_children("391", defined = FALSE)[1:10]
 ```
 
 ## Decoding ICD-9 codes to descriptions

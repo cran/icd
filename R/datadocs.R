@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -14,6 +14,41 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with icd. If not, see <http:#www.gnu.org/licenses/>.
+
+icd_data_names <- c(
+  "icd10_map_ahrq",
+  "icd10_map_cc",
+  "icd10_map_elix",
+  "icd10_map_quan_deyo",
+  "icd10_map_quan_elix",
+  "icd10_sub_chapters",
+  "icd10cm2016",
+  "icd9_majors",
+  "icd9_map_ahrq",
+  "icd9_map_cc",
+  "icd10_map_cc",
+  "icd9_map_elix",
+  "icd9_map_quan_deyo",
+  "icd9_map_quan_elix",
+  "icd9_sources",
+  "icd9_sub_chapters",
+  "icd9cm_billable",
+  "icd9cm_hierarchy",
+  "icd9_chapters",
+  "icd10_chapters",
+  "icd_map_cc_hcc",
+  "icd10cm2016",
+  "icd9_chapters",
+  "icd9_majors",
+  "icd9_map_cc",
+  "icd9cm_billable",
+  "icd_names_ahrq", "icd_names_ahrq_abbrev", "icd_names_ahrq_htn",
+  "icd_names_ahrq_htn_abbrev", "icd_names_charlson",
+  "icd_names_charlson_abbrev", "icd_names_elix", "icd_names_elix_abbrev",
+  "icd_names_elix_htn", "icd_names_elix_htn_abbrev", "icd_names_quan_elix",
+  "icd_names_quan_elix_abbrev", "icd_names_quan_elix_htn",
+  "icd_names_quan_elix_htn_abbrev"
+)
 
 #' ICD-9 chapters
 #'
@@ -47,7 +82,7 @@
 #' @format list with chapter/sub-chapter or major names stored in list names,
 #'   each with two element named character vector with start and end codes.
 #' @name icd9_chapters
-#' @aliases icd9Chapters icd9ChaptersSub icd9ChaptersMajor icd9_sub_chapters
+#' @aliases icd9_sub_chapters
 #'   icd9_majors
 NULL
 
@@ -85,9 +120,6 @@ NULL
 #'
 #' Short-form ICD-9 codes with short and long descriptions, and description of
 #' each hierarchy level containing each code.
-#'
-#' \code{icd9Hierarchy} is deprecated in favor of \code{icd9cm_hierarchy}
-#'
 #' @docType data
 #' @keywords datasets
 #' @format data frame
@@ -107,7 +139,6 @@ NULL
 #' @source
 #' \url{http://wonder.cdc.gov/wonder/sci_data/codes/icd9/type_txt/icd9abb.asp}
 #' @name icd9cm_hierarchy
-#' @aliases icd9Hierarchy
 NULL
 
 #' ICD-10-CM
@@ -140,7 +171,7 @@ NULL
 #' \url{http://www.hcup-us.ahrq.gov/toolssoftware/comorbidity/comorbidity.jsp}
 #' \url{http://www.hcup-us.ahrq.gov/toolssoftware/comorbidityicd10/comorbidity_icd10.jsp}
 #' @name icd9_map_ahrq
-#' @aliases ahrqComorbid ahrq icd10_map_ahrq
+#' @aliases ahrq icd10_map_ahrq
 NULL
 
 #' Quan adaptation of Deyo/Charlson comorbidities
@@ -165,7 +196,7 @@ NULL
 #'   \url{http://web.archive.org/web/20110225042437/http://www.chaps.ucalgary.ca/sas}
 #'
 #' @name icd9_map_quan_deyo
-#' @aliases quanDeyoComorbid icd10_map_quan_deyo
+#' @aliases icd10_map_quan_deyo
 NULL
 
 #' Quan adaptation of Elixhauser comorbidities
@@ -184,7 +215,7 @@ NULL
 #'
 #'
 #' @name icd9_map_quan_elix
-#' @aliases quanElixComorbid icd10_map_quan_elix
+#' @aliases icd10_map_quan_elix
 NULL
 
 #' Elixhauser comorbidities
@@ -207,31 +238,34 @@ NULL
 #'   "Comorbidity Measures for Use with Administrative Data." Medical Care
 #'   January 1998 36, no. 1 (1998): 8-27.
 #' @name icd9_map_elix
-#' @aliases elixComorbid icd10_map_elix
+#' @aliases icd10_map_elix
 NULL
 
 #' Medicare Hierarchical Condition Categories
 #'
-#' Medicare HCC model was developed to use current year diagnoses and demographics
-#' predict current year healthcare expenditure. This classification has been used
-#' for additional risk adjustment models. ICD codes are first assigned to numeric
-#' Condition Categories (CCs). A hierarchy rule is then applied so that each patient
-#' is coded for only the most severe of the Condition Categories in a group. For example,
-#' if a patient has metastatic lung cancer, they will only be assigned the CC
-#' for "Metastatic Cancer and Acute Leukemia", and will not be assigned the
-#' CC for "Lung and other Severe Cancers". Once the hierarchy rules are applied, the codes
-#' are referred to as HCCs. This mapping can change over time. It remained the same from
-#' 2007-10
+#' Medicare HCC model was developed to use current year diagnoses and
+#' demographics predict current year healthcare expenditure. This classification
+#' has been used for additional risk adjustment models. ICD codes are first
+#' assigned to numeric Condition Categories ('CCs'). A hierarchy rule is then
+#' applied so that each patient is coded for only the most severe of the
+#' Condition Categories in a group. For example, if a patient has metastatic
+#' lung cancer, they will only be assigned the 'CC' for "Metastatic Cancer and
+#' Acute Leukemia", and will not be assigned the 'CC' for "Lung and other Severe
+#' Cancers". Once the hierarchy rules are applied, the codes are referred to as
+#' HCCs. This mapping can change over time. It remained the same from 2007-10
 #' @docType data
 #' @keywords datasets
-#' @format \code{dataframe} with 3 columns (\code{icd_code}, \code{cc}, and \code{year})
-#' @references Pope, Gregory C., et al.
-#'   "Diagnostic cost group hierarchical condition category models for Medicare risk adjustment."
-#'   Health Economics Research, Inc. Waltham, MA (2000).
+#' @format \code{dataframe} with 3 columns (\code{icd_code}, \code{cc}, and
+#'   \code{year})
+#' @references Pope, Gregory C., et al. "Diagnostic cost group hierarchical
+#'   condition category models for Medicare risk adjustment." Health Economics
+#'   Research, Inc. Waltham, MA (2000).
 #'   \url{https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Reports/Downloads/Pope_2000_2.pdf}
+#'
 #'
 #'   Risk Adjustment, Centers for Medicare and Medicaid Services
 #'   \url{https://www.cms.gov/Medicare/Health-Plans/MedicareAdvtgSpecRateStats/Risk-Adjustors.html}
+#'
 #' @name icd9_map_hcc
 #' @aliases icd9_map_cc icd10_map_cc icd_map_cc_hcc
 NULL
@@ -247,10 +281,10 @@ NULL
 #' as "Hypertension, combined." _abbrev suffix indicates a very short space-free
 #' description. Quan's version of Elixhauser is identical. AHRQ updates drops
 #' the arrythmia field. The naming convention is a root, e.g.
-#' \code{elixComorbid}, with neither/either/both suffixes \code{_htn} and
-#' \code{_abbrev}. The Charlson derived mappings do not include hypertension.
-#' _abbreviated comorbidity names are helpful for interactive work, whereas the
-#' full names might be preferred for plotting.
+#' \code{icd9_map_elix} or \code{icd10_map_elix}, with neither/either/both
+#' suffixes \code{_htn} and \code{_abbrev}. The Charlson derived mappings do not
+#' include hypertension. _abbreviated comorbidity names are helpful for
+#' interactive work, whereas the full names might be preferred for plotting.
 #' @format list, with character/numeric code. 'Hypertension, uncomplicated' and
 #'   'Hypertension, complicated' are labelled '6a' and '6b'. Diabetes, cancer,
 #'   and metastasis are counted independently, as in the original paper, giving
@@ -260,12 +294,7 @@ NULL
 #'   icd_names_quan_elix icd_names_quan_elix_abbrev icd_names_quan_elix_htn
 #'   icd_names_quan_elix_htn_abbrev icd_names_ahrq icd_names_ahrq_abbrev
 #'   icd_names_ahrq_htn icd_names_ahrq_htn_abbrev icd_names_charlson
-#'   icd_names_charlson_abbrev icd_names_cc elixComorbidNames elixComorbidNamesAbbrev
-#'   elixComorbidNamesHtn elixComorbidNamesHtnAbbrev quanElixComorbidNames
-#'   quanElixComorbidNamesAbbrev quanElixComorbidNamesHtn
-#'   quanElixComorbidNamesHtnAbbrev ahrqComorbidNames ahrqComorbidNamesAbbrev
-#'   ahrqComorbidNamesHtn ahrqComorbidNamesHtnAbbrev charlsonComorbidNames
-#'   charlsonComorbidNamesAbbrev
+#'   icd_names_charlson_abbrev icd_names_cc
 #' @keywords datasets
 #' @docType data
 NULL
@@ -330,6 +359,14 @@ NULL
 #' @name uranium_pathology
 #' @source \url{http://www.ustur.wsu.edu/database/}
 #'   \url{http://www.ustur.wsu.edu/Case_Studies/Pathology/mdb/Pathology_Office2007.zip}
+#' @docType data
+#' @keywords datasets
+NULL
+
+#' ICD-9 data sources
+#'
+#' List of ICD-9 data sources for different versions of ICD-9-CM
+#' @name icd9_sources
 #' @docType data
 #' @keywords datasets
 NULL

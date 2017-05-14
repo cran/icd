@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -24,10 +24,7 @@
 #' \code{datadocs.R}.
 #' @template parse-template
 #' @keywords internal
-icd9_generate_map_elix <- function(condense = NULL, save_data = TRUE, path = NULL) {
-  if (!missing(condense) || !missing(path))
-    warning("'condense' and 'path' are deprecated in icd9_generate_map_elix",
-            call. = FALSE)
+icd9_generate_map_elix <- function(save_data = TRUE) {
   icd9_map_elix <- list(
     chf = c("398.91", "402.11", "402.91", "404.11", "404.13", "404.91",
             "404.93", "428.0" %i9da% "428.9"),
@@ -171,12 +168,7 @@ icd10_generate_map_elix <- function(save_data = TRUE) {
 #'   to include all possible ICD-9 codes.
 #' @template parse-template
 #' @keywords internal
-icd9_generate_map_quan_elix <- function(condense = NULL, save_data = TRUE, path = NULL) {
-
-  if (!missing(condense) || !missing(path))
-    warning("'condense' and 'path' are deprecated in icd9_generate_map_elix, and no longer has any effect.
-The map can be condensed using other functions in the package. 'path' is the data dir in working tree.",
-            call. = FALSE)
+icd9_generate_map_quan_elix <- function(save_data = TRUE) {
   icd9_map_quan_elix <- list(
     chf = c("398.91", "402.01", "402.11", "402.91", "404.01", "404.03",
             "404.11", "404.13", "404.91", "404.93", "425.4" %i9da% "425.9",
@@ -316,7 +308,9 @@ icd10_generate_map_quan_elix <- function(save_data = TRUE) {
     if (verbose)
       message("f working on: ", paste(x, collapse = " "))
     kids <- icd_children_defined.icd10cm(x, short_code = TRUE)
-    c(kids, x) %>% unique %>% icd_sort.icd10
+    c(kids, x) %>%
+      unique %>%
+      icd_sort.icd10
   }
 
   icd10_map_quan_elix <- lapply(quan_elix_raw, f)
@@ -396,7 +390,9 @@ icd10_generate_map_quan_deyo <- function(save_data = TRUE) {
   # size based on the input data before comorbidity matching.
   f <- function(x) {
     icd_children_defined.icd10cm(x, short_code = TRUE) %>%
-      c(x) %>% unique %>% icd_sort.icd10
+      c(x) %>%
+      unique %>%
+      icd_sort.icd10
   }
 
   icd10_map_quan_deyo <- lapply(quan_charl_raw, f)

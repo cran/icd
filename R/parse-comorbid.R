@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -58,12 +58,12 @@ icd10_fetch_ahrq_sas <- function(offline) {
 #' in generating the package itself.
 #' @template parse-template
 #' @keywords internal manip
-icd9_parse_ahrq_sas <- function(save_data = FALSE) {
+icd9_parse_ahrq_sas <- function(save_data = FALSE, offline = TRUE) {
   assert_flag(save_data)
 
   # readLines make assumptions or guess about encoding, consider using
   # Hadleyverse for this in future
-  ahrq_info <- icd9_fetch_ahrq_sas(offline = TRUE)
+  ahrq_info <- icd9_fetch_ahrq_sas(offline = offline)
 
   ahrq_sas_lines <- readLines(ahrq_info$file_path)
   icd9_map_ahrq_working <- sas_format_extract_rcomfmt(ahrq_sas_lines)
@@ -82,15 +82,22 @@ icd9_parse_ahrq_sas <- function(save_data = FALSE) {
     the_pairs <- some_pairs[lapply(some_pairs, length) == 2]
     out <- c(out, lapply(the_pairs, function(x) sas_expand_range(x[1], x[2])))
     # update icd9_map_ahrq with full range of icd9 codes:
-    out %>% unlist %>% unique %>% as.icd9 %>% as.icd_short_diag -> icd9_map_ahrq[[cmb]]
+    icd9_map_ahrq[[cmb]] <- unlist(out) %>%
+      unique %>%
+      as.icd9 %>%
+      as.icd_short_diag
   }
 
   # drop this superfluous finale which allocates any other ICD-9 code to the
   # "Other" group
   icd9_map_ahrq[[" "]] <- NULL
-  icd9_map_ahrq[ahrq_htn] %>% unlist %>% unname %>% as.icd9 %>% as.icd_short_diag -> icd9_map_ahrq[["HTNCX"]]
-  icd9_map_ahrq[ahrq_chf] %>% unlist %>% unname %>% as.icd9 %>% as.icd_short_diag -> icd9_map_ahrq[["CHF"]]
-  icd9_map_ahrq[ahrq_renal] %>% unlist %>% unname %>% as.icd9 %>% as.icd_short_diag -> icd9_map_ahrq[["RENLFAIL"]]
+  clean_up_map <- function(x) {
+    as.icd_short_diag(as.icd9(unname(unlist(x))))
+  }
+
+  clean_up_map(icd9_map_ahrq[ahrq_htn]) -> icd9_map_ahrq[["HTNCX"]]
+  clean_up_map(icd9_map_ahrq[ahrq_chf]) -> icd9_map_ahrq[["CHF"]]
+  clean_up_map(icd9_map_ahrq[ahrq_renal]) -> icd9_map_ahrq[["RENLFAIL"]]
 
   icd9_map_ahrq[ahrq_unused] <- NULL
 
@@ -131,17 +138,19 @@ icd9_parse_ahrq_sas <- function(save_data = FALSE) {
 
 # This is in some ways simpler than that ICD-9 equivalent because I make no
 # attempt to find all the child codes.
-icd10_parse_ahrq_sas <- function(save_data = FALSE) {
+icd10_parse_ahrq_sas <- function(save_data = FALSE, offline = TRUE) {
   assert_flag(save_data)
 
-  ahrq_info <- icd10_fetch_ahrq_sas(offline = TRUE)
+  ahrq_info <- icd10_fetch_ahrq_sas(offline = offline)
 
   ahrq_sas_lines <- readLines(ahrq_info$file_path)
   icd10_map_ahrq <- sas_format_extract_rcomfmt(ahrq_sas_lines)
 
-  icd10_map_ahrq[ahrq_htn] %>% unlist %>% unname -> icd10_map_ahrq[["HTNCX"]]
-  icd10_map_ahrq[ahrq_chf] %>% unlist %>% unname -> icd10_map_ahrq[["CHF"]]
-  icd10_map_ahrq[ahrq_renal] %>% unlist %>% unname -> icd10_map_ahrq[["RENLFAIL"]]
+  unun <- function(x) unname(unlist(x))
+
+  icd10_map_ahrq[["HTNCX"]] <- icd10_map_ahrq[ahrq_htn] %>% unun
+  icd10_map_ahrq[["CHF"]] <- icd10_map_ahrq[ahrq_chf] %>% unun
+  icd10_map_ahrq[["RENLFAIL"]] <- icd10_map_ahrq[ahrq_renal] %>% unun
 
   icd10_map_ahrq[ahrq_unused] <- NULL
 
@@ -186,12 +195,12 @@ icd9_fetch_quan_deyo_sas <- function(...) {
 #' @template parse-template
 #' @template offline
 #' @keywords internal manip
-icd9_parse_quan_deyo_sas <- function(save_data = FALSE) {
+icd9_parse_quan_deyo_sas <- function(save_data = FALSE, offline = TRUE) {
   assert_flag(save_data)
 
   # download the file and/or just get the path or file name, fails if missing
   # by default
-  f_info <- icd9_fetch_quan_deyo_sas(offline = TRUE)
+  f_info <- icd9_fetch_quan_deyo_sas(offline = offline)
 
   quan_sas_lines <- readLines(f_info$file_path, warn = FALSE)
   let_statements <- sas_extract_let_strings(quan_sas_lines)
@@ -205,7 +214,10 @@ icd9_parse_quan_deyo_sas <- function(save_data = FALSE) {
   # do use icd:: to refer to a lazy-loaded dataset which is obscurely within
   # the package, but not in its namespace, or something...
   names(icd9_map_quan_deyo) <- icd::icd_names_charlson_abbrev
-  icd9_map_quan_deyo %<>% as.icd_short_diag %>% icd9 %>% icd_comorbidity_map
+  icd9_map_quan_deyo %<>%
+    as.icd_short_diag %>%
+    icd9 %>%
+    icd_comorbidity_map
 
   if (save_data)
     save_in_data_dir(icd9_map_quan_deyo)
@@ -218,8 +230,8 @@ icd9_parse_quan_deyo_sas <- function(save_data = FALSE) {
 #' \href{https://www.cms.gov/Medicare/Health-Plans/MedicareAdvtgSpecRateStats/Risk-Adjustors.html}{
 #' Medicare Risk Adjustors}. Due to the complex file structure of the original
 #' data (many nested zip files), they have been organized in the folder
-#' data/icd_hcc_rawdata/. This function creates an .RData file containing
-#' icd9/10 to CC crosswalks.
+#' \code{data/icd_hcc_rawdata/}. This function creates a data file containing
+#' ICD-9/10 to CC crosswalks.
 #' Import the ICD9 to CC crosswalks
 #' @template parse-template
 #' @keywords internal manip
@@ -345,10 +357,10 @@ icd10_parse_cc <- function(save_data = FALSE) {
 #' \href{https://www.cms.gov/Medicare/Health-Plans/MedicareAdvtgSpecRateStats/Risk-Adjustors.html}{
 #' Medicare Risk Adjustors}. Due to the complex file structure of the original
 #' data (many nested zip files), they have been organized in the folder
-#' data/icd_hcc_rawdata/hierarchy.
+#' \code{data/icd_hcc_rawdata/hierarchy}.
 #'
-#' This function creates an .RData file containing rules for converting CCs to
-#' HCC
+#' This function creates an \code{.RData} file containing rules for converting
+#' CCs to HCC
 #' @template parse-template
 #' @keywords internal manip
 icd_parse_cc_hierarchy <- function(save_data = FALSE) {
@@ -368,7 +380,7 @@ icd_parse_cc_hierarchy <- function(save_data = FALSE) {
   # Add year variable to each dataframe
   icd_map_cc_hcc <- mapply(cbind, icd_map_cc_hcc, "year" = years, SIMPLIFY = FALSE)
 
-  # Convert each item in the list of icd_map_cc_hcc objects into a dataframe
+  # Convert each item in the list of 'icd_map_cc_hcc' objects into a dataframe
   # and combine into a single DF
   icd_map_cc_hcc <- lapply(icd_map_cc_hcc, as.data.frame, stringsAsFactors = FALSE)
   icd_map_cc_hcc <- do.call(rbind, icd_map_cc_hcc)

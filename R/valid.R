@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -204,7 +204,7 @@ set_re_globals()
 #'
 #' @param x An ICD-9 or 10 code. If the class is set to \code{'icd9'},
 #'   \code{'icd10'}, \code{'icd10cm'} etc then perform appropriate validation.
-#' @template major
+#' @template mjr
 #' @template whitespace_ok
 #' @template dotdotdot
 #' @seealso \url{http://www.stata.com/users/wgould/icd9/icd9.hlp}

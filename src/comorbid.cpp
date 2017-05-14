@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2016  Jack O. Wasey
+// Copyright (C) 2014 - 2017  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -29,9 +29,9 @@
 // R CMD INSTALL --no-docs icd && R -e "library(icd); icd:::runOpenMPVecInt();"
 
 //' @rdname icd_comorbid
-//' @description \link{Rcpp} approach to comorbidity assignment with OpenMP and
-//'   vector of integers strategy. It is very fast, and most time is now spent
-//'   setting up the data to be passed in.
+//' @description \code{\link{Rcpp}} approach to comorbidity assignment with
+//'   OpenMP and vector of integers strategy. It is very fast, and most time is
+//'   now spent setting up the data to be passed in.
 //' @param aggregate single logical value, if \code{TRUE}, then take (possible
 //'   much) more time to aggregate out-of-sequence visit IDs in the input
 //'   data.frame. If this is \code{FALSE}, then each contiguous group of visit

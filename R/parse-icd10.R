@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -29,9 +29,10 @@
 #' @references
 #'   https://www.cms.gov/Medicare/Coding/ICD10/downloads/icd-10quickrefer.pdf
 #' @keywords internal
-icd10cm_get_all_defined <- function(save_data = FALSE) {
+icd10cm_get_all_defined <- function(save_data = FALSE, offline = TRUE) {
 
-  f_info <- icd10cm_get_flat_file()
+  f_info <- icd10cm_get_flat_file(offline = offline)
+  stopifnot(!is.null(f_info))
 
   # readLines may muck up encoding, resulting in weird factor order generation later?
   x <- readLines(con = f_info$file_path, encoding = "ASCII")
@@ -51,29 +52,29 @@ icd10cm_get_all_defined <- function(save_data = FALSE) {
   )
 
   icd10cm2016[["code"]] %<>% as.icd10cm %>% as.icd_short_diag
-  icd10cm2016[["code"]] %>% icd_get_major %>% factor_nosort -> icd10cm2016[["three_digit"]]
+  icd10cm2016[["three_digit"]] <-
+    factor_nosort(icd_get_major(icd10cm2016[["code"]]))
 
   # here we must re-factor so we don't have un-used levels in major
-  merge(x = icd10cm2016["three_digit"],
-        y = icd10cm2016[c("code", "short_desc")],
-        by.x = "three_digit", by.y = "code",
-        all.x = TRUE) %>%
-    magrittr::extract2("short_desc") %>% factor_nosort -> icd10cm2016[["major"]]
+  icd10cm2016[["major"]] <- factor_nosort(
+    merge(x = icd10cm2016["three_digit"],
+          y = icd10cm2016[c("code", "short_desc")],
+          by.x = "three_digit", by.y = "code",
+          all.x = TRUE)[["short_desc"]]
+  )
+
 
   # can't use icd_expand_range_major here for ICD-10-CM, because it would use
   # the output of this function (and it can't just do numeric ranges because
   # there are some non-numeric characters scattered around)
 
   sc_lookup <- icd10_generate_subchap_lookup()
-  merge(x = icd10cm2016["three_digit"], y = sc_lookup,
-        by.x = "three_digit", by.y = "sc_major",
-        all.x = TRUE) %>%
-    magrittr::extract2("sc_desc") -> icd10cm2016[["sub_chapter"]]
+  icd10cm2016[["sub_chapter"]] <- merge(x = icd10cm2016["three_digit"], y = sc_lookup,
+        by.x = "three_digit", by.y = "sc_major", all.x = TRUE)[["sc_desc"]]
 
   chap_lookup <- icd10_generate_chap_lookup()
-  merge(icd10cm2016["three_digit"], chap_lookup,
-        by.x = "three_digit", by.y = "chap_major", all.x = TRUE) %>%
-    magrittr::extract2("chap_desc") -> icd10cm2016[["chapter"]]
+  icd10cm2016[["chapter"]] <- merge(icd10cm2016["three_digit"], chap_lookup,
+        by.x = "three_digit", by.y = "chap_major", all.x = TRUE)[["chap_desc"]]
 
   if (save_data)
     save_in_data_dir(icd10cm2016)

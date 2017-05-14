@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -29,8 +29,8 @@
 #'   \code{major} \code{minor}. Yes, this is very like a data frame, but we do
 #'   not need the overhead of structuring it that way. \item two vectors of
 #'   separated major and minor parts }
-#' @template major
-#' @template minor
+#' @template mjr
+#' @template mnr
 #' @template icd9-any
 #' @template icd9-short
 #' @template icd9-decimal
@@ -51,7 +51,7 @@ NULL
 #' the chapter headings can be converted into the full set of their children,
 #' and then used to look-up which chapter, sub-chapter, or 'major' a given code
 #' belongs. Always returns a map with short-form ICD-9 codes. These can be
-#' converted in bulk with \code{lapply} and \code{icd9ShortToDecimal}.
+#' converted in bulk with \code{lapply} and \code{icd_short_to_decimal}.
 #' @param x Either a chapter list itself, or the name of one, e.g.
 #'   \code{icd9_sub_chapters}
 #' @family ICD-9 convert
@@ -371,54 +371,55 @@ icd_decimal_to_short.icd10cm <- function(x) {
 #' @export
 #' @keywords internal
 icd_decimal_to_short.default <- function(x) {
-  if (is.factor(x)) {
-    levels(x) <- as.icd_short_diag(trim(gsub("\\.", "", levels(x))))
-    return(x)
-  }
-  as.icd_short_diag(trim(gsub("\\.", "", x)))
+  switch(
+    icd_guess_version(as_char_no_warn(x), short_code = FALSE),
+    "icd9" = icd_decimal_to_short.icd9(x),
+    "icd10" = icd_decimal_to_short.icd10(x),
+    stop("Unknown ICD version guessed from input")
+  )
 }
 
 #' Convert decimal ICD codes to component parts
 #' @export
 #' @keywords internal
-icd_decimal_to_parts <- function(x, minor_empty = "") {
+icd_decimal_to_parts <- function(x, mnr_empty = "") {
   UseMethod("icd_decimal_to_parts")
 }
 
 #' Convert short format ICD codes to component parts
 #' @export
 #' @keywords internal
-icd_short_to_parts <- function(x, minor_empty = "") {
+icd_short_to_parts <- function(x, mnr_empty = "") {
   UseMethod("icd_short_to_parts")
 }
 
 #' @describeIn icd_short_to_parts Convert short format ICD-9 code to parts
 #' @export
 #' @keywords internal manip
-icd_short_to_parts.icd9 <- function(x, minor_empty = "") {
+icd_short_to_parts.icd9 <- function(x, mnr_empty = "") {
   # Cannot specify default values in both header and C++ function body, so use a
   # shim here.
-  .Call("icd_icd9ShortToPartsCpp", PACKAGE = "icd", x, minor_empty)
+  .Call("icd_icd9ShortToPartsCpp", x, mnr_empty)
 }
 
 #' @describeIn icd_decimal_to_parts Convert decimal ICD-9 code to parts
 #' @export
 #' @keywords internal manip
-icd_decimal_to_parts.icd9 <- function(x, minor_empty = "") {
-  .Call("icd_icd9DecimalToPartsCpp", PACKAGE = "icd", x, minor_empty)
+icd_decimal_to_parts.icd9 <- function(x, mnr_empty = "") {
+  .Call("icd_icd9DecimalToPartsCpp", x, mnr_empty)
 }
 
 #' @describeIn icd_short_to_parts Convert short format ICD code to parts,
 #'   guessing whether ICD-9 or ICD-10
 #' @export
 #' @keywords internal manip
-icd_short_to_parts.character <- function(x, minor_empty = "") {
+icd_short_to_parts.character <- function(x, mnr_empty = "") {
   # Cannot specify default values in both header and C++ function body, so use a
   # shim here.
   switch(
     icd_guess_version(x, short_code = TRUE),
-    "icd9" = .Call("icd_icd9ShortToPartsCpp", PACKAGE = "icd", x, minor_empty),
-    "icd10" = icd_short_to_parts.icd10(x, minor_empty = minor_empty),
+    "icd9" = .Call("icd_icd9ShortToPartsCpp", x, mnr_empty),
+    "icd10" = icd_short_to_parts.icd10(x, mnr_empty = mnr_empty),
     stop("Unknown ICD version guessed from input")
   )
 }
@@ -427,11 +428,11 @@ icd_short_to_parts.character <- function(x, minor_empty = "") {
 #'   ICD version
 #' @export
 #' @keywords internal manip
-icd_decimal_to_parts.character <- function(x, minor_empty = "") {
+icd_decimal_to_parts.character <- function(x, mnr_empty = "") {
   switch(
     icd_guess_version(x, short_code = FALSE),
-    "icd9" = .Call("icd_icd9DecimalToPartsCpp", PACKAGE = "icd", x, minor_empty),
-    "icd10" = icd_decimal_to_parts.icd10(x, minor_empty = minor_empty),
+    "icd9" = .Call("icd_icd9DecimalToPartsCpp", x, mnr_empty),
+    "icd10" = icd_decimal_to_parts.icd10(x, mnr_empty = mnr_empty),
     stop("Unknown ICD version guessed from input")
   )
 }

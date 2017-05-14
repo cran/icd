@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -46,10 +46,10 @@ icd9_extract_alpha_numeric <- function(x) {
 #' library(microbenchmark)
 #' x <- icd:::generate_random_decimal_icd9(1e6)
 #' microbenchmark(
-#'   x %>% as_char_no_warn %>%
+#'   x %>% icd:::as_char_no_warn %>%
 #'   stringr::str_replace("[[:space:]]*([EeVv]?)(0*)([\\.[:digit:]]*)[[:space:]]*", "\\1\\3"),
 #'
-#'   stringr::str_replace(as_char_no_warn(x),
+#'   stringr::str_replace(icd:::as_char_no_warn(x),
 #'               "[[:space:]]*([EeVv]?)(0*)([\\.[:digit:]]*)[[:space:]]*", "\\1\\3"),
 #'
 #'   gsub("[[:space:]]*([EeVv]?)(0*)([\\.[:digit:]]*)[[:space:]]*", "\\1\\3", x),
@@ -66,10 +66,10 @@ icd9_drop_leading_zeroes <- function(x, short_code = icd_guess_short(x)) {
   assert(check_null(short_code), check_flag(short_code))
 
   if (short_code) {
-    parts <- icd_short_to_parts.icd9(x = x, minor_empty = "")
+    parts <- icd_short_to_parts.icd9(x = x, mnr_empty = "")
     # very important: only drop the zero in V codes if the minor part is empty.
-    are_empty <- parts[["minor"]] == ""
-    x[are_empty] <- icd9_drop_leading_zeroes_major(parts[are_empty, "major"])
+    are_empty <- parts[["mnr"]] == ""
+    x[are_empty] <- icd9_drop_leading_zeroes_major(parts[are_empty, "mjr"])
     x
   } else {
     gsub("[[:space:]]*([EeVv]?)(0*)([\\.[:digit:]]*)[[:space:]]*", "\\1\\3", x)

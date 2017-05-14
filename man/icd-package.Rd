@@ -4,11 +4,12 @@
 \name{icd-package}
 \alias{icd}
 \alias{icd-package}
-\alias{icd10-package}
-\alias{icd9-package}
-\alias{package-icd10}
+\alias{icd-package}
 \alias{package-icd9}
-\title{Tools for Working with ICD-9 and ICD-10 Codes, and Finding Comorbidities}
+\alias{icd9-package}
+\alias{icd10-package}
+\alias{package-icd10}
+\title{icd: Tools for Working with ICD-9 and ICD-10 Codes, and Finding Comorbidities}
 \description{
 Calculate comorbidities, Charlson scores, perform fast and accurate
 validation, conversion, manipulation, filtering and comparison of ICD-9 and
@@ -16,13 +17,14 @@ ICD-10 codes. Common ambiguities and code formats are handled. This
 package enables a work flow from raw lists of ICD codes in hospital
 billing databases to comorbidities. ICD-9 and ICD-10 comorbidity mappings
 from Quan (Deyo and Elixhauser versions), Elixhauser and AHRQ included. This
-package replaces icd9, which can now be uninstalled.
+package replaces 'icd9', which should be uninstalled.
 }
 \details{
 \describe{ \item{Comorbidities}{ \code{\link{icd_comorbid}}
-  determines comorbidities for a set of patients with one or more ICD-9
-  codes each. \code{\link{icd9Charlson}} calculates Charlson score
-  (Comorbidity Index).
+  determines comorbidities for a set of patients with one or more ICD-9 codes
+  each. \code{\link{icd_charlson}} calculates Charlson score (Comorbidity
+  Index). If you already calculated the comorbidities, you can use
+  \code{\link{icd_charlson_from_comorbid}}.
 
   \itemize{
 
@@ -32,9 +34,9 @@ package replaces icd9, which can now be uninstalled.
   annually.
 
   \item Quan revised both Deyo/Charlson and Elixhauser ICD-9 to comorbidity
-  mappings. These are presented as: \code{link{icd9_map_quan_deyo}} (which is
+  mappings. These are presented as: \code{\link{icd9_map_quan_deyo}} (which is
   also derived from the original SAS code used in his publication, referenced
-  in the data documentation), \code{link{icd10_map_quan_deyo}},
+  in the data documentation), \code{\link{icd10_map_quan_deyo}},
   \code{\link{icd9_map_quan_elix}}, and \code{\link{icd10_map_quan_elix}}
   which was transcribed directly from the same paper.
 
@@ -50,16 +52,16 @@ package replaces icd9, which can now be uninstalled.
 
   \item{Conversion}{ There are many functions to convert ICD-9 codes or their
   components between different formats and structures. The most commonly used
-  are:  \code{\link{icd9DecimalToShort}}, \code{\link{icd9ShortToDecimal}} to
-  convert, e.g., 002.3 to 0023 and back again. See \link{convert} for other
-  options.}
+  are:  \code{\link{icd_decimal_to_short}},
+  \code{\link{icd_short_to_decimal}} to convert, e.g., 002.3 to 0023 and back
+  again. See \link{convert} for other options.}
 
   \item{Manipulation}{You can find children of a higher-level ICD-9 code with
   \code{\link{icd_children}} and find a common parent to a set of children
   (or arbitrary list of ICD-9 codes) with \code{\link{icd_condense}}.
   \code{\link{icd_sort}} sorts in hierarchical, then numerical order, so
   100.0 comes before 100.00, for example. \code{\link{icd_wide_to_long}} and
-  \code{\link{icd9LongToWide}} convert the two most common data structures
+  \code{\link{icd_long_to_wide}} convert the two most common data structures
   containing patient disease data. This is more sophisticated and tailored to
   the problem than base reshaping or extension packages, although these could
   no doubt be used.}
@@ -76,15 +78,31 @@ package replaces icd9, which can now be uninstalled.
 
   }
 }
-\author{
-Jack O. Wasey \email{jack@jackwasey.com}
-}
 \references{
 \url{http://www.hcup-us.ahrq.gov/toolssoftware/comorbidity/comorbidity.jsp}
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/jackwasey/icd}
+  \item Report bugs at \url{https://github.com/jackwasey/icd/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Jack O. Wasey \email{jack@jackwasey.com} [copyright holder]
+
+Other contributors:
+\itemize{
+  \item William Murphy \email{WMurphy@eatright.org} (Van Walraven scores) [contributor]
+  \item R Core Team (m4 macro for OpenMP detection in configure) [contributor, copyright holder]
+}
+
+
+Jack O. Wasey \email{jack@jackwasey.com}
 }
 \concept{
 ICD-9 ICD-10 comorbidity comorbidities
 }
 \keyword{misc}
 \keyword{utilities}
-

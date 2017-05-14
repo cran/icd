@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2016  Jack O. Wasey
+# Copyright (C) 2014 - 2017  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -18,14 +18,14 @@
 #' Condense ICD-9 code by replacing complete families with parent codes
 #'
 #' This can be thought of as the inverse operation to
-#'   \code{icd9Children}.
+#'   \code{icd_children}.
 #' @template icd9-any
 #' @template icd9-short
 #' @template icd9-decimal
 #' @template short_code
-#' @template onlyReal
 #' @template dotdotdot
 #' @family ICD-9 ranges
+#' @keywords manip
 #' @export
 icd_condense <- function(x, short_code = icd_guess_short(x), defined = NULL, warn = TRUE, ...) {
   UseMethod("icd_condense")
@@ -47,7 +47,7 @@ icd_condense.icd9 <- function(x, short_code = icd_guess_short(x), defined = NULL
 #' @describeIn icd_condense Condense a set of ICD codes, guessing ICD version
 #'   from input data
 #' @export
-#' @keywords internal
+#' @keywords internal manip
 icd_condense.character <- function(x, short_code = icd_guess_short(x), defined = NULL, ...) {
 
   guess <- icd_guess_version.character(x, short_code = short_code)
@@ -74,6 +74,7 @@ icd9_condense_decimal <- function(x, defined = NULL, warn = TRUE, keep_factor_le
 #' @param keep_factor_levels single logical value, default \code{FALSE}. If
 #'   \code{TRUE}, will reuse the factor levels from the input data for the
 #'   output data. This only applies if a factor is given for the input codes.
+#' @keywords internal manip
 icd9_condense_short <- function(x, defined = NULL, warn = TRUE, keep_factor_levels = FALSE) {
   assert(check_null(defined), check_flag(defined))
   assert_flag(warn)
@@ -101,11 +102,6 @@ icd9_condense_short <- function(x, defined = NULL, warn = TRUE, keep_factor_leve
     x <- icd_get_defined.icd9(x, short_code = TRUE)
     warning("only defined values requested, but some undefined ICD-9 code(s) were given, so dropping them")
   }
-
-  # find good four digit parents for five digit codes
-  # group with the provided four digit parents
-  # find good three-digit parents for four digit codes
-  # think about V and E codes.
 
   # any major codes are automatically in output (not condensing higher than
   # three digit code) and all their children can be removed from the work list
@@ -136,7 +132,7 @@ icd9_condense_short <- function(x, defined = NULL, warn = TRUE, keep_factor_leve
   major_parents <- unique(icd_get_major.icd9(c(out, fout, i9w), short_code = TRUE))
   for (mp in major_parents) {
     test_kids <- icd_children.icd9(mp, short_code = TRUE, defined = defined)
-    test_kids <- test_kids[nchar(test_kids) < (5 + icd9_is_e(mp))] # we've done these already
+    test_kids <- test_kids[nchar(test_kids) < (5L + icd9_is_e(mp))] # we've done these already
     test_kids <- test_kids[-which(test_kids == mp)]
     if (length(test_kids) > 0 && all(test_kids %in% c(out, fout, i9w))) {
       out <- c(out, mp)

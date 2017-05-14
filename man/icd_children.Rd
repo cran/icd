@@ -3,9 +3,9 @@
 \name{icd_children}
 \alias{icd_children}
 \alias{icd_children.character}
+\alias{icd_children.icd9}
 \alias{icd_children.icd10}
 \alias{icd_children.icd10cm}
-\alias{icd_children.icd9}
 \title{Get children of ICD codes}
 \usage{
 icd_children(x, ...)
@@ -13,7 +13,7 @@ icd_children(x, ...)
 \method{icd_children}{character}(x, ...)
 
 \method{icd_children}{icd9}(x, short_code = icd_guess_short(x),
-  defined = TRUE, billable = FALSE, ...)
+  defined = TRUE, billable = FALSE, debug = FALSE, ...)
 
 \method{icd_children}{icd10}(x, short_code = icd_guess_short(x), defined,
   billable = FALSE, ...)
@@ -55,6 +55,7 @@ only applies to ICD-10-CM for now).
 
 \item \code{icd10cm}: Get children of ICD-10-CM codes
 }}
+
 \examples{
 library(magrittr, warn.conflicts = FALSE, quietly = TRUE) # optional
 
@@ -80,4 +81,3 @@ Other ICD-9 ranges: \code{\link{icd_condense}},
 }
 \keyword{internal}
 \keyword{manip}
-

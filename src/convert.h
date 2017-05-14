@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2016  Jack O. Wasey
+// Copyright (C) 2014 - 2017  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -18,23 +18,17 @@
 #ifndef CONVERT_H_
 #define CONVERT_H_
 
-#include "local.h"
-#include "util.h"
-#include "is.h"
-#include "manip.h"
+#include "icd_types.h"
 #include <Rcpp.h>
 
 // need default argument here for other functions to exploit,
 // but this is then not exported by Rcpp (which works on the function body).
-Rcpp::List icd9ShortToPartsCpp(const Rcpp::CharacterVector icd9Short, const Rcpp::String minor_empty = "");
-Rcpp::List icd9DecimalToPartsCpp(const Rcpp::CharacterVector icd9Decimal, const Rcpp::String minor_empty = "");
-Rcpp::CharacterVector icd9PartsToShort(const Rcpp::List parts);
-Rcpp::CharacterVector icd9PartsToDecimal(const Rcpp::List parts);
-Rcpp::CharacterVector icd9MajMinToCode(const Rcpp::CharacterVector major, const Rcpp::CharacterVector minor, bool isShort);
-Rcpp::CharacterVector icd9MajMinToShort(const Rcpp::CharacterVector major, const Rcpp::CharacterVector minor);
-Rcpp::CharacterVector icd9MajMinToDecimal(const Rcpp::CharacterVector major, const Rcpp::CharacterVector minor);
-Rcpp::CharacterVector icd9DecimalToShort(const Rcpp::CharacterVector icd9Decimal);
-Rcpp::CharacterVector icd9ShortToDecimal(const Rcpp::CharacterVector icd9Short);
-Rcpp::CharacterVector icd9GetMajor(const Rcpp::CharacterVector icd9, const bool isShort);
+Rcpp::List icd9ShortToPartsCpp(CV icd9Short, Rcpp::String mnr_empty = "");
+Rcpp::List icd9DecimalToPartsCpp(const CV icd9Decimal, const Rcpp::String mnr_empty = "");
+CV icd9PartsToShort(const Rcpp::List parts);
+CV icd9PartsToDecimal(const Rcpp::List parts);
+CV icd9DecimalToShort(const CV icd9Decimal);
+CV icd9ShortToDecimal(const CV icd9Short);
+CV icd9Getmjr(const CV icd9, const bool isShort);
 
 #endif /* CONVERT_H_ */

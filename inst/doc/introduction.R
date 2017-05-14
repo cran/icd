@@ -21,6 +21,9 @@ patients_icd9 <- data.frame(
   stringsAsFactors = FALSE
   )
 
+## ----pkgdesc, results='asis', echo = FALSE-------------------------------
+cat(packageDescription("icd")$Description)
+
 ## ----show data formats, echo=TRUE----------------------------------------
 # long format ICD-9-CM codes, with present-on-arrival flags
 patients_icd9
@@ -71,6 +74,7 @@ codes %>% as.icd_decimal_diag %>% as.icd10
 df <- data.frame(i9 = as.icd9(c("100", "001")), 
                  i10 = as.icd10(c("Z771", "Z87820")))
 
+# demonstrate that an error is thrown for trying to do this:
 try(df %>% as.icd9 %>% as.icd10)
 
 ## ----simple conversion---------------------------------------------------
@@ -92,12 +96,12 @@ icd_is_valid(c("1", "001", "100", "123456", "003.21"), short_code = TRUE)
 
 ## ----ranges--------------------------------------------------------------
 # get all possible codes
-"003" %i9sa% "0033" %>% head(9) # show first 9 of 111 values
+#"003" %i9sa% "0033" %>% head(9) # show first 9 of 111 values
 # just get the ones which correspond to diagnoses (keeping the 3-digit chapters)
-"494" %i9s% "4941"
+#"494" %i9s% "4941"
 
-"10099" %i9sa% "10101"
-"V10" %i9da% "V10.02"
+#"10099" %i9sa% "10101"
+#"V10" %i9da% "V10.02"
 "E987" %i9da% "E988.1"
 
 # can't range between different types:
@@ -125,7 +129,7 @@ icd_children("481")
 
 ## ----all children--------------------------------------------------------
 # first ten possible ICD-9 child codes from 391
-icd_children("391", onlyReal = FALSE)[1:10]
+icd_children("391", defined = FALSE)[1:10]
 
 ## ----explain simple------------------------------------------------------
 icd_explain("1.0") # 'decimal' format code inferred

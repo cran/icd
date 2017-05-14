@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2016  Jack O. Wasey
+// Copyright (C) 2014 - 2017  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -20,12 +20,10 @@
 
 #include "local.h"
 #include <Rcpp.h>
-#include <vector>
-#include <string>
 
 void setDecimalDiag(Rcpp::RObject& x, bool value);
-void setDecimalDiag(Rcpp::CharacterVector& x, bool);
+void setDecimalDiag(CV& x, bool);
 void setShortDiag(Rcpp::RObject& x, bool value);
-void setShortDiag(Rcpp::CharacterVector& x, bool);
+void setShortDiag(CV& x, bool);
 
 #endif /* ATTR_H_ */
