@@ -12,18 +12,22 @@ Classification/ACM-2012: Social and professional topics~Medical
         records, Applied computing~Health care information systems,
         Applied computing~Health informatics, Applied
         computing~Bioinformatics
-Version: 2.2
-Date: 2017-05-01
+Version: 2.3.1
+Date: 2017-10-11
 Authors@R: c(
     person(given = "Jack O.", family = "Wasey", role = c("aut", "cre", "cph"), email = "jack@jackwasey.com"),
     person(given = "William", family = "Murphy", role = "ctb", email = "WMurphy@eatright.org", comment = "Van Walraven scores"),
+    person(given = "Anobel", family = "Odisho", role = "ctb", email = "anobel.odisho@ucsf.edu", comment = "Hierarchical Condition Codes"),
+    person(given = "Ed", family = "Lee", role = "ctb", comment = "explain codes in table format"),
+    person(given = "Kevin", family = "Ushey", role = "ctb", comment = "Code adapted for fast factor generation"),
     person("R Core Team", role = c("ctb", "cph"), comment = "m4 macro for OpenMP detection in configure")
     )
 Maintainer: Jack O. Wasey <jack@jackwasey.com>
 URL: https://github.com/jackwasey/icd
 Depends: R (>= 3.3.0)
 Imports: checkmate (>= 1.7.0), magrittr, stats, Rcpp (>= 0.12.3), utils
-Suggests: knitr, RODBC, roxygen2 (>= 5.0.0), rmarkdown, testthat, xml2
+Suggests: knitr, RODBC, roxygen2 (>= 5.0.0), rmarkdown, stringr,
+        testthat, xml2
 LazyData: true
 LazyDataCompression: xz
 ByteCompile: true
@@ -34,9 +38,12 @@ VignetteBuilder: knitr
 LinkingTo: Rcpp, testthat
 RoxygenNote: 6.0.1
 NeedsCompilation: yes
-Packaged: 2017-05-07 17:55:06 UTC; jack
+Packaged: 2017-10-11 13:24:43 UTC; waseyj
 Author: Jack O. Wasey [aut, cre, cph],
   William Murphy [ctb] (Van Walraven scores),
+  Anobel Odisho [ctb] (Hierarchical Condition Codes),
+  Ed Lee [ctb] (explain codes in table format),
+  Kevin Ushey [ctb] (Code adapted for fast factor generation),
   R Core Team [ctb, cph] (m4 macro for OpenMP detection in configure)
 Repository: CRAN
-Date/Publication: 2017-05-15 00:10:19 UTC
+Date/Publication: 2017-10-12 09:09:29 UTC
