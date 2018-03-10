@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -332,15 +332,6 @@ test_that("get Charlson/Deyo comorbidities for a single patient", {
   expect_error(
     icd9_comorbid_quan_deyo(mydf, short_code = FALSE, return_df = TRUE), NA)
 
-})
-
-test_that("correct comorbidities when the whole data frame has a class for ICD type", {
-  mydf <- data.frame(visit_id = c("a", "b", "c"),
-                     icd9 = c("412.93", "441", "044.9"))
-  icd9_comorbid_quan_elix(mydf)
-  icd9_comorbid_quan_deyo(mydf)
-  icd9_comorbid_elix(mydf)
-  icd9_comorbid_ahrq(mydf)
 })
 
 test_that("if an ICD class is not specified for a data set, but is for a column therein,

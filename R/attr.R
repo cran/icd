@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -45,7 +45,7 @@ is.icd_decimal_diag <- function(x, must_work = FALSE) {
 #' Change whether ICD code has short or long attribute
 #'
 #' The attribute \code{icd_short_code} should be either \code{TRUE} or
-#' \code{FALSE}.
+#' \code{FALSE}. There is no attribute named \code{icd_decimal_code}.
 #' @param x ICD data
 #' @param value True or false, default is \code{TRUE}
 #' @examples

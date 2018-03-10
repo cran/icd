@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -17,16 +17,9 @@
 
 test_icd10_most_majors <- outer(LETTERS, sprintf(0:99, fmt = "%02i"), paste0)
 
-context("icd10 WHO parse")
-
-test_that("icd10 WHO recreated exactly", {
-  skip("not implemented yet")
-})
-
 context("icd10 fixed width parse")
 
 test_that("icd10 2016 flat file details are okay", {
-  skip_slow_tests()
   skip_icd10cm_flat_avail()
 
   # check cols at a time, so I get better error feedback:

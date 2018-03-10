@@ -73,6 +73,7 @@ extern SEXP _icd_trimCpp(SEXP);
 extern SEXP _icd_trimLeftCpp(SEXP);
 extern SEXP _icd_valgrindCallgrindStart(SEXP);
 extern SEXP _icd_valgrindCallgrindStop();
+extern SEXP run_testthat_tests();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_icd_fastIntToStringRcpp",                (DL_FUNC) &_icd_fastIntToStringRcpp,                1},
@@ -140,6 +141,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_icd_trimLeftCpp",                        (DL_FUNC) &_icd_trimLeftCpp,                        1},
     {"_icd_valgrindCallgrindStart",             (DL_FUNC) &_icd_valgrindCallgrindStart,             1},
     {"_icd_valgrindCallgrindStop",              (DL_FUNC) &_icd_valgrindCallgrindStop,              0},
+    {"run_testthat_tests",                      (DL_FUNC) &run_testthat_tests,                      0},
     {NULL, NULL, 0}
 };
 

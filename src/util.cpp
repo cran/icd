@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2017  Jack O. Wasey
+// Copyright (C) 2014 - 2018  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -17,9 +17,18 @@
 
 // [[Rcpp::interfaces(r, cpp)]]
 #include "util.h"
-#include "local.h"
-#include <vector>
-#include <string>
+#include <stdlib.h>
+#include <math.h>                              // for floor
+#include <omp.h>                               // for omp_get_max_threads
+#include <stdio.h>                             // for sprintf
+#include <string.h>                            // for strcmp
+#include <algorithm>                           // for copy, sort, transform
+#include <iterator>                            // for back_insert_iterator
+#include <ostream>                             // for size_t, operator<<
+#include <string>                              // for string, basic_string
+#include <vector>                              // for vector, vector<>::size...
+#include "local.h"                             // for ICD_OPENMP
+
 #ifdef ICD_OPENMP
 #include <omp.h>
 #ifdef ICD_STD_PARALLEL

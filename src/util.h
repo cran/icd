@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2017  Jack O. Wasey
+// Copyright (C) 2014 - 2018  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -18,14 +18,17 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-#include "local.h"
-#include <Rcpp.h>
-#include <vector>
-#include <string>
+#include <cstddef>                      // for size_t
+#include <string>                       // for string
+#include <utility>                      // for pair
+#include <vector>                       // for vector
+#include <Rcpp.h> // IWYU pragma: keep
+#include "icd_types.h"                  // for VecStr
+#include "local.h"                      // for ICD_OPENMP
+
 #ifdef ICD_OPENMP
 #include <omp.h>
 #endif
-
 
 typedef std::pair<std::string, std::size_t> pas;
 

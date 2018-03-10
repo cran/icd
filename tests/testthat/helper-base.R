@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -15,13 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with icd. If not, see <http:#www.gnu.org/licenses/>.
 
-local({
-  do_slow_tests <- getOption("icd.do_slow_tests")
-  if (is.null(do_slow_tests) || !do_slow_tests)
-    message("Will skip slow tests")
-  else
-    message("Doing slow tests")
-})
+message("loading helper-base.R")
 
 set.seed(1441)
 n <- 500
@@ -81,7 +75,7 @@ test_twenty <- structure(
   class = "data.frame")
 
 # first and last item from each AHRQ comorbidity:
-icd9(
+icd:::icd9(
   unlist(
     unname(
       c(lapply(icd9_map_ahrq, head, n = 1),
@@ -149,29 +143,6 @@ two_map <- list("malady" = c("100", "2000"),
 
 pts_invalid_mix <- icd_long_data(
   visit_id = c(1000, 1000, 1001),
-  icd9 = icd9(c("27801", "invalides", "25001")),
+  icd9 = icd:::icd9(c("27801", "invalides", "25001")),
   poa = factor(c("Y", "N", "Y")),
   stringsAsFactors = FALSE)
-
-###
-# Sample datasets for HCC tests
-# 4 patients, some with ICDs that do not exist in CC crosswalk
-# One of the patients with multiple visit dates, all valid ICDs
-hcc_test_simple <- icd_long_data(
-  visit_name = c("1", "2", "3", "4", "4"),
-  icd_name = c("20084", "1742", "30410", "41514", "95893"),
-  date = as.Date(c("2011-01-01", "2011-01-02", "2011-01-03",
-    "2011-01-04", "2011-01-04")))
-
-# Only one record
-hcc_test_single <- icd_long_data(
-  visit_name = c("1"),
-  icd_name = c("20084"),
-  date = as.Date(c("2011-01-01")))
-
-# Mix of valid and invalid ICD Codes
-hcc_test_invalid <- icd_long_data(
-  visit_name = c("1", "2", "3", "4", "4"),
-  icd_name = c("20084", "174242", "aB30410", "41514", "95893"),
-  date = as.Date(c("2011-01-01", "2011-01-02", "2011-01-03",
-    "2011-01-04", "2011-01-04")))

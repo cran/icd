@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -106,6 +106,7 @@ icd_explain_table_worker <- function(x, hierarchy, short_code, condense,
   assert_flag(brief)
   assert_flag(warn)
 
+  x <- as_char_no_warn(x)
   xs <- if (!short_code) icd_decimal_to_short.icd9(x) else x
 
   exptable <- merge(data.frame(code = xs, stringsAsFactors = FALSE), hierarchy, all.x = TRUE)

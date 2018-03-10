@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -37,12 +37,10 @@ strim <- function(x) {
 #' \code{NA} is accepted and returned, probably as \code{NA_character_}
 #' @param x character vector
 #' @return character vector
-#' @keywords internal
 #' @examples
-#' \dontrun{
-#' s <- random_string(250);
-#' microbenchmark::microbenchmark(trim(s), trimws(s)) # trimws from R version 3.2
-#' }
+#' s <- icd:::random_string(250);
+#' microbenchmark::microbenchmark(icd:::trim(s), trimws(s)) # trimws from R version 3.2
+#' @keywords internal manip
 trim <- function(x) {
   nax <- is.na(x)
   x[!nax] <- .Call("_icd_trimCpp", PACKAGE = "icd", as.character(x[!nax]))
@@ -70,7 +68,7 @@ trim <- function(x) {
 #' \dontrun{
 #' requireNamespace("microbenchmark")
 #' requireNamespace("stringr")
-#' x <- random_string(25000);
+#' x <- icd:::random_string(25000);
 #' microbenchmark::microbenchmark(
 #'   gsub(x = x, pattern = "A", replacement = "", fixed = TRUE, useBytes = TRUE),
 #'   gsub(x = x, pattern = "A", replacement = "", fixed = TRUE, useBytes = TRUE, perl = TRUE),

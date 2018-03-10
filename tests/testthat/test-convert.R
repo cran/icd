@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -344,15 +344,16 @@ test_that("maj min to short for multiple majors", {
 })
 
 test_that("icd9 parts to short: don't allow cycling.", {
-  skip("removed this internal check for speed")
-  expect_error(icd9MajMinToShort(c("123", "34", "56"), c("1", "20")))
+  expect_equal(icd9MajMinToShort(c("123", "34", "56"), c("1", "20")),
+               c("1231", "03420", ""))
   # causes hang only when compiled with MinGW GCC 4.9 in Rtools 3.2 on 64 bit
-  expect_error(icd9MajMinToShort(c("123", "34"), c("1", "20", "45")))
+  expect_equal(icd9MajMinToShort(c("123", "34"), c("1", "20", "45")),
+               c("1231", "03420"))
 })
 
 test_that("Windows Rtools 3.2 hang test - also triggers bug #75", {
-  skip("removed this internal check for speed")
-  expect_error(icd9MajMinToShort(c("123", "34"), c("1", "20", "45")))
+  expect_equal(icd9MajMinToShort(c("123", "34"), c("1", "20", "45")),
+               c("1231", "03420"))
   # see Rcpp issue #276.
 })
 
@@ -363,7 +364,6 @@ test_that("icd9 parts to short form V and E input, mismatched lengths", {
 })
 
 test_that("convert icd-9 ranges", {
-  skip_slow_tests()
   ooe <- icd_long_data(visit_id = sprintf("pt%02d", seq_along(one_of_each)),
                        code = one_of_each,
                        stringsAsFactors = TRUE)

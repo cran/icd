@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2017  Jack O. Wasey
+// Copyright (C) 2014 - 2018  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -16,11 +16,21 @@
 // along with icd. If not, see <http://www.gnu.org/licenses/>.
 
 // [[Rcpp::interfaces(r, cpp)]]
-#include <Rcpp.h>
 #include "manip.h"
-#include "is.h"
-#include "convert.h"
+#include <Rcpp/r/headers.h>               // for Rf_install, NA_STRING, Rf_l...
+#include <string.h>                       // for strlen
+#include "Rcpp.h"                         // for wrap
+#include "Rcpp/api/meat/proxy.h"          // for AttributeProxyPolicy::Attri...
+#include "Rcpp/exceptions.h"              // for index_out_of_bounds
+#include "Rcpp/sugar/functions/sapply.h"  // for Sapply, sapply
+#include "Rcpp/vector/Vector.h"           // for Vector<>::NameProxy
+#include "Rcpp/vector/instantiation.h"    // for List
+#include "Rcpp/vector/proxy.h"            // for r_vector_name_proxy<>::type
+#include "convert.h"                      // for icd9DecimalToPartsCpp, icd9...
+#include "is.h"                           // for icd9IsASingleV, icd9IsASingleE
 
+//' Simpler add leading zeroes without converting to parts and back
+//' @keywords internal manip
 // [[Rcpp::export]]
 Rcpp::String icd9AddLeadingZeroesMajorSingle(Rcpp::String mjr) {
 	if (mjr == NA_STRING) {
@@ -120,17 +130,17 @@ CV icd9AddLeadingZeroesMajor(CV mjr) {
 //' @template short_code
 //' @return character vector of ICD-9 codes with leading zeroes
 //' @examples
-//' \dontrun{
-//' stopifnot(identical(
-//'   icd9_add_leading_zeroes_alt_cpp(c("1", "E2", "V1", "E"), short_code = TRUE),
-//'   icd9_add_leading_zeroes_cpp(c("1", "E2", "V1", "E"), short_code = TRUE)
-//'   ))
+//' if (require(microbenchmark)) {
+//'   stopifnot(identical(
+//'     icd:::icd9_add_leading_zeroes_alt_cpp(c("1", "E2", "V1", "E"), short_code = TRUE),
+//'     icd:::icd9_add_leading_zeroes_cpp(c("1", "E2", "V1", "E"), short_code = TRUE)
+//'     ))
 //'
 //'   bad_codes <- sample(c("E2", "V01", "1234", "12", "1", "E99", "E987", "V"),
-//'                       size = 1e6, replace = TRUE)
+//'                       size = 1e4, replace = TRUE)
 //'   microbenchmark::microbenchmark(
-//'     icd9_add_leading_zeroes_alt_cpp(bad_codes, short_code = TRUE),
-//'     icd9_add_leading_zeroes_cpp(bad_codes, short_code = TRUE)
+//'     icd:::icd9_add_leading_zeroes_alt_cpp(bad_codes, short_code = TRUE),
+//'     icd:::icd9_add_leading_zeroes_cpp(bad_codes, short_code = TRUE)
 //'   )
 //' }
 //' @keywords internal manip

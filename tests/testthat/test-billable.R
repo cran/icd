@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -65,7 +65,7 @@ test_that("billable codes for expected versions exist", {
 })
 
 test_that("billable codes are all in order", {
-  skip_slow_tests()
+  testthat::skip_on_cran()
   for (v in names(icd9cm_billable)) {
     i <- icd9cm_billable[[v]][["code"]]
     expect_identical(i, icd_sort.icd9(i, short_code = TRUE),

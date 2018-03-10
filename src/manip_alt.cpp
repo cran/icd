@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2017  Jack O. Wasey
+// Copyright (C) 2014 - 2018  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -16,11 +16,21 @@
 // along with icd. If not, see <http://www.gnu.org/licenses/>.
 
 // [[Rcpp::interfaces(r, cpp)]]
-#include <Rcpp.h>
-#include "manip.h"
-#include "is.h"
-#include "convert.h"
+#include "manip_alt.h"
+#include <Rcpp/r/headers.h>               // for NA_STRING, Rf_install
+#include <string.h>                       // for strlen
+#include <string>                         // for string, operator+
+#include "Rcpp/sugar/functions/sapply.h"  // for Sapply, sapply
+#include "convert.h"                      // for icd9DecimalToShort
+#include "is.h"                           // for icd9IsASingleV, icd9IsASing...
 
+//' Decompose a 'short' ICD code and insert the leading zeroes as needed.
+//'
+//' This should add leading zeroes when there is definitely no ambiguity,
+//' e.g. V1. However V10 should not be altered, because V010 is a different
+//' code. The goal is for this to be faster, but must be correct! Example in
+//' \code{manip.cpp} has the benchmark code.
+//' @keywords internal manip
 // [[Rcpp::export]]
 Rcpp::String icd9AddLeadingZeroesShortSingle(Rcpp::String x) {
   if (x == NA_STRING) {
@@ -46,6 +56,7 @@ Rcpp::String icd9AddLeadingZeroesShortSingle(Rcpp::String x) {
       } else {
         s.insert(1, "00");
       }
+      return(s);
     case 3:
       if (!icd9IsASingleV(s.c_str())) {
         s.insert(1, "0");
@@ -55,6 +66,8 @@ Rcpp::String icd9AddLeadingZeroesShortSingle(Rcpp::String x) {
   return (s);
 }
 
+//' @rdname icd9_add_leading_zeroes_cpp
+//' @keywords internal manip
 // [[Rcpp::export(icd9_add_leading_zeroes_alt_cpp)]]
 CV icd9AddLeadingZeroesDirect(CV x, bool short_code) {
   // a shortcut for when short codes is just to add the appropriate leading
@@ -65,4 +78,3 @@ CV icd9AddLeadingZeroesDirect(CV x, bool short_code) {
   CV y = icd9DecimalToShort(x);
   return Rcpp::sapply(y, icd9AddLeadingZeroesShortSingle);
 }
-

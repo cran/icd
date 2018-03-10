@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2017  Jack O. Wasey
+// Copyright (C) 2014 - 2018  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -17,10 +17,5 @@
 
 #ifndef COMORBIDICD10_H_H
 #define COMORBIDICD10_H_H
-
-#include <Rcpp.h> // includes Rinternals
-extern "C" {
-#include <cstdlib>
-}
 
 #endif /* COMORBIDICD10_H_H */

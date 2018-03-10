@@ -67,15 +67,15 @@ icd_is_valid(c("100", "A1001")) # they can't both be valid
 codes <- c("A10.01", "L40.50", "Z77.098")
 # set class to be icd10cm (and implicitly icd10)
 as.icd10cm(codes)
-# set class to indicate decimal code and icd10 (not necessarily icd10cm)
+# or set class to indicate decimal code and icd10 (not necessarily icd10cm)
 codes %>% as.icd_decimal_diag %>% as.icd10
 
 ## ----mixed ICD-9 and ICD-10 data-----------------------------------------
 df <- data.frame(i9 = as.icd9(c("100", "001")), 
                  i10 = as.icd10(c("Z771", "Z87820")))
 
-# demonstrate that an error is thrown for trying to do this:
-try(df %>% as.icd9 %>% as.icd10)
+# it is an error to try to convert ICD-9 class codes to ICD-10
+# df %>% as.icd9 %>% as.icd10
 
 ## ----simple conversion---------------------------------------------------
 icd_decimal_to_short(c("1", "10.20", "100", "123.45"))

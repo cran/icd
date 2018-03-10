@@ -26,9 +26,9 @@ was not specified, then the first column of the data frame is used.}
 all columns matching the regular expression \code{icd_regex} will be
 included.}
 
-\item{icd_name}{The column in the \code{data.frame} which contains the ICD
-codes. This is a character vector of length one. If it is \code{NULL},
-\code{icd9} will attempt to guess the column name, looking for
+\item{icd_name}{The name of the column in the \code{data.frame} which
+contains the ICD codes. This is a character vector of length one. If it is
+\code{NULL}, \code{icd9} will attempt to guess the column name, looking for
 progressively less likely possibilities until it matches a single column.
 Failing this, it will take the first column in the data frame. Specifying
 the column using this argument avoids the guesswork.}
@@ -50,10 +50,11 @@ related to ICD codes. Empty strings and NA values will be dropped, and
 everything else kept. No validation of the ICD codes is done.
 }
 \examples{
-  widedf <- data.frame(visit_name = c("a", "b", "c"),
-    icd9_01 = c("441", "4424", "441"),
-    icd9_02 = c(NA, "443", NA))
-  icd_wide_to_long(widedf)
+widedf <- data.frame(visit_name = c("a", "b", "c"),
+  icd9_01 = c("441", "4424", "441"),
+  icd9_02 = c(NA, "443", NA)
+  )
+icd_wide_to_long(widedf)
 }
 \seealso{
 Other ICD-9 convert: \code{\link{icd9PartsToShort}},

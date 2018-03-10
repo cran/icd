@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2017  Jack O. Wasey
+// Copyright (C) 2014 - 2018  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -15,11 +15,26 @@
 // You should have received a copy of the GNU General Public License
 // along with icd. If not, see <http://www.gnu.org/licenses/>.
 
-#include "local.h"
 #include <Rcpp.h>
-#include <vector>
-#include <string>
-// #include <Rinternals.h>
+#include <Rcpp/r/headers.h>              // for Rf_install
+#include <iterator>                      // for advance
+#include <vector>                        // for vector
+#include "Rcpp.h"                        // for wrap
+#include "Rcpp/Environment.h"            // for Environment
+#include "Rcpp/api/meat/Environment.h"   // for Environment_Impl::Environmen...
+#include "Rcpp/api/meat/proxy.h"         // for BindingPolicy::Binding::oper...
+#include "Rcpp/exceptions.h"             // for warning
+#include "Rcpp/proxy/Binding.h"          // for BindingPolicy<>::Binding
+#include "Rcpp/sugar/functions/is_na.h"  // for is_na, IsNa
+#include "Rcpp/sugar/functions/match.h"  // for match
+#include "Rcpp/sugar/operators/not.h"    // for Not_Vector, operator!
+#include "Rcpp/traits/storage_type.h"    // for storage_type<>::type
+#include "Rcpp/vector/Subsetter.h"       // for SubsetProxy
+#include "Rcpp/vector/Vector.h"          // for Vector<>::iterator, Vector<>...
+#include "Rcpp/vector/VectorBase.h"      // for VectorBase
+#include "Rcpp/vector/instantiation.h"   // for IntegerVector, List
+#include "Rcpp/vector/proxy.h"           // for r_vector_name_proxy<>::type
+#include "icd_types.h"                   // for CV, VecStr
 
 //
 //  # matches, nc, matches, last_row

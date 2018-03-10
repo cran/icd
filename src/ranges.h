@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2017  Jack O. Wasey
+// Copyright (C) 2014 - 2018  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -17,6 +17,7 @@
 
 #ifndef RANGES_H_
 #define RANGES_H_
+#include <stddef.h>     // for size_t
 #include "icd_types.h"
 #include <Rcpp.h>
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2017  Jack O. Wasey
+// Copyright (C) 2014 - 2018  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -16,8 +16,12 @@
 // along with icd. If not, see <http://www.gnu.org/licenses/>.
 
 // [[Rcpp::interfaces(r, cpp)]]
+//#include <Rcpp.h>                       // for wrap
 #include "attr.h"
-#include <Rcpp.h>
+#include <Rcpp/r/headers.h>             // for Rf_install
+#include "Rcpp.h"                       // for wrap
+#include "Rcpp/api/meat/proxy.h"        // for AttributeProxyPolicy::Attribu...
+#include "Rcpp/proxy/AttributeProxy.h"  // for AttributeProxyPolicy<>::Attri...
 
 //' Set ICD short-form diagnosis code attribute
 //'
@@ -29,31 +33,18 @@
 //' j
 //' attr(j, "icd_short_diag") <- FALSE
 //' j
-//' icd:::.attr_decimal_diag(j)
+//' icd:::attr_decimal_diag(j)
 //' as.icd_decimal_diag(j)
-//' \dontrun{
-//' library(pryr)
-//' j <- 1
-//' c(address(j), refs(j))
-//' attr(j, "icd_short_diag") <- TRUE
-//' c(address(j), refs(j))
-//' attr(j, "icd_short_diag") <- FALSE
-//' c(address(j), refs(j))
-//' icd:::.attr_decimal_diag(j)
-//' c(address(j), refs(j))
-//' j <- as.icd_decimal_diag(j, TRUE)
-//' c(address(j), refs(j))
-//' # Rcpp cleverer than R, and doesn't return a copy of the data
-//' }
+//' # if pryr is installed, use address and refs to see what is going on
 //' @keywords internal attribute
-// [[Rcpp::export(.attr_decimal_diag)]]
+// [[Rcpp::export(attr_decimal_diag)]]
 void setDecimalDiag(Rcpp::RObject& x, bool value = true) {
   x.attr("icd_short_diag") = !value;
 }
 
 //' @rdname as.icd_short_diag
 //' @keywords internal attribute
-// [[Rcpp::export(.attr_short_diag)]]
+// [[Rcpp::export(attr_short_diag)]]
 void setShortDiag(Rcpp::RObject& x, bool value = true) {
   x.attr("icd_short_diag") = value;
 }

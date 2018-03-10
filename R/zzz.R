@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -47,7 +47,7 @@ release_questions <- function() {
     # data:
     "Have you regenerated icd9cm_hierarchy and other compiled data on Linux?",
     "Uranium data requires rebuild on Windows for RODBC to extract raw data",
-    "Have you run tools::checkRdaFiles(\"data\") to check everything is optimally compressed?",
+    "Have you run tools::checkRdaFiles('data') to check everything is optimally compressed?",
     # documentation:
     "Have you checked all TODO comments, made into github issues where appropriate",
     "Do all examples look ok (not just run without errors)?",
@@ -68,7 +68,7 @@ release_questions <- function() {
     "Has config.h.win been updated to reflect latest configure.ac results?",
     "Are there skipped tests which should be run?",
     "Have tests been run with slow and online tests turned on?",
-    "Does it compile and check fine on travis/wercker/appveyor?",
+    "Does it compile, test and check fine on travis and appveyor?",
     "Have you checked on Windows, win_builder (if possible with configure.win failure),
       Mac, Ubuntu, UBSAN rocker, and updated my docker image which
       resembles a CRAN maintainers environment?",
@@ -80,6 +80,7 @@ release_questions <- function() {
     "Have all unnecessary files been ignored in built archive? Especially
       thinking of autoconfigure stuff. Look in the final built archive
       before submitting to CRAN?",
+    "Has .*_alt\\.[Rr]$ been reactivated in .Rbuildignore?",
     # not CRAN
     "Are github pages site refreshed from latest documentation?",
 

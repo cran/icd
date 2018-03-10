@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -14,19 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with icd. If not, see <http:#www.gnu.org/licenses/>.
-
-do_slow_tests <- function(x = TRUE) {
-  options("icd.do_slow_tests" = x)
-}
-
-doing_slow_tests <- function() {
-  identical(getOption("icd.do_slow_tests"), TRUE)
-}
-
-skip_slow_tests <- function(msg = "skipping slow test") {
-  if (!doing_slow_tests())
-    testthat::skip(msg)
-}
 
 rtf_year_ok <- function(year) {
   !is.null(rtf_fetch_year(year, offline = TRUE))
@@ -327,80 +314,4 @@ random_string <- function(n, max_chars = 4) {
          FUN = function(x) rand_ch(),
          FUN.VALUE = character(n)
   )  %>% apply(1, paste0, collapse = "")
-}
-
-#' Show options which control testing
-#'
-#' Get the options for all currently used \code{icd} testing options.
-#' @keywords internal debugging
-show_test_options <- function() {
-  print(options("icd.do_slow_tests"))
-}
-
-# nocov start
-
-#' Set test options to do everything
-#'
-#' Default without setting options is for slow tests to be skipped. This
-#' function explicitly sets options to do slow tests.
-#' @keywords internal debugging
-set_full_test_options <- function() {
-
-  message("current test options:")
-  show_test_options()
-
-  message("now setting full test options")
-  options("icd.do_slow_tests" = TRUE)
-  show_test_options()
-}
-# nocov end
-
-#' Set-up test options
-#'
-#' Checks shell environment for whether to do slow or online tests. If
-#' \code{covr} is detected (an option is set), then we may be in a sub-process
-#' and not see any shell environment or options from the calling process, so try
-#' to set slow tests on and warnings off.
-#' @keywords internal debugging
-setup_test_check <- function() {
-
-  options("icd.do_slow_tests" = isTRUE(options("icd.do_slow_tests")))
-
-  # covr runs tests in a completely different R process, so seem like options are not
-  # preserved.. An alternative might be to add an expression to be run to covr
-  # package_coverage command (or caller).
-  if (!is.null(getOption("covr.exclude_pattern"))) {
-    message("covr detected so doing slow tests")
-    show_test_options()
-    if (!is.null(getOption("icd.do_slow_tests")))
-      options("icd.do_slow_tests" = TRUE)
-    show_test_options()
-
-    # also try to turn off all other warnings, e.g. testthat 'info' deprecation.
-    options("warn" = -1)
-  }
-
-  if (identical(tolower(Sys.getenv("ICD_SLOW_TESTS")), "true")) {
-    message("environment variable ICD_SLOW_TESTS found to be true, so doing slow tests")
-    options("icd.do_slow_tests" = TRUE)
-  }
-}
-
-#' run \code{testtthat::test_check} with a Perl regular expression filter
-#'
-#' Use 'summary' reporter so that \code{covr} produces output and doesn't time-out on
-#' Travis. The code coverage testing is slower than regular testing because of
-#' instrumentation.
-#' @param pattern PERL regular expression to match tests
-#' @param msg character, if given will give this message, otherwise,
-#'   messages the regular expression
-#' @keywords internal debugging
-my_test_check <- function(pattern, msg) {
-  if (missing(msg))
-    msg <- pattern
-
-  message(msg)
-  # use Perl for grepl to interpret the regex which can then include negative
-  # backrefs to exclude things.
-  testthat::test_check("icd", filter = pattern, perl = TRUE, reporter = "summary")
 }

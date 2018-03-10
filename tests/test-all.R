@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -29,9 +29,4 @@ if (packageVersion("testthat") < package_version("0.11.0.9000")) {
           devtools::install_github('hadley/testthat')")
 }
 
-# when covr runs tests, it installs the package with source, and sources the files in the test directory.
-# This means that /data-raw would be absent, so it should be in inst/data-raw for testing.
-
-icd:::setup_test_check()
-icd:::show_test_options()
 testthat::test_check("icd", reporter = "summary")

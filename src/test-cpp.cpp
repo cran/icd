@@ -1,21 +1,15 @@
 #include <Rcpp.h>
 #include "is.h"
 #include "manip.h"
+#include "manip_alt.h"
 #include "util.h"
 #include "appendMinor.h"
 #include "convert.h"
 #include "convert_alt.h"
-#include "../inst/include/icd.h"
 #include "config.h"
+
 #ifdef HAVE_TESTTHAT_H
 #include <testthat.h>
-
-context("C++ Catch") {
-  test_that("two plus two is four") {
-    int result = 2 + 2;
-    expect_true(result == 4);
-  }
-}
 
 context("internal 'is' functions") {
   test_that("is n") {
@@ -196,7 +190,7 @@ context("MajMin to code") {
     expect_error(icd9MajMinToCode(mj, mn, true));
   }
 }
-#endif
+#endif // end debug-only block
 
 context("add leading zeroes to major") {
   test_that("when major len is 0, result is empty") {
@@ -209,6 +203,17 @@ context("add leading zeroes to major") {
 
   test_that("E code with three char major works") {
     expect_true(icd9AddLeadingZeroesMajorSingleStd("E01") == "E001");
+  }
+}
+
+context("test alternate zero-adding code") {
+  test_that("when a code would be made ambiguous, don't change it") {
+    expect_true(Rcpp::as<std::string>(icd9AddLeadingZeroesDirect("E010", true)[0]) == "E010");
+  }
+  test_that("short E codes work") {
+    expect_true(Rcpp::as<std::string>(icd9AddLeadingZeroesDirect("E1", true)[0]) == "E001");
+    Rcpp::String e1 = icd9AddLeadingZeroesShortSingle("E1");
+    expect_true(Rcpp::as<std::string>(CV::create(e1)) == "E001");
   }
 }
 

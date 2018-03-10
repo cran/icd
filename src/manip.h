@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2017  Jack O. Wasey
+// Copyright (C) 2014 - 2018  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -20,7 +20,7 @@
 
 // [[Rcpp::interfaces(r, cpp)]]
 #include "icd_types.h"
-#include <Rcpp.h>
+#include "Rcpp/String.h"  // for String
 #include <string>
 
 CV icd9AddLeadingZeroes(CV icd9, bool isShort);

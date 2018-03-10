@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2017  Jack O. Wasey
+// Copyright (C) 2014 - 2018  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -16,12 +16,30 @@
 // along with icd. If not, see <http://www.gnu.org/licenses/>.
 
 // [[Rcpp::interfaces(r, cpp)]]
-#include "local.h"
-#include "icd_types.h"
 #include <Rcpp.h>
+#include <Rcpp/r/headers.h>             // for STRING_ELT, SEXP, PROTECT
+#include <string.h>                     // for strcmp
+#include <algorithm>                    // for find, fill
+#include <string>                       // for string, operator==
+#include <vector>                       // for vector
+#include "Rcpp.h"                       // for wrap
+#include "Rcpp/Dimension.h"             // for Dimension
+#include "Rcpp/api/meat/Dimension.h"    // for Dimension::operator SEXPREC *
+#include "Rcpp/api/meat/proxy.h"        // for AttributeProxyPolicy::Attribu...
+#include "Rcpp/exceptions.h"            // for stop
+#include "Rcpp/proxy/AttributeProxy.h"  // for AttributeProxyPolicy<>::Attri...
+#include "Rcpp/vector/DimNameProxy.h"   // for DimNameProxy
+#include "Rcpp/vector/Matrix.h"         // for rownames
+#include "Rcpp/vector/Vector.h"         // for Vector<>::Proxy
+#include "icd_types.h"                  // for VecStr, VecVecStr, CV
+
 #ifdef ICD_VALGRIND
 #include <valgrind/callgrind.h>
 #endif
+
+extern "C" {
+  #include "cutil.h"                            // for getRListOrDfElement
+}
 
 CV raggedToWide(const VecVecStr& ragged, int max_per_pt,
 		const VecStr &visitIds) {

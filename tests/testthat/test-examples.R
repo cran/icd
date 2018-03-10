@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -24,4 +24,4 @@ context("function examples")
 old_opts <- options(warn = 2)
 on.exit(options(old_opts), add = TRUE)
 
-test_examples(path = "../../man")
+testthat::test_examples()

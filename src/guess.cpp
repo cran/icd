@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2017  Jack O. Wasey
+// Copyright (C) 2014 - 2018  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -17,12 +17,14 @@
 
 // [[Rcpp::interfaces(r, cpp)]]
 #include "guess.h"
-#include "local.h"
 #include <Rcpp.h>
 #include <vector>
 #include <string>
 #include <algorithm>
 #include <Rinternals.h>
+extern "C" {
+  #include "cutil.h"                            // for getRListOrDfElement
+}
 
 using Rcpp::LogicalVector;
 

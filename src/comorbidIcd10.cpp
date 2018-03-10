@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2017  Jack O. Wasey
+// Copyright (C) 2014 - 2018  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -19,10 +19,30 @@
 // [[Rcpp::plugins(openmp)]]
 
 #include "comorbidIcd10.h"
-#include "local.h"
-#include <Rcpp.h>
-#include <vector>
-#include <string>
+#include <Rcpp/r/headers.h>                 // for Rf_install, Rf_mkString
+#include <string.h>                         // for strlen, strncpy
+#include <string>                           // for string
+#include "Rcpp.h"                           // for wrap
+#include "Rcpp/DataFrame.h"                 // for DataFrame
+#include "Rcpp/String.h"                    // for String
+#include "Rcpp/api/meat/proxy.h"            // for AttributeProxyPolicy::Att...
+#include "Rcpp/as.h"                        // for as
+#include "Rcpp/exceptions.h"                // for stop
+#include "Rcpp/generated/Vector__create.h"  // for Vector::create
+#include "Rcpp/proxy/AttributeProxy.h"      // for AttributeProxyPolicy<>::A...
+#include "Rcpp/proxy/NamesProxy.h"          // for NamesProxyPolicy<>::Names...
+#include "Rcpp/sugar/functions/any.h"       // for any
+#include "Rcpp/sugar/functions/match.h"     // for match
+#include "Rcpp/vector/Vector.h"             // for Vector<>::NameProxy, Vect...
+#include "Rcpp/vector/instantiation.h"      // for List, LogicalMatrix, Inte...
+#include "Rcpp/vector/proxy.h"              // for r_vector_name_proxy<>::type
+#include "RcppCommon.h"                     // for wrap
+#include "icd_types.h"                      // for CV
+#include "local.h" // for DEBUG
+extern "C" {
+  #include <cstddef>                          // for size_t
+  //#include <cstdlib>                          // for size_t
+}
 
 using Rcpp::IntegerVector;
 using Rcpp::LogicalMatrix;
@@ -81,6 +101,16 @@ Rcpp::LogicalMatrix icd10_comorbid_parent_search_cpp(Rcpp::DataFrame x,
     codeNchar = strlen(code_cstring);
     if (codeNchar > 15)
       Rcpp::stop("ICD-10 codes must all be less than 16 characters long.");
+    if (codeNchar <3) {
+      // abort to avoid segfault. will need to do better than this and
+      // replace with NA and go to next item
+      //Rcpp::stop("ICD-10 codes must be at least three characters long.");
+#ifdef ICD_DEBUG
+      Rcpp::Rcout << "continuing\n";
+#endif
+      continue;
+    }
+
     size_t codeCurChar;
 
     for (R_xlen_t j = 0; j != map.size(); ++j) {

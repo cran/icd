@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -123,3 +123,9 @@ test_that("icd_explain_table, appropriately convert mixed code character vector,
             res <- icd_explain_table(icd10(codes))
             expect_equal(is.na(res$short_desc), c(FALSE, TRUE, TRUE))
           })
+
+test_that("icd_explain_table works with factor input", {
+  f <- factor(c("25010", "E777", "lorem ipsum"))
+  expect_equal(dim(icd_explain_table(f)), c(3, 10))
+  expect_equal(icd_explain_table(f)[2, 2], NA_character_)
+})

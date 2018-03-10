@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -21,16 +21,19 @@ context("OpenMP thread and chunk parameters")
 test_that("single icd9 code comorbidity", {
   # this is enough to segfault with clang 3.7, libc++ and libomp
   x <- data.frame(visit_id = "a", icd9 = "441")
-  icd9_comorbid_quan_deyo(x, short_code = FALSE, applyHierarchy = T)
+  y <- icd9_comorbid_quan_deyo(x, short_code = FALSE, applyHierarchy = TRUE)
+  expect_true(is.matrix(y))
+  expect_equal(dim(y), c(1L, 17L))
+  expect_equal(sum(y), 1)
 })
 
-test_that("thousands of patients", {
-  x <- generate_random_pts(10000)
-  icd9_comorbid_quan_deyo(x, short_code = FALSE, applyHierarchy = TRUE)
+test_that("icd9 comorbidities for thousands of random patients to stress OpenMP", {
+  x <- generate_random_pts(10000, np = 20)
+  res <- icd9_comorbid_quan_deyo(x, short_code = FALSE, applyHierarchy = TRUE)
+  expect_equal(dim(res), c(500, 17))
 })
 
 test_that("vary all OMP-related numbers at once", {
-  skip_slow_tests()
   old_opts <- options("icd.threads", "icd.chunk_size", "icd.omp_chunk_size")
   omp_chunk_size <- 1
   # prime numbers

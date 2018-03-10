@@ -1,4 +1,4 @@
-# Copyright (C) 2014 - 2017  Jack O. Wasey
+# Copyright (C) 2014 - 2018  Jack O. Wasey
 #
 # This file is part of icd.
 #
@@ -72,9 +72,9 @@ icd_check_conflict_with_icd10cm <- icd_check_conflict_with_icd10
 #' microbenchmark::microbenchmark(attr(rp, "k", exact = TRUE), attributes(rp), times = times)
 #' }
 #' @keywords internal
-icd_classes_conflict <- function(x) {
-  is.icd9(x) && is.icd10(x)
-}
+icd_classes_conflict <- function(x)
+  is.icd9(x) && is.icd10(x) ||
+  is.icd_long_data(x) && is.icd_wide_data(x)
 
 #' prefer an order of classes
 #'
@@ -325,10 +325,11 @@ as.icd_comorbidity_map <- function(x) {
 #' @param warn single logical value, if TRUE, will give warnings when
 #'   incompatible types are combined using \code{c}
 #' @examples
-#' \dontrun{
-#' # throw an error? or assign type according to first argument?
+#' # Care with the following:
 #' c(as.icd9("E998"), as.icd10("A10"))
+#' # which results in both codes sharing the 'icd9' class.
 #'
+#' \dontrun{
 #' # benchmark subsetting to justify using .subset2 (5% faster)
 #' library(microbenchmark)
 #' j <- list(as.icd9cm("E990"), as.icd9cm("10010"))
@@ -338,7 +339,7 @@ as.icd_comorbidity_map <- function(x) {
 #'                times = 1e6)
 #'
 #' # logical list to vector
-#' a <- list(T,T)
+#' a <- list(TRUE, TRUE)
 #' microbenchmark(as.logical(a), c(a, recursive = TRUE), times = 1e6)
 #'
 #' # c(..., recursive = TRUE) vs unlist

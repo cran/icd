@@ -29,29 +29,21 @@ test_that("well ordered class lists are created", {
   expect_icd_classes_ordered(icd10(""))
   expect_icd_classes_ordered(icd10cm(""))
 
-  skip("this is time consuming, and we should probably tolerate mixed order anyway")
-  expect_icd_classes_ordered(icd_short_diag(""))
+  expect_icd_classes_ordered(as.icd_short_diag(""))
   expect_icd_classes_ordered(as.icd_decimal_diag(""))
+  expect_icd_classes_ordered(as.icd_decimal_diag(as.icd9("")))
 })
 
 test_that("well ordered class lists short/decimal ICD combos are created", {
-  skip("this is time consuming, and we should probably tolerate mixed order anyway")
-  expect_icd_classes_ordered(icd_short_diag(icd9("V102")))
+  expect_icd_classes_ordered(as.icd_short_diag(icd9("V102")))
   expect_icd_classes_ordered(as.icd_decimal_diag(icd9cm("410.00")))
-  expect_icd_classes_ordered(icd_short_diag(icd10("A100")))
+  expect_icd_classes_ordered(as.icd_short_diag(icd10("A100")))
   expect_icd_classes_ordered(as.icd_decimal_diag(icd10cm("B23.1")))
 
   expect_icd_classes_ordered(as.icd_decimal_diag(icd9("V10.2")))
-  expect_icd_classes_ordered(icd_short_diag(icd9cm("41000")))
+  expect_icd_classes_ordered(as.icd_short_diag(icd9cm("41000")))
   expect_icd_classes_ordered(as.icd_decimal_diag(icd10("A10.0")))
-  expect_icd_classes_ordered(icd_short_diag(icd10cm("B231")))
-})
-
-test_that("warn if changing ICD decimal to short or vice versa", {
-  skip("not sure I want this behaviour")
-  expect_warning(as.icd_short_diag(as.icd_decimal_diag("10.1"), warn = TRUE))
-  expect_warning(as.icd_decimal_diag(as.icd_short_diag("2222"), warn = TRUE))
-  expect_warning(as.icd_short_diag(as.icd_decimal_diag(icd9cm("10.1")), warn = TRUE))
+  expect_icd_classes_ordered(as.icd_short_diag(icd10cm("B231")))
 })
 
 test_that("is short or decimal code", {
@@ -69,18 +61,6 @@ test_that("no warning or error for combining same types", {
   expect_warning(c(as.icd9(""), as.icd9("")), regexp = NA)
   expect_warning(c(as.icd10(""), as.icd10("")), regexp = NA)
   expect_warning(c(as.icd10cm(""), as.icd10cm("")), regexp = NA)
-})
-
-test_that("warn if combining mixed ICD sub-version types", {
-  skip("hold off this for now")
-  c(as.icd9cm(""), as.icd9(""))
-  c(as.icd10cm(""), as.icd10(""))
-})
-
-test_that("error if combining mixed ICD version types, e.g. ICD-9 vs ICD-10", {
-  skip("this is nice to have, but adds weight to 'c'")
-  expect_error(c(as.icd9cm(""), as.icd10("")))
-  expect_error(c(as.icd10cm(""), as.icd9("")))
 })
 
 test_that("combining identity", {
@@ -241,7 +221,6 @@ test_that("no conflict for built-in data", {
 })
 
 test_that("conflicting ICD type classes can be found", {
-  skip("working on this")
   expect_true(icd_classes_conflict(structure("V10", class = c("icd9cm", "icd10", "character"))))
   expect_true(icd_classes_conflict(structure("V10", class = c("icd9", "icd10", "character"))))
   expect_true(icd_classes_conflict(structure("V10", class = c("icd9cm", "icd10cm", "character"))))
@@ -252,14 +231,7 @@ test_that("conflicting ICD type classes can be found", {
   expect_true(icd_classes_conflict(structure(list("V10", "A20"), class = c("icd9cm", "icd10", "list"))))
 })
 
-test_that("conflicting short vs decimal class asssignment", {
-  skip("working on this")
-  expect_true(icd_classes_conflict(structure("V10", class = c("icd_short_diag", "icd_decimal_diag"))))
-  expect_true(icd_classes_conflict(structure("V10", class = c("icd_decimal_diag", "icd_short_diag"))))
-})
-
 test_that("long vs wide data conflict identified", {
-  skip("WIP")
   v_bad <- vermont_dx
   class(v_bad) <- c(class(v_bad), "icd_long_data")
   u_bad <- uranium_pathology
@@ -272,37 +244,9 @@ test_that("long vs wide data conflict identified", {
 
 context("class updates")
 
-test_that("update data frame class for simple cases", {
-  skip("obsolete")
-
-  expect_updated_class <- function(fun_name) {
-
-    x <- data.frame(visit_id = c(1, 2, 3),
-                    code = do.call(fun_name, list(c("V10", "V10", "V10"))),
-                    stringsAsFactors = FALSE)
-
-    eval(bquote(expect_true(inherits(update_data_frame_class(.(x)), fun_name))))
-  }
-
-  for (cl in c("icd9", "icd9cm", "icd10", "icd10cm")) {
-    message(cl)
-    expect_updated_class(cl)
-  }
-})
-
-test_that("fail to update data frame class with conflicting cols", {
-  skip("obsolete")
-  x <- data.frame(visit_id = c(1, 2, 3),
-                  code.icd9 = icd9(c("100", "V10", "V10")),
-                  code.icd10 = icd10(c("A01", "V10", "V10")),
-                  stringsAsFactors = FALSE)
-  expect_error(update_data_frame_class(x, must_work = TRUE))
-  expect_identical(update_data_frame_class(x, must_work = FALSE), x)
-})
-
 test_that("can create NA valued ICD code types", {
-  expect_scalar_na(as.icd9(NA))
-  expect_scalar_na(as.icd9cm(NA))
-  expect_scalar_na(as.icd10(NA))
-  expect_scalar_na(as.icd10cm(NA))
+  checkmate::expect_scalar_na(as.icd9(NA))
+  checkmate::expect_scalar_na(as.icd9cm(NA))
+  checkmate::expect_scalar_na(as.icd10(NA))
+  checkmate::expect_scalar_na(as.icd10cm(NA))
 })

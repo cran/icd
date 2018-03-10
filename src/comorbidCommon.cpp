@@ -1,4 +1,4 @@
-// Copyright (C) 2014 - 2017  Jack O. Wasey
+// Copyright (C) 2014 - 2018  Jack O. Wasey
 //
 // This file is part of icd.
 //
@@ -17,9 +17,12 @@
 
 // [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::plugins(openmp)]]
-#include "local.h"
-#include "util.h"
-#include <algorithm>
+#include <Rcpp.h>
+#include <algorithm>                   // for binary_search, copy
+#include <vector>                      // for vector, vector<>::const_iterator
+#include "Rcpp/iostream/Rstreambuf.h"  // for Rcout
+#include "icd_types.h"                 // for ComorbidOut, VecVecInt, VecVec...
+#include "local.h"                     // for ICD_OPENMP
 
 //' core search for ICD code in a map
 //' @keywords internal
