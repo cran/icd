@@ -12,5 +12,5 @@ pts <- data.frame(patient_id = c("1", "2", "3", "4", "4"),
 pts
 
 ## ----hcc-----------------------------------------------------------------
-icd_comorbid_hcc(pts)
+comorbid_hcc(pts)
 

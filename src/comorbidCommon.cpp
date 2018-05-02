@@ -17,12 +17,15 @@
 
 // [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::plugins(openmp)]]
+#include "comorbidCommon.h"
 #include <Rcpp.h>
 #include <algorithm>                   // for binary_search, copy
 #include <vector>                      // for vector, vector<>::const_iterator
 #include "Rcpp/iostream/Rstreambuf.h"  // for Rcout
 #include "icd_types.h"                 // for ComorbidOut, VecVecInt, VecVec...
 #include "local.h"                     // for ICD_OPENMP
+#include "config.h"                     // for valgrind, CXX11 etc
+#include "util.h"                     // for debug_parallel
 
 //' core search for ICD code in a map
 //' @keywords internal
@@ -37,16 +40,15 @@ void lookupComorbidByChunkFor(const VecVecInt& vcdb,
   VecVecIntSz chunk_end_i;
   VecVecIntSz vis_i;
   const VecVecIntSz vsz = vcdb.size();
+
 #ifdef ICD_DEBUG_TRACE
   Rcpp::Rcout << "vcdb.size() = " << vcdb.size() << "\n";
   Rcpp::Rcout << "map.size() = " << map.size() << "\n";
 #endif
-#ifdef ICD_DEBUG_PARALLEL
-  debug_parallel();
-#endif
+  debug_parallel_env();
 
 #ifdef ICD_OPENMP
-#pragma omp parallel for schedule(static) default(none) shared(out, Rcpp::Rcout, vcdb, map) private(chunk_end_i, vis_i)
+#pragma omp parallel for schedule(static) default(none) shared(out, vcdb, map) private(Rcpp::Rcout, chunk_end_i, vis_i)
   // SOMEDAY: need to consider other processes using multiple cores, see Writing R Extensions.
   //	omp_set_schedule(omp_sched_static, ompChunkSize);
 #endif
@@ -56,9 +58,7 @@ void lookupComorbidByChunkFor(const VecVecInt& vcdb,
 #ifdef ICD_DEBUG_TRACE
     Rcpp::Rcout << "vis_i = " << vis_i << "\n";
 #endif
-#ifdef ICD_DEBUG_PARALLEL
     debug_parallel();
-#endif
     // chunk end is an index, so for zero-based vis_i and chunk_end should be
     // the last index in the chunk
     chunk_end_i = vis_i + chunkSize - 1;
@@ -78,11 +78,9 @@ void lookupComorbidByChunkFor(const VecVecInt& vcdb,
     const ComorbidOut falseComorbidChunk(num_comorbid * (1 + end - begin), false);
     chunk = falseComorbidChunk;
     for (VecVecIntSz urow = begin; urow <= end; ++urow) { //end is index of end of chunk, so we include it in the loop.
+      for (VecVecIntSz cmb = 0; cmb != num_comorbid; ++cmb) { // loop through icd codes for this visitId
 #ifdef ICD_DEBUG_TRACE
-      Rcpp::Rcout << "row: " << 1 + urow - begin << " of " << 1 + end - begin << "\n";
-#endif
-      for (VecVecIntSz cmb = 0; cmb < num_comorbid; ++cmb) { // loop through icd codes for this visitId
-#ifdef ICD_DEBUG_TRACE
+        Rcpp::Rcout << "row: " << 1 + urow - begin << " of " << 1 + end - begin << ", ";
         Rcpp::Rcout << "cmb = " << cmb << "\n";
         Rcpp::Rcout << "vcdb length in lookupOneChunk = " << vcdb.size() << "\n";
         Rcpp::Rcout << "map length in lookupOneChunk = " << map.size() << "\n";
@@ -93,18 +91,14 @@ void lookupComorbidByChunkFor(const VecVecInt& vcdb,
 
         const VecInt::const_iterator cbegin = codes.begin();
         const VecInt::const_iterator cend = codes.end();
-        for (VecInt::const_iterator code_it = cbegin; code_it != cend;
-        ++code_it) {
-          bool found_it = std::binary_search(mapCodes.begin(),
-                                             mapCodes.end(), *code_it);
+        for (VecInt::const_iterator code_it = cbegin; code_it != cend; ++code_it) {
+          // the maps were already sorted, now binary search is actually only O(log n)
+          bool found_it = std::binary_search(mapCodes.begin(), mapCodes.end(), *code_it);
           if (found_it) {
             const ComorbidOut::size_type chunk_idx = num_comorbid
             * (urow - begin) + cmb;
-#ifdef ICD_DEBUG
-            chunk.at(chunk_idx) = true;
-#else
+            // chunk.at(chunk_idx) = true; // for debug if going OOB
             chunk[chunk_idx] = true;
-#endif
             break;
           } // end if found_it
         } // end loop through codes in one comorbidity
@@ -124,8 +118,7 @@ void lookupComorbidByChunkFor(const VecVecInt& vcdb,
   Rcpp::Rcout << "writing a chunk beginning at: " << vis_i << "\n";
 #endif
   // write calculated data to the output matrix (must sync threads before this)
-  std::copy(chunk.begin(), chunk.end(),
-            out.begin() + (num_comorbid * vis_i));
+  std::copy(chunk.begin(), chunk.end(), out.begin() + (num_comorbid * vis_i));
 }
   } // end parallel for
 
@@ -133,17 +126,3 @@ void lookupComorbidByChunkFor(const VecVecInt& vcdb,
   Rcpp::Rcout << "finished looking up all chunks in for loop\n";
 #endif
 }
-
-ComorbidOut lookupComorbidByChunkFor(const VecVecInt& vcdb, const VecVecInt& map,
-                                     const int chunkSize, const int ompChunkSize) {
-  // initialize output matrix with all false for all comorbidities
-  ComorbidOut out(vcdb.size() * map.size(), false);
-#ifdef ICD_DEBUG_TRACE
-  Rcpp::Rcout << "top level vcdb.size() = " << vcdb.size() << "\n";
-  Rcpp::Rcout << "top level map.size() = " << map.size() << "\n";
-#endif
-  //TODO: pass the output by reference, instead?
-  lookupComorbidByChunkFor(vcdb, map, chunkSize, ompChunkSize, out);
-  return out;
-}
-

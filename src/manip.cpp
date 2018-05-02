@@ -16,16 +16,9 @@
 // along with icd. If not, see <http://www.gnu.org/licenses/>.
 
 // [[Rcpp::interfaces(r, cpp)]]
+#include "Rcpp.h"
 #include "manip.h"
-#include <Rcpp/r/headers.h>               // for Rf_install, NA_STRING, Rf_l...
 #include <string.h>                       // for strlen
-#include "Rcpp.h"                         // for wrap
-#include "Rcpp/api/meat/proxy.h"          // for AttributeProxyPolicy::Attri...
-#include "Rcpp/exceptions.h"              // for index_out_of_bounds
-#include "Rcpp/sugar/functions/sapply.h"  // for Sapply, sapply
-#include "Rcpp/vector/Vector.h"           // for Vector<>::NameProxy
-#include "Rcpp/vector/instantiation.h"    // for List
-#include "Rcpp/vector/proxy.h"            // for r_vector_name_proxy<>::type
 #include "convert.h"                      // for icd9DecimalToPartsCpp, icd9...
 #include "is.h"                           // for icd9IsASingleV, icd9IsASingleE
 
@@ -33,93 +26,93 @@
 //' @keywords internal manip
 // [[Rcpp::export]]
 Rcpp::String icd9AddLeadingZeroesMajorSingle(Rcpp::String mjr) {
-	if (mjr == NA_STRING) {
-		return (NA_STRING);
-	}
-	std::string m(mjr);
-	if (!icd9IsASingleVE(mjr.get_cstring())) {
-		switch (strlen(mjr.get_cstring())) {
-		case 0:
-			return (NA_STRING);
-		case 1:
-			return ("00" + m);
-		case 2:
-			return ("0" + m);
-		case 3:
-			return (m);
-		}
-	} else {
-		switch (strlen(mjr.get_cstring())) {
-		case 1:
-			return (NA_STRING);
-		case 2:
-			if (icd9IsASingleV(m.c_str())) {
-				m.insert(1, "0");
-				return (m);
-			} else {
-				m.insert(1, "00");
-				return (m);
-			}
-		case 3:
-			if (icd9IsASingleV(m.c_str())) {
-				return (m);
-			} else {
-				m.insert(1, "0");
-				return (m);
-			}
-		case 4:
-			if (icd9IsASingleE(m.c_str()))
-				return (m);
-		}
-	}
-	return NA_STRING;
+  if (mjr == NA_STRING) {
+    return (NA_STRING);
+  }
+  std::string m(mjr);
+  if (!icd9IsASingleVE(mjr.get_cstring())) {
+    switch (strlen(mjr.get_cstring())) {
+    case 0:
+      return (NA_STRING);
+    case 1:
+      return ("00" + m);
+    case 2:
+      return ("0" + m);
+    case 3:
+      return (m);
+    }
+  } else {
+    switch (strlen(mjr.get_cstring())) {
+    case 1:
+      return (NA_STRING);
+    case 2:
+      if (icd9IsASingleV(m.c_str())) {
+        m.insert(1, "0");
+        return (m);
+      } else {
+        m.insert(1, "00");
+        return (m);
+      }
+    case 3:
+      if (icd9IsASingleV(m.c_str())) {
+        return (m);
+      } else {
+        m.insert(1, "0");
+        return (m);
+      }
+    case 4:
+      if (icd9IsASingleE(m.c_str()))
+        return (m);
+    }
+  }
+  return NA_STRING;
 }
 
 // [[Rcpp::export]]
 std::string icd9AddLeadingZeroesMajorSingleStd(std::string m) {
-	const char * cs = m.c_str();
-	const std::string::size_type len = m.length();
-	if (!icd9IsASingleVE(cs)) {
-		switch (len) {
-		case 0:
-			return ("");
-		case 1:
-			return ("00" + m);
-		case 2:
-			return ("0" + m);
-		case 3:
-			return (m);
-		}
-	} else {
-		switch (len) {
-		case 1:
-			return ("");
-		case 2:
-			if (icd9IsASingleV(cs)) {
-				m.insert(1, "0");
-				return (m);
-			} else {
-				m.insert(1, "00");
-				return (m);
-			}
-		case 3:
-			if (icd9IsASingleV(cs)) {
-				return (m);
-			} else {
-				m.insert(1, "0");
-				return (m);
-			}
-		case 4:
-			if (icd9IsASingleE(cs))
-				return (m);
-		}
-	}
-	return "";
+  const char * cs = m.c_str();
+  const std::string::size_type len = m.length();
+  if (!icd9IsASingleVE(cs)) {
+    switch (len) {
+    case 0:
+      return ("");
+    case 1:
+      return ("00" + m);
+    case 2:
+      return ("0" + m);
+    case 3:
+      return (m);
+    }
+  } else {
+    switch (len) {
+    case 1:
+      return ("");
+    case 2:
+      if (icd9IsASingleV(cs)) {
+        m.insert(1, "0");
+        return (m);
+      } else {
+        m.insert(1, "00");
+        return (m);
+      }
+    case 3:
+      if (icd9IsASingleV(cs)) {
+        return (m);
+      } else {
+        m.insert(1, "0");
+        return (m);
+      }
+    case 4:
+      if (icd9IsASingleE(cs))
+        return (m);
+    }
+  }
+  return "";
 }
 
 // [[Rcpp::export(icd9_add_leading_zeroes_major)]]
 CV icd9AddLeadingZeroesMajor(CV mjr) {
-	return Rcpp::sapply(mjr, icd9AddLeadingZeroesMajorSingle);
+  return Rcpp::sapply(mjr, icd9AddLeadingZeroesMajorSingle);
 }
 
 //' @title Add leading zeroes to incomplete ICD-9 codes
@@ -129,27 +122,13 @@ CV icd9AddLeadingZeroesMajor(CV mjr) {
 //' @param x Character vector of ICD-9 codes
 //' @template short_code
 //' @return character vector of ICD-9 codes with leading zeroes
-//' @examples
-//' if (require(microbenchmark)) {
-//'   stopifnot(identical(
-//'     icd:::icd9_add_leading_zeroes_alt_cpp(c("1", "E2", "V1", "E"), short_code = TRUE),
-//'     icd:::icd9_add_leading_zeroes_cpp(c("1", "E2", "V1", "E"), short_code = TRUE)
-//'     ))
-//'
-//'   bad_codes <- sample(c("E2", "V01", "1234", "12", "1", "E99", "E987", "V"),
-//'                       size = 1e4, replace = TRUE)
-//'   microbenchmark::microbenchmark(
-//'     icd:::icd9_add_leading_zeroes_alt_cpp(bad_codes, short_code = TRUE),
-//'     icd:::icd9_add_leading_zeroes_cpp(bad_codes, short_code = TRUE)
-//'   )
-//' }
 //' @keywords internal manip
 // [[Rcpp::export(icd9_add_leading_zeroes_cpp)]]
 CV icd9AddLeadingZeroes(CV x, bool short_code) {
   if (short_code) {
-  // a shortcut for when short codes is just to add the appropriate leading
-  // zeros when the total length is <3. Even then decimal may be quicker by
-  // converting from short than calculating by parts.
+    // a shortcut for when short codes is just to add the appropriate leading
+    // zeros when the total length is <3. Even then decimal may be quicker by
+    // converting from short than calculating by parts.
     Rcpp::List parts = icd9ShortToPartsCpp(x, "");
     parts["mjr"] = icd9AddLeadingZeroesMajor(parts["mjr"]);
     return icd9PartsToShort(parts);

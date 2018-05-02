@@ -11,7 +11,7 @@
 
 <meta name="author" content="Jack O. Wasey" />
 
-<meta name="date" content="2018-03-09" />
+<meta name="date" content="2018-05-01" />
 
 <title>ICD-10 comorbidities</title>
 
@@ -306,7 +306,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">ICD-10 comorbidities</h1>
 <h4 class="author"><em>Jack O. Wasey</em></h4>
-<h4 class="date"><em>2018-03-09</em></h4>
+<h4 class="date"><em>2018-05-01</em></h4>
 
 </div>
 
@@ -343,8 +343,8 @@ along with icd. If not, see <http:#www.gnu.org/licenses/>.
 #&gt; 8     2   I64
 #&gt; 9     2 J43.9
 #&gt; 10    2 J84.1</code></pre>
-<p>We can convert the date from long to wide format easily. This is done quickly in C++, and gives reliable output with factors). It also has other features which make it work well with other functions in this package. However, you may be happier using dplyr and friends for this manipulation.</p>
-<pre class="r"><code>uranium_pathology %&gt;% icd_long_to_wide %&gt;% head
+<p>We can convert the date from long to wide format easily. This is done quickly in C++, and gives reliable output with factors). It also has other features which make it work well with other functions in this package. However, you may be happier using  and friends for this manipulation.</p>
+<pre class="r"><code>uranium_pathology %&gt;% long_to_wide %&gt;% head
 #&gt;   [,1]    [,2]    [,3]    [,4]    [,5]    [,6]    [,7]    [,8]   
 #&gt; 1 &quot;F17.9&quot; &quot;I21.9&quot; &quot;K75.9&quot; &quot;R55&quot;   NA      NA      NA      NA     
 #&gt; 2 &quot;I25.1&quot; &quot;I35.8&quot; &quot;I63.9&quot; &quot;I64&quot;   &quot;J43.9&quot; &quot;J84.1&quot; &quot;K57.9&quot; &quot;N39.0&quot;
@@ -353,7 +353,7 @@ along with icd. If not, see <http:#www.gnu.org/licenses/>.
 #&gt; 5 &quot;C34.9&quot; &quot;C77.1&quot; &quot;C77.2&quot; &quot;C78.0&quot; &quot;C78.7&quot; &quot;C79.7&quot; &quot;I51.7&quot; &quot;K57.9&quot;
 #&gt; 6 &quot;A16.9&quot; &quot;I12.9&quot; &quot;I21.9&quot; &quot;I25.1&quot; &quot;I25.9&quot; &quot;I70.0&quot; &quot;J45.9&quot; &quot;N26&quot;</code></pre>
 <p>Now map these diagnoses to disease groups as defined by Quan et al:</p>
-<pre class="r"><code>quan_comorbidities &lt;- icd_comorbid(uranium_pathology, icd10_map_quan_elix)
+<pre class="r"><code>quan_comorbidities &lt;- comorbid(uranium_pathology, icd10_map_quan_elix)
 # see the first few rows and columns:
 quan_comorbidities[1:6, 3:10]
 #&gt;   Valvular  PHTN   PVD   HTN HTNcx Paralysis NeuroOther Pulmonary
@@ -367,7 +367,7 @@ quan_comorbidities[1:6, 3:10]
 <pre class="r"><code># create trivial comorbidity map:
 cholera_typhoid_map &lt;- list(cholera = &quot;A00&quot;, typhoid = &quot;A01&quot;)
 patients &lt;- data.frame(patient = c(&quot;0001&quot;, &quot;0001&quot;, &quot;0002&quot;), code = c(&quot;A001234567&quot;, &quot;A01&quot;, &quot;A019&quot;))
-icd_comorbid(patients , map = cholera_typhoid_map)
+comorbid(patients , map = cholera_typhoid_map)
 #&gt;      cholera typhoid
 #&gt; 0001    TRUE    TRUE
 #&gt; 0002   FALSE    TRUE</code></pre>
@@ -381,8 +381,8 @@ icd_comorbid(patients , map = cholera_typhoid_map)
 #&gt; attr(,&quot;class&quot;)
 #&gt; [1] &quot;icd10&quot;     &quot;character&quot;</code></pre>
 <p>For more information on working with ICD-10 codes, see the introduction vignette, and function examples. E.g.</p>
-<pre><code>?icd_comorbid
-?icd_explain</code></pre>
+<pre><code>?comorbid
+?explain</code></pre>
 
 
 

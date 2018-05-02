@@ -2,12 +2,12 @@
 % Please edit documentation in R/RcppExports.R
 \name{icd9MajMinToCode}
 \alias{icd9MajMinToCode}
-\alias{icd9MajMinToCodePrePadded}
+\alias{icd9MajMinToCode_alt_PrePadded}
 \title{Convert \code{mjr} and \code{mnr} vectors to single code}
 \usage{
 icd9MajMinToCode(mjr, mnr, isShort)
 
-icd9MajMinToCodePrePadded(mjr, mnr, isShort)
+icd9MajMinToCode_alt_PrePadded(mjr, mnr, isShort)
 }
 \arguments{
 \item{isShort}{Deprecated. Single logical value which determines whether the
@@ -30,25 +30,10 @@ In debug mode, will check that \code{mjr} and \code{mnr} are same length.
 }
 \section{Functions}{
 \itemize{
-\item \code{icd9MajMinToCodePrePadded}: Same as \code{icd9MajMinToCode} but assume
+\item \code{icd9MajMinToCode_alt_PrePadded}: Same as \code{icd9MajMinToCode} but assume
 codes are already trimmed and correctly padded with zeros, e.g. E001, V09,
 001. This version does handle NA values correctly. ' @keywords internal
 }}
 
-\examples{
-\dontrun{
-n <- 5e6
-mjrs <- as.character(sample(1:999, n, replace = TRUE))
-mnrs <- as.character(sample(0:99, n, replace = TRUE))
-microbenchmark::microbenchmark(
-  icd9MajMinToCode(mjrs, mnrs, TRUE),
-  icd9MajMinToCodeStd(mjrs, mnrs, TRUE),
-  icd9MajMinToCodePrePadded(mjrs, mnrs, TRUE),
-  times = 10
-)
-}
-# std method about the same with O3 (4\% faster, but no NA handling), but 50\% quicker with O0
-# std method without doing padding is 5 times quicker than previous...
-}
 \keyword{internal}
 \keyword{manip}

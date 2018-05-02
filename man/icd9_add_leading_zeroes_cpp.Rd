@@ -2,12 +2,9 @@
 % Please edit documentation in R/RcppExports.R
 \name{icd9_add_leading_zeroes_cpp}
 \alias{icd9_add_leading_zeroes_cpp}
-\alias{icd9_add_leading_zeroes_alt_cpp}
 \title{Add leading zeroes to incomplete ICD-9 codes}
 \usage{
 icd9_add_leading_zeroes_cpp(x, short_code)
-
-icd9_add_leading_zeroes_alt_cpp(x, short_code)
 }
 \arguments{
 \item{x}{Character vector of ICD-9 codes}
@@ -23,21 +20,6 @@ character vector of ICD-9 codes with leading zeroes
 Non-decimal ICD-9 codes with length<5 are often ambiguous. E.g.
   100 could be 1.00 10.0 or 100 if coded incorrectly. We must assume 100 is
   really 100
-}
-\examples{
-if (require(microbenchmark)) {
-  stopifnot(identical(
-    icd:::icd9_add_leading_zeroes_alt_cpp(c("1", "E2", "V1", "E"), short_code = TRUE),
-    icd:::icd9_add_leading_zeroes_cpp(c("1", "E2", "V1", "E"), short_code = TRUE)
-    ))
-
-  bad_codes <- sample(c("E2", "V01", "1234", "12", "1", "E99", "E987", "V"),
-                      size = 1e4, replace = TRUE)
-  microbenchmark::microbenchmark(
-    icd:::icd9_add_leading_zeroes_alt_cpp(bad_codes, short_code = TRUE),
-    icd:::icd9_add_leading_zeroes_cpp(bad_codes, short_code = TRUE)
-  )
-}
 }
 \keyword{internal}
 \keyword{manip}

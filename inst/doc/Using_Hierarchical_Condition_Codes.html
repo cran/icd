@@ -325,7 +325,7 @@ $(document).ready(function () {
 ## 5     0064 112 2007
 ## 6     0074   5 2007</code></pre>
 <p>The method returns a table with each ICD-9 code and its corresponding CC. The third column labeled “year” specifies the year that a ICD-9 code was assigned to a corresponding CC. This is needed because HCC has been changed and updated over the years, so the CC assigned to a code in one year might be different from the CC assigned to that same code in another year.</p>
-<p>ICD also provides a method for mapping specific ICD codes to HCCs. The method <code>icd_comorbid_hcc</code> takes as input a list of ICD-9 or ICD-10 codes and outputs a mapping of those codes to their corresponding CCs. For this example, we have an arbitrary table of five ICD-9 codes along with their corresponding patient identifiers and dates of visit.</p>
+<p>ICD also provides a method for mapping specific ICD codes to HCCs. The method <code>comorbid_hcc</code> takes as input a list of ICD-9 or ICD-10 codes and outputs a mapping of those codes to their corresponding CCs. For this example, we have an arbitrary table of five ICD-9 codes along with their corresponding patient identifiers and dates of visit.</p>
 <pre class="r"><code>pts &lt;- data.frame(patient_id = c(&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;4&quot;),
                   icd_code = c(&quot;20084&quot;, &quot;1742&quot;, &quot;30410&quot;, &quot;41514&quot;, &quot;95893&quot;), 
                   date = as.Date(c(&quot;2011-01-01&quot;, &quot;2011-01-02&quot;, &quot;2011-01-03&quot;, &quot;2011-01-04&quot;, &quot;2011-01-04&quot;)))
@@ -337,9 +337,9 @@ pts</code></pre>
 ## 3          3    30410 2011-01-03
 ## 4          4    41514 2011-01-04
 ## 5          4    95893 2011-01-04</code></pre>
-<p>The function <code>icd_comorbid_hcc</code> takes as input a data frame in the “long” format (i.e. mutiple rows per patients). If the data has one row per patient, but multiple codes in different columns, this is the “wide” format. <code>icd_wide_to_long</code> could be used to convert before inputting into <code>icd_comorbid_hcc</code>. Doing it this way, instead of with tools like <code>dplyr</code> allows some guessing for which columns are codes, and which are identifiers, and is also written specifically to do this task efficiently, given the usual structure of hospital data. <code>icd_comorbid_hcc</code> also requires the ICD codes to be in “short” format. If your codes are in “decimal” format, you can easily convert them with the function <code>icd_decimal_to_short</code>.</p>
-<p>Now that our data are in the correct form, we run the mapping function <code>icd_comorbid_hcc</code> with our input, specifying the name of the column in our dataset that contains patients’ visit dates.</p>
-<pre class="r"><code>icd_comorbid_hcc(pts)</code></pre>
+<p>The function <code>comorbid_hcc</code> takes as input a data frame in the “long” format (i.e. mutiple rows per patients). If the data has one row per patient, but multiple codes in different columns, this is the “wide” format. <code>wide_to_long</code> could be used to convert before inputting into <code>comorbid_hcc</code>. Doing it this way, instead of with tools like <code>dplyr</code> allows some guessing for which columns are codes, and which are identifiers, and is also written specifically to do this task efficiently, given the usual structure of hospital data. <code>comorbid_hcc</code> also requires the ICD codes to be in “short” format. If your codes are in “decimal” format, you can easily convert them with the function <code>decimal_to_short</code>.</p>
+<p>Now that our data are in the correct form, we run the mapping function <code>comorbid_hcc</code> with our input, specifying the name of the column in our dataset that contains patients’ visit dates.</p>
+<pre class="r"><code>comorbid_hcc(pts)</code></pre>
 <pre><code>##   patient_id       date hcc
 ## 1          1 2011-01-01   9
 ## 2          2 2011-01-02  10

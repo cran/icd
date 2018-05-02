@@ -1,49 +1,73 @@
 Package: icd
 Title: Tools for Working with ICD-9 and ICD-10 Codes, and Finding
         Comorbidities
-Description: Calculate comorbidities, Charlson scores, perform fast and accurate
-    validation, conversion, manipulation, filtering and comparison of ICD-9 and
-    ICD-10 codes. Common ambiguities and code formats are handled. This
-    package enables a work flow from raw lists of ICD codes in hospital
-    billing databases to comorbidities. ICD-9 and ICD-10 comorbidity mappings
-    from Quan (Deyo and Elixhauser versions), Elixhauser and AHRQ included. This
-    package replaces 'icd9', which should be uninstalled.
+Version: 3.0.0
+Date: 2018-05-01
+Authors@R: 
+    c(person(given = "Jack O.",
+             family = "Wasey",
+             role = c("aut", "cre", "cph"),
+             email = "jack@jackwasey.com"),
+      person(given = "William",
+             family = "Murphy",
+             role = "ctb",
+             email = "WMurphy@eatright.org",
+             comment = "Van Walraven scores"),
+      person(given = "Anobel",
+             family = "Odisho",
+             role = "ctb",
+             email = "anobel.odisho@ucsf.edu",
+             comment = "Hierarchical Condition Codes"),
+      person(given = "Vitaly",
+             family = "Druker",
+             role = "ctb",
+             email = "vdruker@gmail.com",
+             comment = "AHRQ CCS"),
+      person(given = "Ed",
+             family = "Lee",
+             role = "ctb",
+             comment = "explain codes in table format"),
+      person(given = "Kevin",
+             family = "Ushey",
+             role = "ctb",
+             comment = "Code adapted for fast factor generation"),
+      person(given = "R Core Team",
+             role = c("ctb", "cph"),
+             comment = "m4 macro for OpenMP detection in configure"))
+Maintainer: Jack O. Wasey <jack@jackwasey.com>
+Description: Calculate comorbidities, Charlson scores, perform
+    fast and accurate validation, conversion, manipulation, filtering and
+    comparison of ICD-9 and ICD-10 codes. This package enables a work flow
+    from raw lists of ICD codes in hospital databases to
+    comorbidities. ICD-9 and ICD-10 comorbidity mappings from Quan (Deyo
+    and Elixhauser versions), Elixhauser and AHRQ included.  Common
+    ambiguities and code formats are handled.
+License: GPL-3
+URL: https://github.com/jackwasey/icd
+BugReports: https://github.com/jackwasey/icd/issues
+Depends: R (>= 3.4)
+Imports: checkmate (>= 1.7.0), magrittr, stats, Rcpp (>= 0.12.3), utils
+Suggests: knitr, RODBC, roxygen2 (>= 5.0.0), rmarkdown, stringr,
+        testthat (>= 0.11.1), xml2
+LinkingTo: Rcpp, RcppEigen, testthat
+VignetteBuilder: knitr
+ByteCompile: true
 Classification/ACM-2012: Social and professional topics~Medical
         records, Applied computing~Health care information systems,
         Applied computing~Health informatics, Applied
         computing~Bioinformatics
-Version: 2.4.1
-Date: 2018-03-09
-Authors@R: c(
-    person(given = "Jack O.", family = "Wasey", role = c("aut", "cre", "cph"), email = "jack@jackwasey.com"),
-    person(given = "William", family = "Murphy", role = "ctb", email = "WMurphy@eatright.org", comment = "Van Walraven scores"),
-    person(given = "Anobel", family = "Odisho", role = "ctb", email = "anobel.odisho@ucsf.edu", comment = "Hierarchical Condition Codes"),
-    person(given = "Ed", family = "Lee", role = "ctb", comment = "explain codes in table format"),
-    person(given = "Kevin", family = "Ushey", role = "ctb", comment = "Code adapted for fast factor generation"),
-    person("R Core Team", role = c("ctb", "cph"), comment = "m4 macro for OpenMP detection in configure")
-    )
-Maintainer: Jack O. Wasey <jack@jackwasey.com>
-URL: https://github.com/jackwasey/icd
-Depends: R (>= 3.3.0)
-Imports: checkmate (>= 1.7.0), magrittr, stats, Rcpp (>= 0.12.3), utils
-Suggests: knitr, microbenchmark, RODBC, roxygen2 (>= 5.0.0), rmarkdown,
-        stringr, testthat, xml2
+Copyright: See file (inst/)COPYRIGHTS
 LazyData: true
 LazyDataCompression: xz
-ByteCompile: true
-BugReports: https://github.com/jackwasey/icd/issues
-License: GPL-3
-Copyright: See file (inst/)COPYRIGHTS
-VignetteBuilder: knitr
-LinkingTo: Rcpp, testthat
 RoxygenNote: 6.0.1
 NeedsCompilation: yes
-Packaged: 2018-03-10 03:34:27 UTC; waseyj
+Packaged: 2018-05-01 22:44:00 UTC; waseyj
 Author: Jack O. Wasey [aut, cre, cph],
   William Murphy [ctb] (Van Walraven scores),
   Anobel Odisho [ctb] (Hierarchical Condition Codes),
+  Vitaly Druker [ctb] (AHRQ CCS),
   Ed Lee [ctb] (explain codes in table format),
   Kevin Ushey [ctb] (Code adapted for fast factor generation),
   R Core Team [ctb, cph] (m4 macro for OpenMP detection in configure)
 Repository: CRAN
-Date/Publication: 2018-03-10 16:19:46 UTC
+Date/Publication: 2018-05-02 07:39:53 UTC

@@ -19,7 +19,6 @@
 #include "util.h"
 #include <stdlib.h>
 #include <math.h>                              // for floor
-#include <omp.h>                               // for omp_get_max_threads
 #include <stdio.h>                             // for sprintf
 #include <string.h>                            // for strcmp
 #include <algorithm>                           // for copy, sort, transform
@@ -28,14 +27,10 @@
 #include <string>                              // for string, basic_string
 #include <vector>                              // for vector, vector<>::size...
 #include "local.h"                             // for ICD_OPENMP
+#include "config.h"                             // for ICD_VALGRIND
 
 #ifdef ICD_OPENMP
 #include <omp.h>
-#ifdef ICD_STD_PARALLEL
-#include <parallel/algorithm>
-#else
-#include <algorithm>
-#endif
 #endif
 
 // trim one string from right
@@ -83,7 +78,7 @@ void printCharVec(CV cv) {
 }
 #endif
 
-// [[Rcpp::export]]
+// [[Rcpp::export(get_omp_cores)]]
 int getOmpCores() {
   int cores = 0;
 #ifdef ICD_OPENMP
@@ -92,7 +87,9 @@ int getOmpCores() {
   return cores;
 }
 
-// [[Rcpp::export]]
+// nocov start
+
+// [[Rcpp::export(get_omp_max_threads)]]
 int getOmpMaxThreads() {
   int maxthreads = 0;
 #ifdef ICD_OPENMP
@@ -101,7 +98,8 @@ int getOmpMaxThreads() {
   return maxthreads;
 }
 
-// [[Rcpp::export]]
+// https://stackoverflow.com/questions/43736622/which-openmp-schedule-am-i-running/43755259#43755259
+// [[Rcpp::export(get_omp_threads)]]
 int getOmpThreads() {
   int threads = 0;
 #ifdef ICD_OPENMP
@@ -111,17 +109,44 @@ int getOmpThreads() {
   return threads;
 }
 
-void debug_parallel() {
-#if defined(ICD_OPENMP) && defined(ICD_DEBUG_PARALLEL)
-  Rcpp::Rcout << "threads per omp_get_schedule = " << getOmpThreads() << ". ";
-  Rcpp::Rcout << "max threads per omp_get_schedule = " << getOmpMaxThreads() << ". ";
-  Rcpp::Rcout << "avail threads = " << omp_get_num_threads() << ". ";
-  Rcpp::Rcout << "omp_get_thread_num = " << omp_get_thread_num() << ". ";
-  Rcpp::Rcout << "omp_get_num_procs = " << getOmpCores() << "\n";
+// [[Rcpp::export]]
+void debug_parallel_env() {
+#ifdef ICD_DEBUG_PARALLEL
+  Rcpp::Rcout << "checking OpenMP flags...\n";
+#ifdef HAVE_R_OPENMP
+  Rcpp::Rcout << "HAVE_R_OPENMP is defined.\n";
+#endif
+#ifdef _OPENMP
+  Rcpp::Rcout << "_OPENMP is defined.\n";
 #else
-  Rcpp::Rcout << "ICD_OPENMP is not defined\n";
+  Rcpp::Rcout << "_OPENMP is not defined.\n";
+#endif
+
+#ifdef ICD_OPENMP
+  Rcpp::Rcout << "ICD_OPENMP is defined.\n";
+#else
+  Rcpp::Rcout << "ICD_OPENMP is not defined.\n";
+#endif
 #endif
 }
+
+// [[Rcpp::export]]
+void debug_parallel() {
+  //  cannot use Rcpp:Rcout in multithreaded code: alternative (for debugging
+  //  only) is RcppThreads. Small package but I'm reluctant to add another
+  //  dependency.
+  /*
+#if defined(ICD_OPENMP) && defined(ICD_DEBUG_PARALLEL)
+   Rcpp::Rcout << "threads per omp_get_schedule = " << getOmpThreads()
+               << " max threads per omp_get_schedule = " << getOmpMaxThreads()
+               << " avail threads = " << omp_get_num_threads()
+               << " omp_get_thread_num = " << omp_get_thread_num()
+               << " omp_get_num_procs = " << getOmpCores() << "\n";
+#endif // ICD_DEBUG_PARALLEL
+   */
+}
+
+// nocov end
 
 // [[Rcpp::export]]
 Rcpp::NumericVector randomMajorCpp(int	n) {
@@ -216,6 +241,10 @@ int valgrindCallgrindStart(bool zerostats = false) {
     Rcpp::Rcout << "Zeroing callgrind stats.\n";
     CALLGRIND_ZERO_STATS;
   }
+#else
+#ifdef ICD_DEBUG
+  Rcpp::Rcout << "NOT starting valgrind instrumentation.\n";
+#endif
 #endif
   return 0;
 }
@@ -264,7 +293,7 @@ VecStr icd9SortCpp(VecStr x) {
 }
 
 // add one because R indexes from 1, not 0
-std::size_t getSecondPlusOne(const std::pair<std::string, std::size_t>& p) { return p.second + 1; }
+inline std::size_t getSecondPlusOne(const std::pair<std::string, std::size_t>& p) { return p.second + 1; }
 
 // [[Rcpp::export(icd9_order_cpp)]]
 std::vector<std::size_t> icd9OrderCpp(VecStr x) {
@@ -281,12 +310,14 @@ std::vector<std::size_t> icd9OrderCpp(VecStr x) {
   return out;
 }
 
-// //[[Rcpp::export]]
-// CV env_to_vec_flip(Rcpp::Environment env) {
-//   CV out(Rf_length(env.ls(true)));
-// for (CV::iterator i; i != out.end(); ++i) {
-//   out[env[*i]] = *i;
-// }
-// return
-// }
-
+//' fast factor generation WIP
+//' @keywords internal manip
+// [[Rcpp::export]]
+SEXP factor_fast( SEXP x ) {
+  switch( TYPEOF(x) ) {
+  case INTSXP: return fast_factor_template<INTSXP>(x);
+  case REALSXP: return fast_factor_template<REALSXP>(x);
+  case STRSXP: return fast_factor_template<STRSXP>(x);
+  }
+  return R_NilValue;
+}

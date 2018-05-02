@@ -17,18 +17,15 @@
 
 #ifndef RANGES_H_
 #define RANGES_H_
+
 #include <stddef.h>     // for size_t
 #include "icd_types.h"
 #include <Rcpp.h>
+#include "range-const.h"                    // for v_empty_std, v0, v0_std, v1
 
-// define end() to get end index of a C array
-template<typename T, size_t N>
-T * end(T (&ra)[N]) {
-  return ra + N;
-}
-
-VecStr icd9ExpandMinorStd(const Str& mnr, bool isE);
-CV icd9ChildrenShort(CV icd9Short, bool onlyReal = true);
-CV icd9ChildrenDecimalCpp(CV icd9Decimal, bool onlyReal = true);
+CV icd9ChildrenShort(CV icd9Short, const VecStr& icd9cmReal, bool onlyReal = true);
+CV icd9ChildrenShortUnordered(CV icd9Short, const VecStr& icd9cmReal, bool onlyReal = true);
+CV icd9ChildrenDecimalCpp(CV icd9Decimal, const VecStr& icd9cmReal, bool onlyReal = true);
 CV icd9ExpandMinor(const Str& mnr, bool isE = false);
+
 #endif /* RANGES_H_ */

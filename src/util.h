@@ -18,13 +18,14 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
+#include "config.h"
+#include "local.h"                      // for ICD_OPENMP
+#include "icd_types.h"                  // for VecStr
 #include <cstddef>                      // for size_t
 #include <string>                       // for string
 #include <utility>                      // for pair
 #include <vector>                       // for vector
 #include <Rcpp.h> // IWYU pragma: keep
-#include "icd_types.h"                  // for VecStr
-#include "local.h"                      // for ICD_OPENMP
 
 #ifdef ICD_OPENMP
 #include <omp.h>
@@ -39,6 +40,7 @@ int getOmpCores();
 int getOmpThreads();
 int getOmpMaxThreads();
 void debug_parallel();
+void debug_parallel_env();
 Rcpp::NumericVector randomMajorCpp(int n);
 VecStr icd9RandomShortN(VecStr::size_type n);
 VecStr icd9RandomShortV(VecStr::size_type n);
@@ -50,5 +52,24 @@ int valgrindCallgrindStop();
 
 bool icd9CompareStrings(std::string a, std::string b);
 std::vector<std::size_t> icd9OrderCpp(VecStr x);
+
+// concatenate a vector of vectors
+template <class COCiter, class Oiter>
+void my_concat (COCiter start, COCiter end, Oiter dest) {
+  while (start != end) {
+    dest = std::copy(start->begin(), start->end(), dest);
+    ++start;
+  }
+}
+
+// template for factors of different S types
+template <int RTYPE>
+Rcpp::IntegerVector fast_factor_template( const Rcpp::Vector<RTYPE>& x ) {
+  Rcpp::Vector<RTYPE> levs = unique(x); // or sort_unique
+  Rcpp::IntegerVector out = match(x, levs);
+  out.attr("levels") = Rcpp::as<Rcpp::CharacterVector>(levs);
+  out.attr("class") = "factor";
+  return out;
+}
 
 #endif /* UTIL_H_ */

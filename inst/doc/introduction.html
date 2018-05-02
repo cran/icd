@@ -11,7 +11,7 @@
 
 <meta name="author" content="Jack O. Wasey" />
 
-<meta name="date" content="2018-03-09" />
+<meta name="date" content="2018-05-01" />
 
 <title>Quick Introduction to icd: ICD-9 and ICD-10 comorbidities, validation and manipulation</title>
 
@@ -306,7 +306,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Quick Introduction to <em>icd</em>: ICD-9 and ICD-10 comorbidities, validation and manipulation</h1>
 <h4 class="author"><em>Jack O. Wasey</em></h4>
-<h4 class="date"><em>2018-03-09</em></h4>
+<h4 class="date"><em>2018-05-01</em></h4>
 
 </div>
 
@@ -359,7 +359,7 @@ along with icd. If not, see <http:#www.gnu.org/licenses/>.
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <!-- _TODO: update with first paragraph from DESCRIPTION_ -->
-<p>Calculate comorbidities, Charlson scores, perform fast and accurate validation, conversion, manipulation, filtering and comparison of ICD-9 and ICD-10 codes. Common ambiguities and code formats are handled. This package enables a work flow from raw lists of ICD codes in hospital billing databases to comorbidities. ICD-9 and ICD-10 comorbidity mappings from Quan (Deyo and Elixhauser versions), Elixhauser and AHRQ included. This package replaces ‘icd9’, which should be uninstalled.</p>
+<p>Calculate comorbidities, Charlson scores, perform fast and accurate validation, conversion, manipulation, filtering and comparison of ICD-9 and ICD-10 codes. This package enables a work flow from raw lists of ICD codes in hospital databases to comorbidities. ICD-9 and ICD-10 comorbidity mappings from Quan (Deyo and Elixhauser versions), Elixhauser and AHRQ included. Common ambiguities and code formats are handled.</p>
 <p>When calculating which patients have which comorbidities, the data are typically structured in long or wide formats:</p>
 <pre class="r"><code># long format ICD-9-CM codes, with present-on-arrival flags
 patients_icd9
@@ -393,13 +393,13 @@ vermont_dx[1:5, c(1, 6:15)]
 <p>One use of this package is to identify diagnoses present on admission to hospital (POA). If a POA field is present in the data, it can be used to filter the diagnosis codes. Let’s walk through an example for some ICD-9 data:</p>
 <pre class="r"><code># use AHRQ revision of Elixhauser comorbidities, show only first eight columns
 icd9_comorbid_ahrq(patients_icd9)[, 1:8]
-#&gt;        CHF Valvular  PHTN   PVD  HTN Paralysis NeuroOther Pulmonary
-#&gt; 1000  TRUE    FALSE FALSE FALSE TRUE     FALSE      FALSE     FALSE
-#&gt; 1001 FALSE    FALSE FALSE FALSE TRUE      TRUE      FALSE     FALSE
-#&gt; 1002 FALSE    FALSE FALSE FALSE TRUE     FALSE      FALSE     FALSE</code></pre>
+#&gt;        CHF Valvular  PHTN   PVD   HTN Paralysis NeuroOther Pulmonary
+#&gt; 1000  TRUE    FALSE FALSE FALSE FALSE     FALSE      FALSE     FALSE
+#&gt; 1001 FALSE    FALSE FALSE FALSE  TRUE      TRUE      FALSE     FALSE
+#&gt; 1002 FALSE    FALSE FALSE FALSE  TRUE     FALSE      FALSE     FALSE</code></pre>
 <p>Things work beautifully using <a href="https://cran.r-project.org/package=magrittr">magrittr</a> <code>%&gt;%</code> to chain functions together. I use <code>magrittr</code> in the package itself, and I recommend trying it to clarify chains of commands, such as the following:</p>
 <pre class="r"><code># find Elixhauser comorbidities present-on-arrival
-patients_icd9 %&gt;% icd_filter_poa %&gt;% icd9_comorbid_elix %&gt;% head
+patients_icd9 %&gt;% filter_poa %&gt;% icd9_comorbid_elix %&gt;% head
 #&gt;        CHF Arrhythmia Valvular  PHTN   PVD   HTN Paralysis NeuroOther
 #&gt; 1000 FALSE      FALSE    FALSE FALSE FALSE FALSE     FALSE      FALSE
 #&gt; 1001 FALSE      FALSE    FALSE FALSE FALSE  TRUE     FALSE      FALSE
@@ -415,7 +415,7 @@ patients_icd9 %&gt;% icd_filter_poa %&gt;% icd9_comorbid_elix %&gt;% head
 
 # same as above, then summarize first five:
 patients_icd9 %&gt;% 
-  icd_filter_poa %&gt;% 
+  filter_poa %&gt;% 
   icd9_comorbid_elix %&gt;% 
   extract(, 1:5) %&gt;% 
   apply(2, as.integer) %&gt;% 
@@ -430,7 +430,7 @@ patients_icd9 %&gt;%
 
 # convert vermont discharge data to wide format, 
 # find comorbidities, convert TRUE to 1 and show first few
-vermont_dx %&gt;% icd_wide_to_long  %&gt;% icd9_comorbid_quan_deyo  %&gt;% apply(2, as.integer) %&gt;%  head
+vermont_dx %&gt;% wide_to_long  %&gt;% icd9_comorbid_quan_deyo  %&gt;% apply(2, as.integer) %&gt;%  head
 #&gt;      MI CHF PVD Stroke Dementia Pulmonary Rheumatic PUD LiverMild DM DMcx
 #&gt; [1,]  0   1   0      0        0         0         0   0         0  0    0
 #&gt; [2,]  0   1   0      0        0         1         0   0         0  1    0
@@ -446,16 +446,16 @@ vermont_dx %&gt;% icd_wide_to_long  %&gt;% icd9_comorbid_quan_deyo  %&gt;% apply
 #&gt; [5,]         0     0      0           0    0   0
 #&gt; [6,]         0     0      0           0    0   0</code></pre>
 <p>The above can be rewritten in classic R with many parentheses:</p>
-<pre class="r"><code>head(apply(icd9_comorbid_quan_deyo(icd_wide_to_long(vermont_dx)), 2, as.integer))</code></pre>
+<pre class="r"><code>head(apply(icd9_comorbid_quan_deyo(wide_to_long(vermont_dx)), 2, as.integer))</code></pre>
 </div>
 <div id="specifying-data-types" class="section level2">
 <h2>Specifying data types</h2>
 <p><code>icd</code> will guess the type and form of input data when possible, but there are ambiguities:</p>
-<pre class="r"><code>icd_is_valid(&quot;100&quot;) # valid ICD-9 code
+<pre class="r"><code>is_valid(&quot;100&quot;) # valid ICD-9 code
 #&gt; [1] TRUE
-icd_is_valid(&quot;A1001&quot;) # valid ICD-10 code
+is_valid(&quot;A1001&quot;) # valid ICD-10 code
 #&gt; [1] TRUE
-icd_is_valid(c(&quot;100&quot;, &quot;A1001&quot;)) # they can't both be valid
+is_valid(c(&quot;100&quot;, &quot;A1001&quot;)) # they can't both be valid
 #&gt; [1]  TRUE FALSE</code></pre>
 <p>You can let <code>icd</code> guess types, or specify the type of your data explicitly:</p>
 <pre class="r"><code># decimal format ICD-10 codes
@@ -466,7 +466,7 @@ as.icd10cm(codes)
 #&gt; attr(,&quot;class&quot;)
 #&gt; [1] &quot;icd10cm&quot;   &quot;icd10&quot;     &quot;character&quot;
 # or set class to indicate decimal code and icd10 (not necessarily icd10cm)
-codes %&gt;% as.icd_decimal_diag %&gt;% as.icd10
+codes %&gt;% as.decimal_diag %&gt;% as.icd10
 #&gt; [1] &quot;A10.01&quot;  &quot;L40.50&quot;  &quot;Z77.098&quot;
 #&gt; attr(,&quot;icd_short_diag&quot;)
 #&gt; [1] FALSE
@@ -483,13 +483,13 @@ codes %&gt;% as.icd_decimal_diag %&gt;% as.icd10
 <div id="converting-icd-9-codes-between-types" class="section level2">
 <h2>Converting ICD-9 codes between types</h2>
 <p>ICD-9 codes are usually presented in <em>decimal</em> format (beware, for this is not a number), e.g. <code>003.21</code>, whereas most electronic records seem to use the <em>short</em> form without a decimal place. These are not interchangeable simply by removing the decimal place, and great care is taken to do this correctly. The functions were also designed to deal with the common problem of incorrectly formatted ICD-9 codes. The assumption is made that short codes of three or fewer characters are describing only the ‘major’ part: there is no other reasonable interpretation. For example, <code>020</code> must be taken to mean <code>20</code>, not <code>2.0</code> or even <code>0.20</code>. In most cases, when <em>icd</em> works on ICD-9 codes, it will convert any codes of fewer than three characters into zero-padded three-digit codes.</p>
-<pre class="r"><code>icd_decimal_to_short(c(&quot;1&quot;, &quot;10.20&quot;, &quot;100&quot;, &quot;123.45&quot;))
+<pre class="r"><code>decimal_to_short(c(&quot;1&quot;, &quot;10.20&quot;, &quot;100&quot;, &quot;123.45&quot;))
 #&gt; [1] &quot;001&quot;   &quot;01020&quot; &quot;100&quot;   &quot;12345&quot;
 #&gt; attr(,&quot;icd_short_diag&quot;)
 #&gt; [1] TRUE
 #&gt; attr(,&quot;class&quot;)
 #&gt; [1] &quot;icd9&quot;      &quot;character&quot;
-icd_short_to_decimal(c(&quot;1&quot;, &quot;22&quot;, &quot;2244&quot;, &quot;1005&quot;))
+short_to_decimal(c(&quot;1&quot;, &quot;22&quot;, &quot;2244&quot;, &quot;1005&quot;))
 #&gt; [1] &quot;001&quot;   &quot;022&quot;   &quot;224.4&quot; &quot;100.5&quot;
 #&gt; attr(,&quot;icd_short_diag&quot;)
 #&gt; [1] FALSE
@@ -498,7 +498,7 @@ icd_short_to_decimal(c(&quot;1&quot;, &quot;22&quot;, &quot;2244&quot;, &quot;10
 
 # similar operations with magrittr, also showing invalid codes
 codes &lt;- as.icd9(c(&quot;87.65&quot;, &quot;9999&quot;, &quot;Aesop&quot;, -100, &quot;&quot;, NA))
-icd_decimal_to_short(codes)
+decimal_to_short(codes)
 #&gt; [1] &quot;08765&quot; &quot;&quot;      &quot;&quot;      &quot;&quot;      &quot;&quot;      NA     
 #&gt; attr(,&quot;class&quot;)
 #&gt; [1] &quot;icd9&quot;      &quot;character&quot;
@@ -508,15 +508,15 @@ icd_decimal_to_short(codes)
 <div id="validation-of-icd-9-codes" class="section level2">
 <h2>Validation of ICD-9 codes</h2>
 <pre class="r"><code># guess both ICD version (9, but could be 10?), and decimal vs short form
-icd_is_valid(&quot;V10.2&quot;)
+is_valid(&quot;V10.2&quot;)
 #&gt; [1] TRUE
 
 # state we are using short or decimal codes:
-icd_is_valid(c(&quot;099.17&quot;, &quot;-1&quot;), short_code = TRUE)
+is_valid(c(&quot;099.17&quot;, &quot;-1&quot;), short_code = TRUE)
 #&gt; [1] FALSE FALSE
-icd_is_valid(c(&quot;099.17&quot;, &quot;-1.1&quot;), short_code = FALSE)
+is_valid(c(&quot;099.17&quot;, &quot;-1.1&quot;), short_code = FALSE)
 #&gt; [1]  TRUE FALSE
-icd_is_valid(c(&quot;1&quot;, &quot;001&quot;, &quot;100&quot;, &quot;123456&quot;, &quot;003.21&quot;), short_code = TRUE)
+is_valid(c(&quot;1&quot;, &quot;001&quot;, &quot;100&quot;, &quot;123456&quot;, &quot;003.21&quot;), short_code = TRUE)
 #&gt; [1]  TRUE  TRUE  TRUE FALSE FALSE</code></pre>
 </div>
 <div id="ranges-of-icd-9-codes" class="section level2">
@@ -541,13 +541,13 @@ icd_is_valid(c(&quot;1&quot;, &quot;001&quot;, &quot;100&quot;, &quot;123456&quo
 # &quot;V10&quot; %i9s% &quot;E800&quot; # throws an error</code></pre>
 <p>This is used internally to interpret ranges of ICD-9 codes specified in the literature. Sometimes it is not clear exactly what an ICD-9 range presented in a paper means, but at least we can explicitly decide what should be included in our interpretation, and the ranges can be reused even when the underlying codes may be different, as codes are added and removed from time-to-time, and although the original papers would have been based on their ICD-9 ranges resolving to a specific set of codes, they are likely to be valid for new diagnoses in the given subgroups. Ultimately, this needs detailed attention, but the strategy in  is to give a good best guess, given these limitations.</p>
 <p>Another way of specifying ranges are to use function calls. These are exactly equivalent to the <code>%i9s%</code> and <code>%i9d%</code> range operators. This example shows the result when the user specifies a range which would include parents but not all their children:</p>
-<pre class="r"><code>icd_expand_range(&quot;4820&quot;, &quot;4823&quot;) # default, equivalent to %i9s%
+<pre class="r"><code>expand_range(&quot;4820&quot;, &quot;4823&quot;) # default, equivalent to %i9s%
 #&gt; [1] &quot;4820&quot;  &quot;4821&quot;  &quot;4822&quot;  &quot;4823&quot;  &quot;48230&quot; &quot;48231&quot; &quot;48232&quot; &quot;48239&quot;
 #&gt; attr(,&quot;icd_short_diag&quot;)
 #&gt; [1] TRUE
 #&gt; attr(,&quot;class&quot;)
 #&gt; [1] &quot;icd9&quot;      &quot;character&quot;
-icd_expand_range(&quot;4820&quot;, &quot;4823&quot;, defined = FALSE)
+expand_range(&quot;4820&quot;, &quot;4823&quot;, defined = FALSE)
 #&gt;  [1] &quot;4820&quot;  &quot;48200&quot; &quot;48201&quot; &quot;48202&quot; &quot;48203&quot; &quot;48204&quot; &quot;48205&quot; &quot;48206&quot;
 #&gt;  [9] &quot;48207&quot; &quot;48208&quot; &quot;48209&quot; &quot;4821&quot;  &quot;48210&quot; &quot;48211&quot; &quot;48212&quot; &quot;48213&quot;
 #&gt; [17] &quot;48214&quot; &quot;48215&quot; &quot;48216&quot; &quot;48217&quot; &quot;48218&quot; &quot;48219&quot; &quot;4822&quot;  &quot;48220&quot;
@@ -559,18 +559,18 @@ icd_expand_range(&quot;4820&quot;, &quot;4823&quot;, defined = FALSE)
 #&gt; attr(,&quot;class&quot;)
 #&gt; [1] &quot;icd9&quot;      &quot;character&quot;
 # see the first few differences (which are by definition not 'real' codes):
-setdiff(icd_expand_range(&quot;4820&quot;, &quot;4823&quot;, defined = FALSE),
-        icd_expand_range(&quot;4820&quot;, &quot;4823&quot;)) %&gt;% head
+setdiff(expand_range(&quot;4820&quot;, &quot;4823&quot;, defined = FALSE),
+        expand_range(&quot;4820&quot;, &quot;4823&quot;)) %&gt;% head
 #&gt; [1] &quot;48200&quot; &quot;48201&quot; &quot;48202&quot; &quot;48203&quot; &quot;48204&quot; &quot;48205&quot;</code></pre>
 <p>It is easy to find the children of a higher-level ICD-9 code:</p>
-<pre class="r"><code>icd_children(as.icd9(&quot;391&quot;))
+<pre class="r"><code>children(as.icd9(&quot;391&quot;))
 #&gt; [1] &quot;391&quot;  &quot;3910&quot; &quot;3911&quot; &quot;3912&quot; &quot;3918&quot; &quot;3919&quot;
 #&gt; attr(,&quot;icd_short_diag&quot;)
 #&gt; [1] TRUE
 #&gt; attr(,&quot;class&quot;)
 #&gt; [1] &quot;icd9&quot;      &quot;character&quot;
 # mid-level code
-icd:::icd_children.icd9(&quot;0032&quot;)
+icd:::children.icd9(&quot;0032&quot;)
 #&gt; [1] &quot;0032&quot;  &quot;00320&quot; &quot;00321&quot; &quot;00322&quot; &quot;00323&quot; &quot;00324&quot; &quot;00329&quot;
 #&gt; attr(,&quot;icd_short_diag&quot;)
 #&gt; [1] TRUE
@@ -579,21 +579,21 @@ icd:::icd_children.icd9(&quot;0032&quot;)
 # leaf node has no children
 # be explicit about the type of code:
 test_code &lt;- as.icd9(as.icd_short_diag(&quot;00321&quot;))
-icd_children(test_code)
+children(test_code)
 #&gt; [1] &quot;00321&quot;
 #&gt; attr(,&quot;icd_short_diag&quot;)
 #&gt; [1] TRUE
 #&gt; attr(,&quot;class&quot;)
 #&gt; [1] &quot;icd9&quot;      &quot;character&quot;
 # or the same, but guessing the characteristics
-icd_children(&quot;00321&quot;)
+children(&quot;00321&quot;)
 #&gt; [1] &quot;00321&quot;
 #&gt; attr(,&quot;icd_short_diag&quot;)
 #&gt; [1] TRUE
 #&gt; attr(,&quot;class&quot;)
 #&gt; [1] &quot;icd9&quot;      &quot;character&quot;
 # pneumococcal pneumonia is a three-digit ICD-9 code with no descendants
-icd_children(&quot;481&quot;)
+children(&quot;481&quot;)
 #&gt; [1] &quot;481&quot;
 #&gt; attr(,&quot;icd_short_diag&quot;)
 #&gt; [1] TRUE
@@ -601,7 +601,7 @@ icd_children(&quot;481&quot;)
 #&gt; [1] &quot;icd9&quot;      &quot;character&quot;</code></pre>
 <p>By adding <code>defined = TRUE</code>, all syntactically valid ICD-9 codes are returned, even if not defined by CMS as diagnoses. This is relevant because of minor coding errors, or coding in a different year to the master list. A planned feature is to allow testing of an ICD-9 code against the valid codes for the year it was entered, but at present only the 2014 master list is used. This means that some older valid codes may no longer be on the list. However, there have been very few changes to ICD-9-CM in the last five years with ICD-10-CM in the wings.</p>
 <pre class="r"><code># first ten possible ICD-9 child codes from 391
-icd_children(&quot;391&quot;, defined = FALSE)[1:10]
+children(&quot;391&quot;, defined = FALSE)[1:10]
 #&gt;  [1] &quot;391&quot;   &quot;3910&quot;  &quot;39100&quot; &quot;39101&quot; &quot;39102&quot; &quot;39103&quot; &quot;39104&quot; &quot;39105&quot;
 #&gt;  [9] &quot;39106&quot; &quot;39107&quot;
 #&gt; attr(,&quot;icd_short_diag&quot;)
@@ -611,29 +611,29 @@ icd_children(&quot;391&quot;, defined = FALSE)[1:10]
 </div>
 <div id="decoding-icd-9-codes-to-descriptions" class="section level2">
 <h2>Decoding ICD-9 codes to descriptions</h2>
-<p>There are various ways of extracting the description of the condition described by an ICD-9 code. the icd_explain group of functions return a data frame with a column for the ICD-9 code, a column for the full length Diagnosis, and a column for the short Description.</p>
-<pre class="r"><code>icd_explain(&quot;1.0&quot;) # 'decimal' format code inferred
+<p>There are various ways of extracting the description of the condition described by an ICD-9 code. the explain group of functions return a data frame with a column for the ICD-9 code, a column for the full length Diagnosis, and a column for the short Description.</p>
+<pre class="r"><code>explain(&quot;1.0&quot;) # 'decimal' format code inferred
 #&gt; [1] &quot;Cholera due to vibrio cholerae&quot;
-icd_explain(&quot;0019&quot;) # 'short' format code inferred
+explain(&quot;0019&quot;) # 'short' format code inferred
 #&gt; [1] &quot;Cholera, unspecified&quot;</code></pre>
 <pre class="r"><code># we can be explicit about short vs decimal
-icd_explain(&quot;434.00&quot;, short_code = FALSE)
+explain(&quot;434.00&quot;, short_code = FALSE)
 #&gt; [1] &quot;Cerebral thrombosis without mention of cerebral infarction&quot;
-icd_explain(c(&quot;43410&quot;, &quot;43491&quot;), short_code = TRUE)
+explain(c(&quot;43410&quot;, &quot;43491&quot;), short_code = TRUE)
 #&gt; [1] &quot;Cerebral embolism without mention of cerebral infarction&quot;       
 #&gt; [2] &quot;Cerebral artery occlusion, unspecified with cerebral infarction&quot;
 #explain top level code with children
-&quot;391&quot; %&gt;% icd_explain # single three-digit code
+&quot;391&quot; %&gt;% explain # single three-digit code
 #&gt; [1] &quot;Rheumatic fever with heart involvement&quot;
-&quot;391&quot; %&gt;% icd_children # let's see the child codes
+&quot;391&quot; %&gt;% children # let's see the child codes
 #&gt; [1] &quot;391&quot;  &quot;3910&quot; &quot;3911&quot; &quot;3912&quot; &quot;3918&quot; &quot;3919&quot;
 #&gt; attr(,&quot;icd_short_diag&quot;)
 #&gt; [1] TRUE
 #&gt; attr(,&quot;class&quot;)
 #&gt; [1] &quot;icd9&quot;      &quot;character&quot;
-&quot;391&quot; %&gt;% icd_children %&gt;% icd_explain # children condensed to parent code
+&quot;391&quot; %&gt;% children %&gt;% explain # children condensed to parent code
 #&gt; [1] &quot;Rheumatic fever with heart involvement&quot;
-&quot;391&quot; %&gt;% icd_children %&gt;% icd_explain(condense = FALSE) # prevent condense
+&quot;391&quot; %&gt;% children %&gt;% explain(condense = FALSE) # prevent condense
 #&gt; [1] &quot;Rheumatic fever with heart involvement&quot;    
 #&gt; [2] &quot;Acute rheumatic pericarditis&quot;              
 #&gt; [3] &quot;Acute rheumatic endocarditis&quot;              
@@ -641,7 +641,7 @@ icd_explain(c(&quot;43410&quot;, &quot;43491&quot;), short_code = TRUE)
 #&gt; [5] &quot;Other acute rheumatic heart disease&quot;       
 #&gt; [6] &quot;Acute rheumatic heart disease, unspecified&quot;</code></pre>
 <p>Arbitrary named list(s) of codes:</p>
-<pre class="r"><code>icd_explain(list(somecodes = as.icd9(c(&quot;001&quot;, &quot;391&quot;)),
+<pre class="r"><code>explain(list(somecodes = as.icd9(c(&quot;001&quot;, &quot;391&quot;)),
                  morecodes = as.icd9cm(c(&quot;001.1&quot;, &quot;001.9&quot;))))
 #&gt; $somecodes
 #&gt; [1] &quot;Cholera&quot;                               
@@ -651,50 +651,51 @@ icd_explain(c(&quot;43410&quot;, &quot;43491&quot;), short_code = TRUE)
 #&gt; [1] &quot;Cholera due to vibrio cholerae el tor&quot;
 #&gt; [2] &quot;Cholera, unspecified&quot;</code></pre>
 <p><code>001</code> (Cholera) isn’t itself a diagnostic code, i.e. leaf node in the hierarchy, but <code>390</code> (Rheumatic fever without heart involvement) is. Both are explained correctly:</p>
-<pre class="r"><code>icd_explain(list(cholera = &quot;001&quot;, rheumatic_heart = &quot;390&quot;))
+<pre class="r"><code>explain(list(cholera = &quot;001&quot;, rheumatic_heart = &quot;390&quot;))
 #&gt; $cholera
 #&gt; [1] &quot;Cholera&quot;
 #&gt; 
 #&gt; $rheumatic_heart
 #&gt; [1] &quot;Rheumatic fever without mention of heart involvement&quot;</code></pre>
 <p>Now try to explain on a non-existent (but ‘valid’) ICD-9 code:</p>
-<pre class="r"><code>s &lt;- icd_explain(&quot;001.5&quot;) # gives warning</code></pre>
-<p>As we have just seen, <em>icd_explain</em> can convert lists of ICD-9 or ICD-10 codes to a human-readable format. Let’s apply the <code>icd_explain</code> to a list of comorbidity ICD-9 codes in one of the commonly-used mappings. This makes comprehending a complicated list much easier. Taking the list for dementia:</p>
+<pre class="r"><code>s &lt;- explain(&quot;001.5&quot;) # gives warning</code></pre>
+<p>As we have just seen, <em>explain</em> can convert lists of ICD-9 or ICD-10 codes to a human-readable format. Let’s apply the <code>explain</code> to a list of comorbidity ICD-9 codes in one of the commonly-used mappings. This makes comprehending a complicated list much easier. Taking the list for dementia:</p>
 <pre class="r"><code>length(icd9_map_quan_deyo[[&quot;Dementia&quot;]]) # 133 possible ICD-9 codes
 #&gt; [1] 133
 length(icd10_map_quan_deyo[[&quot;Dementia&quot;]]) # the ICD-10 map is different
 #&gt; [1] 20
-# icd_explain summarizes these to just two groups:
-icd9_map_quan_deyo[[&quot;Dementia&quot;]] %&gt;% icd_explain(warn = FALSE)
+# explain summarizes these to just two groups:
+icd9_map_quan_deyo[[&quot;Dementia&quot;]] %&gt;% explain(warn = FALSE)
 #&gt; [1] &quot;Dementias&quot;                                  
 #&gt; [2] &quot;Dementia in conditions classified elsewhere&quot;
 #&gt; [3] &quot;Senile degeneration of brain&quot;
 # contrast with:
-icd9_map_quan_deyo[[&quot;Dementia&quot;]] %&gt;% icd_explain(condense = TRUE, warn = FALSE)
+icd9_map_quan_deyo[[&quot;Dementia&quot;]] %&gt;% explain(condense = TRUE, warn = FALSE)
 #&gt; [1] &quot;Dementias&quot;                                  
 #&gt; [2] &quot;Dementia in conditions classified elsewhere&quot;
 #&gt; [3] &quot;Senile degeneration of brain&quot;</code></pre>
 <p>Use a range with more than two hundred ICD-9 codes (most of them not real):</p>
 <pre class="r"><code>length(&quot;390&quot; %i9da% &quot;392.1&quot;)
 #&gt; [1] 244
-&quot;390&quot; %i9da% &quot;392.1&quot; %&gt;% icd_explain(warn = FALSE)
+&quot;390&quot; %i9da% &quot;392.1&quot; %&gt;% explain(warn = FALSE)
 #&gt; [1] &quot;Rheumatic fever without mention of heart involvement&quot;
-#&gt; [2] &quot;Rheumatic fever with heart involvement&quot;</code></pre>
+#&gt; [2] &quot;Rheumatic fever with heart involvement&quot;              
+#&gt; [3] &quot;Rheumatic chorea with heart involvement&quot;</code></pre>
 <p>The warnings here are irrelevant because we know that `%i9da% produces codes which do not correspond to diagnoses. However, in other usage, the user would typically expect the ICD-9 codes he or she is using to be diagnostic, hence the default to warn.</p>
 </div>
 <div id="filtering-by-present-on-arrival" class="section level2">
 <h2>Filtering by Present-on-Arrival</h2>
 <p>This flag is recorded with each ICD-9 code, indicating whether that diagnosis was present on admission. With some caution, codes flagged specifically not <em>POA</em> can be treated as new diseases during an admission.</p>
-<p>Present-on-arrival (POA) is typically a factor, or vector of values such as “Y”, “N”, “X”, “E”, or NA. Intermediate codes, such as “exempt”, “unknown” and NA mean that “yes” is not the same as “not no.” This requires four functions to cover the possibilities stored in <code>icd_poa_choices</code>:</p>
+<p>Present-on-arrival (POA) is typically a factor, or vector of values such as “Y”, “N”, “X”, “E”, or NA. Intermediate codes, such as “exempt”, “unknown” and NA mean that “yes” is not the same as “not no.” This requires four functions to cover the possibilities stored in <code>poa_choices</code>:</p>
 <pre><code>#&gt; [1] &quot;yes&quot;    &quot;no&quot;     &quot;notYes&quot; &quot;notNo&quot;</code></pre>
 <p>Filter for present-on-arrival being “Y”</p>
-<pre class="r"><code>patients_icd9 %&gt;% icd_filter_poa_yes
+<pre class="r"><code>patients_icd9 %&gt;% filter_poa_yes
 #&gt;   visit_id  icd9
 #&gt; 1     1000 40201
 #&gt; 4     1000 25001
 #&gt; 6     1001  4011</code></pre>
 <p>Show that <em>yes</em> is not equal to <em>not no</em> (e.g. due to NA in <code>poa</code> field)</p>
-<pre class="r"><code>patients_icd9 %&gt;% icd_filter_poa_not_no
+<pre class="r"><code>patients_icd9 %&gt;% filter_poa_not_no
 #&gt;   visit_id  icd9
 #&gt; 1     1000 40201
 #&gt; 2     1000  2258
@@ -737,7 +738,7 @@ icd10_map_ahrq$CHF[1:5]
 <h3>Elixhauser comorbidities</h3>
 <p>Elixhauser originally devleoped this set of comorbidities to predict long term mortality based on hospital ICD-9-CM coding records. The AHRQ comorbidities are an updated version of this, however the original Elixhauser have been used in many publications. The ICD-9-CM codes have changed slightly over the years.</p>
 <pre class="r"><code># the names of the comorbidities in each map are available as named lists:
-icd_names_elix[1:5]
+names_elix[1:5]
 #&gt; $`01`
 #&gt; [1] &quot;Congestive heart failure&quot;
 #&gt; 
@@ -752,7 +753,7 @@ icd_names_elix[1:5]
 #&gt; 
 #&gt; $`05`
 #&gt; [1] &quot;Peripheral vascular disorders&quot;
-unlist(unname(icd_names_elix))
+unlist(unname(names_elix))
 #&gt;  [1] &quot;Congestive heart failure&quot;                       
 #&gt;  [2] &quot;Cardiac arrhythmias&quot;                            
 #&gt;  [3] &quot;Valvular disease&quot;                               
@@ -822,7 +823,7 @@ names(icd10_map_quan_elix)
 <h3>Filter patients and create comorbidities</h3>
 <p>Take my patients, find the ones where there definitely or maybe was a diagnosis present on admission, then generate comorbidities based on the AHRQ mapping. N.b. <code>NotNo</code> is not the same as <code>Yes</code> because of some exempt, unclassifiable conditions, or <code>NA</code> values for the present-on-admission flag.</p>
 <pre class="r"><code>patients_icd9 %&gt;%
-  icd_filter_poa_not_no %&gt;%
+  filter_poa_not_no %&gt;%
   icd9_comorbid_ahrq %&gt;%
   extract(1:9)
 #&gt; [1]  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE</code></pre>
@@ -830,8 +831,8 @@ names(icd10_map_quan_elix)
 <div id="compare-two-comorbidity-definitions" class="section level3">
 <h3>Compare two comorbidity definitions</h3>
 <p>We will find the differences between some categories of the original Elixhauser and the updated version by Quan. Just taking the select few comorbidity groups for brevity:</p>
-<pre class="r"><code>difference &lt;- icd_diff_comorbid(icd9_map_elix, icd9_map_quan_elix,
-                 all_names = c(&quot;CHF&quot;, &quot;PHTN&quot;, &quot;HTN&quot;, &quot;Valvular&quot;))
+<pre class="r"><code>difference &lt;- diff_comorbid(icd9_map_elix, icd9_map_quan_elix,
+                            all_names = c(&quot;CHF&quot;, &quot;PHTN&quot;, &quot;HTN&quot;, &quot;Valvular&quot;))
 #&gt; Comorbidity CHF: 
 #&gt; icd9_map_quan_elix has 70 codes not in icd9_map_elix. First few are: 'Heart failure' 'Mal hypert hrt dis w hf' 'Mal hyp ht/kd I-IV w hf' 'Mal hyp ht/kd stg V w hf' 'Prim cardiomyopathy NEC' 
 #&gt; Comorbidity PHTN: 
@@ -860,12 +861,12 @@ str(difference)
 #&gt;   ..$ only.x: chr(0) 
 #&gt;   ..$ only.y: chr [1:106] &quot;0932&quot; &quot;09325&quot; &quot;09326&quot; &quot;09327&quot; ...</code></pre>
 <p>Which pulmonary hypertension codes are only in Quan’s version?</p>
-<pre class="r"><code>difference$PHTN$only.y %&gt;% icd_get_defined %&gt;% icd_explain
+<pre class="r"><code>difference$PHTN$only.y %&gt;% get_defined %&gt;% explain
 #&gt; [1] &quot;Acute pulmonary heart disease&quot;                    
 #&gt; [2] &quot;Chronic pulmonary heart disease&quot;                  
 #&gt; [3] &quot;Arteriovenous fistula of pulmonary vessels&quot;       
 #&gt; [4] &quot;Other specified diseases of pulmonary circulation&quot;</code></pre>
-<p>(Passing through <code>icd_get_defined</code> stops <code>icd_explain</code> complaining that some of the input codes don’t exist. This is because the comorbidity mappings have every possible numerical ICD-9 code, not just the official ones. Could also use <code>warn = FALSE</code> option in <code>icd_explain</code>)</p>
+<p>(Passing through <code>get_defined</code> stops <code>explain</code> complaining that some of the input codes don’t exist. This is because the comorbidity mappings have every possible numerical ICD-9 code, not just the official ones. Could also use <code>warn = FALSE</code> option in <code>explain</code>)</p>
 </div>
 <div id="find-cardiac-related-icd-9-codes" class="section level3">
 <h3>Find cardiac-related ICD-9 codes:</h3>
@@ -875,7 +876,7 @@ str(difference)
         ignore.case = TRUE),
   &quot;code&quot;] %&gt;% unique -&gt; cardiac</code></pre>
 <p>then explain the list, just showing the first ten:</p>
-<pre class="r"><code>as.icd9(cardiac) %&gt;% icd_explain(warn = FALSE) %&gt;% head(10)
+<pre class="r"><code>as.icd9(cardiac) %&gt;% explain(warn = FALSE) %&gt;% head(10)
 #&gt;  [1] &quot;Malignant neoplasm of thymus, heart, and mediastinum&quot;    
 #&gt;  [2] &quot;Rheumatic fever without mention of heart involvement&quot;    
 #&gt;  [3] &quot;Rheumatic fever with heart involvement&quot;                  
@@ -917,42 +918,42 @@ icd9_comorbid(patients_icd9, my_map) # no positive
 <div id="reduce-comorbidity-mapping-from-possible-values-to-defined-diagnostic-codes." class="section level3">
 <h3>Reduce comorbidity mapping from possible values to defined diagnostic codes.</h3>
 <p>Suppose we want to exact match only real ICD-9 codes when looking up comorbdities for some patients. E.g. if the coder accidentally omitted a trailing zero, e.g. code <code>003.20</code> (<em>Localized salmonella infection, unspecified</em>) might have been written as <code>003.2</code> which has a heading (<em>Localized salmonella infections</em>) but is not itself billable. Use of ICD-9 codes for comorbidities generally assumes the codes are either right or wrong. How do we match only real codes, for a strict interpretation of comorbidities? It’s one line or R code:</p>
-<pre class="r"><code>ahrq_strict &lt;- lapply(icd9_map_ahrq, icd_get_defined)
+<pre class="r"><code>ahrq_strict &lt;- lapply(icd9_map_ahrq, get_defined)
 str(icd9_map_ahrq[1:5]) # first five of the original:
 #&gt; List of 5
-#&gt;  $ CHF     :Classes 'icd9', 'character'  atomic [1:121] 39891 40201 40211 40291 ...
-#&gt;   .. ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
-#&gt;  $ Valvular:Classes 'icd9', 'character'  atomic [1:554] 0932 09320 09321 09322 ...
-#&gt;   .. ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
-#&gt;  $ PHTN    :Classes 'icd9', 'character'  atomic [1:133] 4151 41510 41511 41512 ...
-#&gt;   .. ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
-#&gt;  $ PVD     :Classes 'icd9', 'character'  atomic [1:598] 440 4400 44000 44001 ...
-#&gt;   .. ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
-#&gt;  $ HTN     :Classes 'icd9', 'character'  atomic [1:33] 4011 40110 40111 40112 ...
-#&gt;   .. ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
+#&gt;  $ CHF     : 'icd9' chr [1:121] &quot;39891&quot; &quot;40201&quot; &quot;40211&quot; &quot;40291&quot; ...
+#&gt;   ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
+#&gt;  $ Valvular: 'icd9' chr [1:554] &quot;0932&quot; &quot;09320&quot; &quot;09321&quot; &quot;09322&quot; ...
+#&gt;   ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
+#&gt;  $ PHTN    : 'icd9' chr [1:133] &quot;4151&quot; &quot;41510&quot; &quot;41511&quot; &quot;41512&quot; ...
+#&gt;   ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
+#&gt;  $ PVD     : 'icd9' chr [1:598] &quot;440&quot; &quot;4400&quot; &quot;44000&quot; &quot;44001&quot; ...
+#&gt;   ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
+#&gt;  $ HTN     : 'icd9' chr [1:33] &quot;4011&quot; &quot;40110&quot; &quot;40111&quot; &quot;40112&quot; ...
+#&gt;   ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
 str(icd9_map_ahrq[1:5]) # and first five of the result:
 #&gt; List of 5
-#&gt;  $ CHF     :Classes 'icd9', 'character'  atomic [1:121] 39891 40201 40211 40291 ...
-#&gt;   .. ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
-#&gt;  $ Valvular:Classes 'icd9', 'character'  atomic [1:554] 0932 09320 09321 09322 ...
-#&gt;   .. ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
-#&gt;  $ PHTN    :Classes 'icd9', 'character'  atomic [1:133] 4151 41510 41511 41512 ...
-#&gt;   .. ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
-#&gt;  $ PVD     :Classes 'icd9', 'character'  atomic [1:598] 440 4400 44000 44001 ...
-#&gt;   .. ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
-#&gt;  $ HTN     :Classes 'icd9', 'character'  atomic [1:33] 4011 40110 40111 40112 ...
-#&gt;   .. ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE</code></pre>
+#&gt;  $ CHF     : 'icd9' chr [1:121] &quot;39891&quot; &quot;40201&quot; &quot;40211&quot; &quot;40291&quot; ...
+#&gt;   ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
+#&gt;  $ Valvular: 'icd9' chr [1:554] &quot;0932&quot; &quot;09320&quot; &quot;09321&quot; &quot;09322&quot; ...
+#&gt;   ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
+#&gt;  $ PHTN    : 'icd9' chr [1:133] &quot;4151&quot; &quot;41510&quot; &quot;41511&quot; &quot;41512&quot; ...
+#&gt;   ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
+#&gt;  $ PVD     : 'icd9' chr [1:598] &quot;440&quot; &quot;4400&quot; &quot;44000&quot; &quot;44001&quot; ...
+#&gt;   ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE
+#&gt;  $ HTN     : 'icd9' chr [1:33] &quot;4011&quot; &quot;40110&quot; &quot;40111&quot; &quot;40112&quot; ...
+#&gt;   ..- attr(*, &quot;icd_short_diag&quot;)= logi TRUE</code></pre>
 <p>Note the much smaller numbers of codes in each group, now we have discarded all the ones which are not defined as diagnoses.</p>
 </div>
 <div id="which-three-character-icd-9-codes-have-no-child-codes" class="section level3">
 <h3>Which three-character ICD-9 codes have no child codes</h3>
 <p>The ICD-9-CM scheme is structured as follows: - Chapter - Sub-chapter - Major part (three-digit codes) - sub-division (first decimal place) - sub-sub-division (second decimal place)</p>
 <p>For most combinations of zero to nine, nothing is defined. Sometimes, nodes at one level in the hierarchy are descriptive only of their children (branch nodes), whereas some are themselves billable. For this example, let’s find those numeric-only codes which have no children, and by implication are themselves directly billable codes. Here are the first ten:</p>
-<pre class="r"><code>icd9cm_hierarchy$code %&gt;% icd_get_defined -&gt; all_real
+<pre class="r"><code>icd9cm_hierarchy$code %&gt;% get_defined -&gt; all_real
 # select the non-V and non-E codes
 three_digit_real &lt;- all_real[icd9_is_n(all_real)]
 # display
-three_digit_df &lt;- data.frame(code = three_digit_real, description = icd_explain(three_digit_real, condense = FALSE))
+three_digit_df &lt;- data.frame(code = three_digit_real, description = explain(three_digit_real, condense = FALSE))
 print(three_digit_df[1:10, ], row.names = FALSE)
 #&gt;  code                                  description
 #&gt;   001                                      Cholera
@@ -977,7 +978,7 @@ lost_since_27 %&lt;&gt;% as.icd9cm
 lost_since_27 %&lt;&gt;% as.icd9cm
 
 # these are a few which were gained since v27
-data.frame(code = new_since_27, desc = new_since_27 %&gt;% icd_explain)
+data.frame(code = new_since_27, desc = new_since_27 %&gt;% explain)
 #&gt;    code                                          desc
 #&gt; 1 04141                     Escherichia coli [E.coli]
 #&gt; 2 04142 Unspecified malignant neoplasm of skin of lip
@@ -986,7 +987,7 @@ data.frame(code = new_since_27, desc = new_since_27 %&gt;% icd_explain)
 #&gt; 5 17300 Unspecified malignant neoplasm of skin of lip
 #&gt; 6 17301           Basal cell carcinoma of skin of lip
 # these are a few which were lost since v27
-data.frame(code = lost_since_27, desc = lost_since_27 %&gt;% icd_explain)
+data.frame(code = lost_since_27, desc = lost_since_27 %&gt;% explain)
 #&gt;   code
 #&gt; 1 V122
 #&gt; 2 V138

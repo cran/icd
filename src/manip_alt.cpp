@@ -15,12 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with icd. If not, see <http://www.gnu.org/licenses/>.
 
-// [[Rcpp::interfaces(r, cpp)]]
 #include "manip_alt.h"
-#include <Rcpp/r/headers.h>               // for NA_STRING, Rf_install
+#include <Rcpp.h>               // for NA_STRING, Rf_install
 #include <string.h>                       // for strlen
 #include <string>                         // for string, operator+
-#include "Rcpp/sugar/functions/sapply.h"  // for Sapply, sapply
 #include "convert.h"                      // for icd9DecimalToShort
 #include "is.h"                           // for icd9IsASingleV, icd9IsASing...
 
@@ -32,7 +30,7 @@
 //' \code{manip.cpp} has the benchmark code.
 //' @keywords internal manip
 // [[Rcpp::export]]
-Rcpp::String icd9AddLeadingZeroesShortSingle(Rcpp::String x) {
+Rcpp::String icd9AddLeadingZeroes_alt_ShortSingle(Rcpp::String x) {
   if (x == NA_STRING) {
     return (NA_STRING);
   }
@@ -66,15 +64,16 @@ Rcpp::String icd9AddLeadingZeroesShortSingle(Rcpp::String x) {
   return (s);
 }
 
-//' @rdname icd9_add_leading_zeroes_cpp
+//' @describeIn icd9AddLeadingZeroes_alt_ShortSingle Directly apply
+//' icd9AddLeadingZeroesShortSingle to each code without separating into parts
 //' @keywords internal manip
 // [[Rcpp::export(icd9_add_leading_zeroes_alt_cpp)]]
-CV icd9AddLeadingZeroesDirect(CV x, bool short_code) {
+CV icd9AddLeadingZeroes_alt_Direct(CV x, bool short_code) {
   // a shortcut for when short codes is just to add the appropriate leading
   // zeros when the total length is <3.
   if (short_code)
-    return Rcpp::sapply(x, icd9AddLeadingZeroesShortSingle);
+    return Rcpp::sapply(x, icd9AddLeadingZeroes_alt_ShortSingle);
 
   CV y = icd9DecimalToShort(x);
-  return Rcpp::sapply(y, icd9AddLeadingZeroesShortSingle);
+  return Rcpp::sapply(y, icd9AddLeadingZeroes_alt_ShortSingle);
 }

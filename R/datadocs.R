@@ -19,6 +19,7 @@ icd_data_names <- c(
   "icd10_map_ahrq",
   "icd10_map_cc",
   "icd10_map_elix",
+  "icd10_map_charlson",
   "icd10_map_quan_deyo",
   "icd10_map_quan_elix",
   "icd10_sub_chapters",
@@ -26,8 +27,8 @@ icd_data_names <- c(
   "icd9_majors",
   "icd9_map_ahrq",
   "icd9_map_cc",
-  "icd10_map_cc",
   "icd9_map_elix",
+  "icd9_map_charlson",
   "icd9_map_quan_deyo",
   "icd9_map_quan_elix",
   "icd9_sources",
@@ -37,17 +38,14 @@ icd_data_names <- c(
   "icd9_chapters",
   "icd10_chapters",
   "icd_map_cc_hcc",
-  "icd10cm2016",
-  "icd9_chapters",
-  "icd9_majors",
-  "icd9_map_cc",
-  "icd9cm_billable",
-  "icd_names_ahrq", "icd_names_ahrq_abbrev", "icd_names_ahrq_htn",
-  "icd_names_ahrq_htn_abbrev", "icd_names_charlson",
-  "icd_names_charlson_abbrev", "icd_names_elix", "icd_names_elix_abbrev",
-  "icd_names_elix_htn", "icd_names_elix_htn_abbrev", "icd_names_quan_elix",
-  "icd_names_quan_elix_abbrev", "icd_names_quan_elix_htn",
-  "icd_names_quan_elix_htn_abbrev"
+  "names_ahrq", "names_ahrq_abbrev", "names_ahrq_htn",
+  "names_ahrq_htn_abbrev", "names_charlson",
+  "names_charlson_abbrev", "names_elix", "names_elix_abbrev",
+  "names_elix_htn", "names_elix_htn_abbrev", "names_quan_elix",
+  "names_quan_elix_abbrev", "names_quan_elix_htn",
+  "names_quan_elix_htn_abbrev",
+  "icd9_map_single_ccs", "icd9_map_multi_ccs",
+  "icd10_map_ccs"
 )
 
 #' ICD-9 chapters
@@ -182,7 +180,7 @@ NULL
 #' leukemia, lymphoma and non-metastatic cancer. As far as I have looked into
 #' this, in the rare cases where someone had two or three of leukemia, lymphoma
 #' and non-metastatic cancer, the Quan adaptation would give a lower Charlson
-#' score than the original scheme. The Deyo original Charlson to ICD-9-CM groups
+#' score than the original scheme. The original Deyo Charlson to ICD-9-CM groups
 #' does include distinct categories for these things.
 #' @docType data
 #' @keywords datasets
@@ -196,7 +194,7 @@ NULL
 #'   \url{http://web.archive.org/web/20110225042437/http://www.chaps.ucalgary.ca/sas}
 #'
 #' @name icd9_map_quan_deyo
-#' @aliases icd10_map_quan_deyo
+#' @aliases icd10_map_quan_deyo icd9_map_charlson icd10_map_charlson
 NULL
 
 #' Quan adaptation of Elixhauser comorbidities
@@ -270,6 +268,32 @@ NULL
 #' @aliases icd9_map_cc icd10_map_cc icd_map_cc_hcc
 NULL
 
+#' Clinical Classifactions Software (CCS) for ICD9/10-CM
+#'
+#' The Clinical Classifications Software (CCS) for ICD-9/10-CM is one in a
+#' family of databases and software tools developed as part of the Healthcare
+#' Cost and Utilization Project (HCUP),a Federal-State-Industry partnership
+#' sponsored by the Agency for Healthcare Research and Quality. HCUP databases,
+#' tools, and software inform decision making at the national, State, and
+#' community levels. The software contains two different mappings. One is a
+#' single level mapping and one is a multi level classification. This data set
+#' contains the numeric representations of all of the codes.
+#'
+#' This file contains the updated ICD9 version that includes categories for
+#' Mental Health and Substance Abuse. More information on the ICD-9-CM data set
+#' can be found \url{https://www.hcup-us.ahrq.gov/toolssoftware/ccs/ccs.jsp}.
+#'
+#' The file \code{icd10_map_ccs} contains the 2018.1 ICD10 Version of the
+#' mapping. Mor information on the ICD10 code set can be found at
+#' \url{https://www.hcup-us.ahrq.gov/toolssoftware/ccs10/ccs10.jsp}
+#'
+#' @docType data
+#' @keywords datasets
+#' @format list of character vectors, each numbered by co-morbidity
+#' @name icd9_map_single_ccs
+#' @aliases icd9_map_multi_ccs icd10_map_ccs
+NULL
+
 #' Comorbidity names
 #'
 #' These lists provide correctly sorted names of the comorbidities and their
@@ -289,12 +313,16 @@ NULL
 #'   'Hypertension, complicated' are labelled '6a' and '6b'. Diabetes, cancer,
 #'   and metastasis are counted independently, as in the original paper, giving
 #'   the original 30 groups. "01" to "30"
-#' @name icd_names_elix
-#' @aliases icd_names_elix_abbrev icd_names_elix_htn icd_names_elix_htn_abbrev
-#'   icd_names_quan_elix icd_names_quan_elix_abbrev icd_names_quan_elix_htn
-#'   icd_names_quan_elix_htn_abbrev icd_names_ahrq icd_names_ahrq_abbrev
-#'   icd_names_ahrq_htn icd_names_ahrq_htn_abbrev icd_names_charlson
-#'   icd_names_charlson_abbrev icd_names_cc
+#' @name names_elix
+#' @aliases names_elix_abbrev names_elix_htn names_elix_htn_abbrev
+#'   names_quan_elix names_quan_elix_abbrev names_quan_elix_htn
+#'   names_quan_elix_htn_abbrev names_ahrq names_ahrq_abbrev names_ahrq_htn
+#'   names_ahrq_htn_abbrev names_charlson names_charlson_abbrev names_cc
+#'   icd_names_elix icd_names_elix_abbrev icd_names_elix_htn
+#'   icd_names_elix_htn_abbrev icd_names_quan_elix icd_names_quan_elix_abbrev
+#'   icd_names_quan_elix_htn icd_names_quan_elix_htn_abbrev icd_names_ahrq
+#'   icd_names_ahrq_abbrev icd_names_ahrq_htn icd_names_ahrq_htn_abbrev
+#'   icd_names_charlson icd_names_charlson_abbrev icd_names_cc
 #' @keywords datasets
 #' @docType data
 NULL

@@ -4,23 +4,21 @@
 \alias{icd9_chapters_to_map}
 \title{convert the chapter headings to lists of codes}
 \usage{
-icd9_chapters_to_map(x)
+icd9_chapters_to_map(x, defined = FALSE)
 }
 \arguments{
 \item{x}{Either a chapter list itself, or the name of one, e.g.
 \code{icd9_sub_chapters}}
+
+\item{defined}{Single logical value, if \code{TRUE}, the default, only
+officially defined ICD-9 (currently ICD-9-CM) codes will be used in the
+expansion, not any lexically possible ICD-9 code.}
 }
 \description{
 the chapter headings can be converted into the full set of their children,
 and then used to look-up which chapter, sub-chapter, or 'major' a given code
 belongs. Always returns a map with short-form ICD-9 codes. These can be
-converted in bulk with \code{lapply} and \code{icd_short_to_decimal}.
-}
-\seealso{
-Other ICD-9 convert: \code{\link{icd9PartsToShort}},
-  \code{\link{icd9_drop_leading_zeroes}},
-  \code{\link{icd_long_to_wide}},
-  \code{\link{icd_wide_to_long}}
+converted in bulk with \code{lapply} and \code{short_to_decimal}.
 }
 \keyword{internal}
 \keyword{manip}

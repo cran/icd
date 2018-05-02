@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with icd. If not, see <http:#www.gnu.org/licenses/>.
 
-# nocov start
+#nocov start
 
 # icd9_sources is defined in this file and saved in sysdata.rda
 utils::globalVariables(c("icd9_sources", "icd9cm_billable"))
@@ -27,7 +27,7 @@ utils::globalVariables(c("icd9_sources", "icd9cm_billable"))
 #' from the source SAS data. Elixhauser and Quan/Elixhauser mappings are
 #' generated from transcribed codes.
 #' @keywords internal
-icd_update_everything <- function() {
+update_everything <- function() {
   # this is not strictly a parsing step, but is quite slow. It relies on picking
   # up already saved files from previous steps. It can take hours to complete,
   # but only needs to be done rarely. This is only intended to be run from
@@ -53,6 +53,9 @@ icd_update_everything <- function() {
   icd9_parse_ahrq_sas(save_data = TRUE, offline = FALSE)
   icd9_parse_quan_deyo_sas(save_data = TRUE, offline = FALSE)
   icd9_parse_cc(save_data = TRUE)
+  icd9_parse_ahrq_ccs(single = TRUE, save_data = TRUE, offline = FALSE)
+  icd9_parse_ahrq_ccs(single = FALSE, save_data = TRUE, offline = FALSE)
+  icd10_parse_ahrq_ccs(version = "2018.1", save_data = TRUE, offline = FALSE)
   icd9_generate_map_quan_elix(save_data = TRUE)
   icd9_generate_map_elix(save_data = TRUE)
   # ICD 10
@@ -65,13 +68,16 @@ icd_update_everything <- function() {
   icd10cm_extract_sub_chapters(save_data = TRUE, offline = FALSE)
 
   # reload the newly saved data before generating chapters.
-  # depends on icd9cm_billable
+  # The next step depends on icd9cm_billable
   icd9cm_generate_chapters_hierarchy(save_data = TRUE, offline = FALSE, verbose = FALSE)
+
+  generate_uranium_pathology(save_data = TRUE, offline = FALSE)
+  generate_vermont_dx(save_data = TRUE, offline = FALSE)
 }
 
 # quick sanity checks - full tests of x in test-parse.R
 icd9cm_hierarchy_sanity <- function(x) {
-  stopifnot(all(icd_is_valid.icd9(x[["code"]], short_code = TRUE)))
+  stopifnot(all(is_valid.icd9(x[["code"]], short_code = TRUE)))
   if (!any(sapply(x, is.na)))
     return()
   print(colSums(sapply(x, is.na)))
@@ -81,7 +87,6 @@ icd9cm_hierarchy_sanity <- function(x) {
   print(x[which(is.na(x$chapter)), ])
   stop("should not have any NA values in the ICD-9-CM flatten hierarchy data frame")
 }
-# nocov end
 
 #' Get billable codes from all available years
 #'
@@ -142,16 +147,6 @@ parse_leaf_descriptions_all <- function(save_data = TRUE, offline = TRUE) {
 #' @template save_data
 #' @param path Absolute path in which to save parsed data
 #' @template offline
-#' @examples
-#' \dontrun{
-#' library(microbenchmark)
-#' requireNamepsace("stringr")
-#' # stringr::str_split is faster this time
-#' x <- icd:::generate_random_decimal_icd9(10)
-#' microbenchmark(strsplit(x, "\\."), stringr::str_split(x, "\\."))
-#' # str_trim is faster with nothing to trim
-#' microbenchmark(icd:::trim(x), stringr::str_trim(x))
-#' }
 #' @return invisibly return the result
 #' @keywords internal
 icd9_parse_leaf_desc_ver <- function(version = icd9cm_latest_edition(),
@@ -311,7 +306,7 @@ icd9cm_generate_chapters_hierarchy <- function(save_data = FALSE,
   # just copy the long description over.
   bill32 <- icd9cm_billable[["32"]]
 
-  billable_codes <- icd_get_billable.icd9(out[["code"]], short_code = TRUE)
+  billable_codes <- get_billable.icd9(out[["code"]], short_code = TRUE)
   billable_rows <- which(out[["code"]] %in% billable_codes)
   title_rows <- which(out[["code"]] %nin% billable_codes)
   stopifnot(setdiff(c(billable_rows, title_rows), seq_along(out$code)) == integer(0))
@@ -336,7 +331,7 @@ icd9cm_generate_chapters_hierarchy <- function(save_data = FALSE,
   icd9cm_hierarchy <- out
 
   if (save_data)
-    save_in_data_dir(icd9cm_hierarchy) # nocov
+    save_in_data_dir(icd9cm_hierarchy)
 
   invisible(icd9cm_hierarchy)
 }
@@ -361,3 +356,5 @@ fixSubchapterNa <- function(x, start, end) {
   x$sub_chapter <- factor(new_subs, new_levels)
   x
 }
+
+#nocov end

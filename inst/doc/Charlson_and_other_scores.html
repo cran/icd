@@ -11,7 +11,7 @@
 
 <meta name="author" content="Jack O. Wasey" />
 
-<meta name="date" content="2018-03-09" />
+<meta name="date" content="2018-05-01" />
 
 <title>Charlson and other scores from ICD-9 and ICD-10 codes</title>
 
@@ -306,7 +306,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Charlson and other scores from ICD-9 and ICD-10 codes</h1>
 <h4 class="author"><em>Jack O. Wasey</em></h4>
-<h4 class="date"><em>2018-03-09</em></h4>
+<h4 class="date"><em>2018-05-01</em></h4>
 
 </div>
 
@@ -361,7 +361,7 @@ head(vermont_dx)
 #&gt; 5                 
 #&gt; 6
 # convert to long format (could use other tools, but the icd version accounts better for known structure of the data.
-head(vermont_dx %&gt;% icd_wide_to_long)
+head(vermont_dx %&gt;% wide_to_long)
 #&gt;   visit_id age_group  sex death DRG icd_code
 #&gt; 1        7     40-44 male  TRUE 640    27801
 #&gt; 2        7     40-44 male  TRUE 640    03842
@@ -370,11 +370,11 @@ head(vermont_dx %&gt;% icd_wide_to_long)
 #&gt; 5        7     40-44 male  TRUE 640    99591
 #&gt; 6        7     40-44 male  TRUE 640    42842
 # calculate charlson scores and summarize
-vermont_dx %&gt;% icd_wide_to_long %&gt;% icd_charlson %&gt;% summary
+vermont_dx %&gt;% wide_to_long %&gt;% charlson %&gt;% summary
 #&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#&gt;   0.000   0.000   1.000   1.573   2.000   9.000
+#&gt;    0.00    0.00    1.00    1.57    2.00    9.00
 # show the first few actual scores: the names are the patient IDs:
-vermont_dx %&gt;% icd_wide_to_long %&gt;% icd_charlson %&gt;% head(25) -&gt; vermont_charlson
+vermont_dx %&gt;% wide_to_long %&gt;% charlson %&gt;% head(25) -&gt; vermont_charlson
 vermont_charlson
 #&gt;   7  10  13  16  37  41  42  52  68  70  74  78  81  87 120 136 159 167 
 #&gt;   5   3   0   1   1   0   0   0   0   0   0   1   2   0   4   0   0   1 
@@ -391,7 +391,8 @@ unname(vermont_charlson)
 <div id="vermont-example-data-van-walraven-scores" class="section level2">
 <h2>Vermont example data, Van Walraven scores</h2>
 <p>The same principle can be used to calculate the Van Walraven score, which is the Charlson score counterpart for Elixhauser comorbidities.</p>
-<pre><code>vermont_dx %&gt;% icd_wide_to_long %&gt;% icd_van_walraven %&gt;% head(25)</code></pre>
+<pre><code>vermont_dx %&gt;% wide_to_long %&gt;% van_walraven %&gt;% head(25) -&gt; vw_scores
+vw_scores</code></pre>
 </div>
 
 

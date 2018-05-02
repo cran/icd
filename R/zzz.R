@@ -18,16 +18,11 @@
 # nocov start
 
 .onAttach <- function(libname, pkgname) {
-  # nolint start
   packageStartupMessage(
-    "Welcome to the \"icd\" package for finding comorbidities and interpretation of ICD-9 and ICD-10 codes. Suggestions and contributions are welcome at https://github.com/jackwasey/icd .
-
-See the vignettes and help for examples.
-
-Please cite this package if you find it useful in your published work.
-citation(package = \"icd\")
-")
-  # nolint end
+    "Welcome to the 'icd' package for finding comorbidities and interpretation of ICD-9 and ICD-10 codes.\n",
+    "?icd to get started, then see the vignettes and help for details and examples.\n\n",
+    "Suggestions and contributions are welcome at https://github.com/jackwasey/icd . ",
+    "Please cite this package if you find it useful in your published work citation(package = \"icd\")")
 
   if (system.file(package = "icd9") != "")
     packageStartupMessage(
@@ -47,7 +42,7 @@ release_questions <- function() {
     # data:
     "Have you regenerated icd9cm_hierarchy and other compiled data on Linux?",
     "Uranium data requires rebuild on Windows for RODBC to extract raw data",
-    "Have you run tools::checkRdaFiles('data') to check everything is optimally compressed?",
+    "Have you run tools::checkRdaFiles('data') to check everything is saved as xz?",
     # documentation:
     "Have you checked all TODO comments, made into github issues where appropriate",
     "Do all examples look ok (not just run without errors)?",
@@ -57,13 +52,13 @@ release_questions <- function() {
     "Does every file have correct licence information?",
     "Is spelling correct everywhere? E.g. aspell_package_Rd_files('.')",
     # code quality:
-    "Has the development branch been merged/rebased into master?",
     "Are you happy with the code coverage?",
     "Is every SEXP PROTECT()ed and UNPROTECT()ed, when appropriate?",
     "Are all public S3 classes all exported? use devtools::missing_s3()",
     "use LLVM scan build by adding 'scan-build before compiler path in .R/Makevars",
     "regenerate the function registration using tools/package-registration.r or the R 3.4 function",
     # testing and compilation and different platforms:
+    "Have you run tests in tests-deprecated and tests-build-code?",
     "Have you run autoreconf before building and testing?",
     "Has config.h.win been updated to reflect latest configure.ac results?",
     "Are there skipped tests which should be run?",
@@ -80,12 +75,9 @@ release_questions <- function() {
     "Have all unnecessary files been ignored in built archive? Especially
       thinking of autoconfigure stuff. Look in the final built archive
       before submitting to CRAN?",
-    "Has .*_alt\\.[Rr]$ been reactivated in .Rbuildignore?",
     # not CRAN
     "Are github pages site refreshed from latest documentation?",
-
     NULL
   )
 }
-
 # nocov end
