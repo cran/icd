@@ -1,13 +1,14 @@
 Package: icd
 Title: Tools for Working with ICD-9 and ICD-10 Codes, and Finding
         Comorbidities
-Version: 3.0.0
-Date: 2018-05-01
+Version: 3.1.2
+Date: 2018-05-08
 Authors@R: 
     c(person(given = "Jack O.",
              family = "Wasey",
              role = c("aut", "cre", "cph"),
-             email = "jack@jackwasey.com"),
+             email = "jack@jackwasey.com",
+             comment = c(ORCID = "0000-0003-3738-4637")),
       person(given = "William",
              family = "Murphy",
              role = "ctb",
@@ -43,12 +44,12 @@ Description: Calculate comorbidities, Charlson scores, perform
     and Elixhauser versions), Elixhauser and AHRQ included.  Common
     ambiguities and code formats are handled.
 License: GPL-3
-URL: https://github.com/jackwasey/icd
+URL: https://jackwasey.github.io/icd/
 BugReports: https://github.com/jackwasey/icd/issues
 Depends: R (>= 3.4)
 Imports: checkmate (>= 1.7.0), magrittr, stats, Rcpp (>= 0.12.3), utils
-Suggests: knitr, RODBC, roxygen2 (>= 5.0.0), rmarkdown, stringr,
-        testthat (>= 0.11.1), xml2
+Suggests: knitr, roxygen2 (>= 5.0.0), rmarkdown, rticles, testthat (>=
+        0.11.1), tinytex, xml2
 LinkingTo: Rcpp, RcppEigen, testthat
 VignetteBuilder: knitr
 ByteCompile: true
@@ -61,8 +62,8 @@ LazyData: true
 LazyDataCompression: xz
 RoxygenNote: 6.0.1
 NeedsCompilation: yes
-Packaged: 2018-05-01 22:44:00 UTC; waseyj
-Author: Jack O. Wasey [aut, cre, cph],
+Packaged: 2018-05-08 20:36:36 UTC; jack
+Author: Jack O. Wasey [aut, cre, cph] (<https://orcid.org/0000-0003-3738-4637>),
   William Murphy [ctb] (Van Walraven scores),
   Anobel Odisho [ctb] (Hierarchical Condition Codes),
   Vitaly Druker [ctb] (AHRQ CCS),
@@ -70,4 +71,4 @@ Author: Jack O. Wasey [aut, cre, cph],
   Kevin Ushey [ctb] (Code adapted for fast factor generation),
   R Core Team [ctb, cph] (m4 macro for OpenMP detection in configure)
 Repository: CRAN
-Date/Publication: 2018-05-02 07:39:53 UTC
+Date/Publication: 2018-05-09 08:37:48 UTC

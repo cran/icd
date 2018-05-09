@@ -10,8 +10,7 @@ suppressWarnings({
 
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  fig.path = "README-"
+  comment = "#>"
 )
 
 patients_icd9 <- data.frame(
@@ -20,6 +19,12 @@ patients_icd9 <- data.frame(
   poa = c("Y", NA, "N", "Y", "X", "Y", "E"),
   stringsAsFactors = FALSE
   )
+
+## ----quickstart----------------------------------------------------------
+head(uranium_pathology, 10)
+head(comorbid_charlson(uranium_pathology))
+comorbid_charlson(uranium_pathology, return_df = TRUE)[1:5, 1:5]
+hist(charlson(uranium_pathology))
 
 ## ----pkgdesc, results='asis', echo = FALSE-------------------------------
 cat(packageDescription("icd")$Description)
@@ -36,23 +41,30 @@ vermont_dx[1:5, c(1, 6:15)]
 
 ## ----getcomorbidities----------------------------------------------------
 # use AHRQ revision of Elixhauser comorbidities, show only first eight columns
-icd9_comorbid_ahrq(patients_icd9)[, 1:8]
+comorbid_ahrq(patients_icd9)[, 1:8]
 
 ## ----getcomorbidities2---------------------------------------------------
-# find Elixhauser comorbidities present-on-arrival
-patients_icd9 %>% filter_poa %>% icd9_comorbid_elix %>% head
+# find Elixhauser comorbidities which were present-on-arrival
+patients_icd9 %>% filter_poa %>% comorbid_elix
 
-# same as above, then summarize first five:
-patients_icd9 %>% 
-  filter_poa %>% 
-  icd9_comorbid_elix %>% 
-  extract(, 1:5) %>% 
-  apply(2, as.integer) %>% 
-  summary
+# same as above, then summarize five columns:
+patients_icd9 %>%
+  filter_poa %>%
+  comorbid_elix %>%
+  extract(, 5:10) %>%
+  colSums
 
 # convert vermont discharge data to wide format, 
 # find comorbidities, convert TRUE to 1 and show first few
-vermont_dx %>% wide_to_long  %>% icd9_comorbid_quan_deyo  %>% apply(2, as.integer) %>%  head
+vermont_cmb <- vermont_dx %>% wide_to_long %>% 
+  icd9_comorbid_quan_deyo %>%
+  apply(2, as.integer) # convert logical to integer
+
+head(vermont_cmb)
+
+barplot(colSums(vermont_cmb[,1:5]),
+        main = "Histogram of Elixhauser Comorbidities in Vermont data")
+
 
 ## ----lots of brackets, eval = FALSE--------------------------------------
 #  head(apply(icd9_comorbid_quan_deyo(wide_to_long(vermont_dx)), 2, as.integer))
@@ -67,15 +79,8 @@ is_valid(c("100", "A1001")) # they can't both be valid
 codes <- c("A10.01", "L40.50", "Z77.098")
 # set class to be icd10cm (and implicitly icd10)
 as.icd10cm(codes)
-# or set class to indicate decimal code and icd10 (not necessarily icd10cm)
+# indicate decimal code and icd10 (not necessarily icd10cm)
 codes %>% as.decimal_diag %>% as.icd10
-
-## ----mixed ICD-9 and ICD-10 data-----------------------------------------
-df <- data.frame(i9 = as.icd9(c("100", "001")), 
-                 i10 = as.icd10(c("Z771", "Z87820")))
-
-# it is an error to try to convert ICD-9 class codes to ICD-10
-# df %>% as.icd9 %>% as.icd10
 
 ## ----simple conversion---------------------------------------------------
 decimal_to_short(c("1", "10.20", "100", "123.45"))
@@ -85,6 +90,10 @@ short_to_decimal(c("1", "22", "2244", "1005"))
 codes <- as.icd9(c("87.65", "9999", "Aesop", -100, "", NA))
 decimal_to_short(codes)
 
+# ICD-10
+decimal_to_short("T81.10XD")
+
+
 ## ----validation----------------------------------------------------------
 # guess both ICD version (9, but could be 10?), and decimal vs short form
 is_valid("V10.2")
@@ -93,43 +102,6 @@ is_valid("V10.2")
 is_valid(c("099.17", "-1"), short_code = TRUE)
 is_valid(c("099.17", "-1.1"), short_code = FALSE)
 is_valid(c("1", "001", "100", "123456", "003.21"), short_code = TRUE)
-
-## ----ranges--------------------------------------------------------------
-# get all possible codes
-#"003" %i9sa% "0033" %>% head(9) # show first 9 of 111 values
-# just get the ones which correspond to diagnoses (keeping the 3-digit chapters)
-#"494" %i9s% "4941"
-
-#"10099" %i9sa% "10101"
-#"V10" %i9da% "V10.02"
-"E987" %i9da% "E988.1"
-
-# can't range between different types:
-# "V10" %i9s% "E800" # throws an error
-
-## ----rangeanomaly--------------------------------------------------------
-expand_range("4820", "4823") # default, equivalent to %i9s%
-expand_range("4820", "4823", defined = FALSE)
-# see the first few differences (which are by definition not 'real' codes):
-setdiff(expand_range("4820", "4823", defined = FALSE),
-        expand_range("4820", "4823")) %>% head
-
-## ----"childrenReal"------------------------------------------------------
-children(as.icd9("391"))
-# mid-level code
-icd:::children.icd9("0032")
-# leaf node has no children
-# be explicit about the type of code:
-test_code <- as.icd9(as.icd_short_diag("00321"))
-children(test_code)
-# or the same, but guessing the characteristics
-children("00321")
-# pneumococcal pneumonia is a three-digit ICD-9 code with no descendants
-children("481")
-
-## ----all children--------------------------------------------------------
-# first ten possible ICD-9 child codes from 391
-children("391", defined = FALSE)[1:10]
 
 ## ----explain simple------------------------------------------------------
 explain("1.0") # 'decimal' format code inferred
@@ -223,7 +195,7 @@ as.icd9(cardiac) %>% explain(warn = FALSE) %>% head(10)
 #  # codes selected from AHRQ mapping
 #  many_patients <- icd:::generate_random_pts(1e7)
 #  system.time(
-#    icd999999999_comorbid_ahrq(many_patients)
+#    comorbid_ahrq(many_patients)
 #    )[["elapsed"]]
 
 ## ----arbitrary Mapping---------------------------------------------------
@@ -234,7 +206,7 @@ icd9_comorbid(patients_icd9, my_map) # no positive
 ## ----realmapping---------------------------------------------------------
 ahrq_strict <- lapply(icd9_map_ahrq, get_defined)
 str(icd9_map_ahrq[1:5]) # first five of the original:
-str(icd9_map_ahrq[1:5]) # and first five of the result:
+str(ahrq_strict[1:5]) # and first five of the result:
 
 ## ----"find three digit billable"-----------------------------------------
 icd9cm_hierarchy$code %>% get_defined -> all_real

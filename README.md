@@ -16,57 +16,58 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with icd. If not, see <http:#www.gnu.org/licenses/>.
 -->
-
 <!-- README.md is generated from README.Rmd. Please edit that file and render with 
 rmarkdown::render("README.Rmd")
 -->
+icd
+===
 
-# icd
-
-#### downloads from Rstudio mirror
-
+[![CRAN](https://www.r-pkg.org/badges/version/icd "CRAN")](https://cran.r-project.org/package=icd)
+[![GitHub](https://img.shields.io/badge/devel%20version-3.1.2-blue.svg?style=flat "GitHub")](https://github.com/jackwasey/icd)
+[![Travis](https://travis-ci.org/jackwasey/icd.svg?branch=master "Travis Build Status")](https://travis-ci.org/jackwasey/icd)
+[![Appveyor](https://ci.appveyor.com/api/projects/status/9ncfgxht3n5i8t60/branch/master?svg=true "Appveyor Build Status")](https://ci.appveyor.com/project/jackwasey/icd/branch/master)
+[![codecov.io](https://codecov.io/github/jackwasey/icd/coverage.svg?branch=master "Core Code Coverage")](https://codecov.io/github/jackwasey/icd?branch=master)
 [![CRAN RStudio mirror
-downloads](https://cranlogs.r-pkg.org/badges/icd)](https://cran.r-project.org/package=icd)
-[![CRAN
-version](https://www.r-pkg.org/badges/version/icd)](https://cran.r-project.org/package=icd)
-[![Travis](https://travis-ci.org/jackwasey/icd.svg?branch=master)](https://travis-ci.org/jackwasey/icd)
-[![Appveyor](https://ci.appveyor.com/api/projects/status/github/jackwasey/icd)](https://ci.appveyor.com/project/jackwasey/icd)
-[![codecov.io](https://codecov.io/github/jackwasey/icd/coverage.svg?branch=master)](https://codecov.io/github/jackwasey/icd?branch=master)
+downloads](https://cranlogs.r-pkg.org/badges/icd "RStudio Mirror Downloads")](https://cran.r-project.org/package=icd)
 
-# ICD-9 and ICD-10 comorbidities, manipulation and validation
+ICD-9 and ICD-10 comorbidities, manipulation and validation
+===========================================================
 
-## Features
+Features
+--------
 
-  - find comorbidities of patients based on admission or discharge ICD-9
+-   find comorbidities of patients based on admission or discharge ICD-9
     or ICD-10 codes, e.g. Cancer, Heart Disease
-      - several standard mappings of ICD codes to comorbidities are
+    -   several standard mappings of ICD codes to comorbidities are
         included (Quan, Deyo, Elixhauser, AHRQ)
-      - very fast assignment of ICD codes to comorbidities (using matrix
+    -   very fast assignment of ICD codes to comorbidities (using matrix
         multiplication with C and C++ internally)
-  - Charlson and Van Walraven score calculations
-  - Hierarchical Condition Codes (HCC) from CMS
-  - Clinical Classifcations Software (CCS) comorbidities from AHRQ
-  - validation of ICD codes from different annual revisions of ICD-9-CM
+-   Charlson and Van Walraven score calculations
+-   Hierarchical Condition Codes (HCC) from CMS
+-   Clinical Classifcations Software (CCS) comorbidities from AHRQ
+-   validation of ICD codes from different annual revisions of ICD-9-CM
     and ICD-10-CM
-  - summarizing ICD codes into groups, and to human-readable
+-   summarizing ICD codes into groups, and to human-readable
     descriptions
-  - correct conversion between different representations of ICD codes,
+-   correct conversion between different representations of ICD codes,
     with and without a decimal points, leading and trailing characters
     (this is not trivial for ICD-9-CM). ICD-9 to ICD-10 cross-walk is
     not yet implemented
-  - comprehensive test suite to increase confidence in accurate
+-   comprehensive test suite to increase confidence in accurate
     processing of ICD codes
-  - all internal ICD and comorbidity data is extracted directly from
+-   all internal ICD and comorbidity data is extracted directly from
     publically available data or code, increasing confidence in the
     results
 
-## Install
+Install
+-------
 
 ``` r
 install.packages("icd")
 ```
 
-## Introduction
+Introduction
+------------
 
 Calculate comorbidities, Charlson scores, perform fast and accurate
 validation, conversion, manipulation, filtering and comparison of ICD-9
@@ -76,7 +77,8 @@ comorbidity mappings from Quan (Deyo and Elixhauser versions),
 Elixhauser and AHRQ included. Common ambiguities and code formats are
 handled.
 
-## Relevance
+Relevance
+---------
 
 ICD-9 codes are still in heavy use around the world, particularly in the
 USA where the ICD-9-CM (Clinical Modification) was in widespread use
@@ -87,7 +89,8 @@ regulatory purposes and billing. A vast amount of patient data is
 recorded with ICD-9 codes of some kind: this package enables their use
 in R alongside ICD-10.
 
-## Comorbidities
+Comorbidities
+-------------
 
 A common requirement for medical research involving patients is
 determining new or existing comorbidities. This is often reported in
@@ -96,7 +99,8 @@ differences of groups of patients. This package is focussed on fast and
 accurate generation of this comorbidity information from raw lists of
 ICD-9 codes.
 
-## ICD-9 codes
+ICD-9 codes
+-----------
 
 ICD-9 codes are not numbers, and great care is needed when matching
 individual codes and ranges of codes. It is easy to make mistakes, hence
@@ -110,7 +114,8 @@ decimal and non-decimal format codes in different places. This package
 primarily deals with ICD-9-CM (Clinical Modification) codes, but should
 be applicable or easily extendible to the original WHO ICD-9 system.
 
-## ICD-10 codes
+ICD-10 codes
+------------
 
 ICD-10 has a somewhat simpler format, with consistent use of a letter,
 then two alphanumeric characters. However, especially for ICD-10-CM,
@@ -123,7 +128,8 @@ ICD-10, but comorbidities can be generated from older ICD-9 codes and
 newer ICD-10 codes in parallel, and the comorbidities can then be
 compared.
 
-## Examples
+Examples
+--------
 
 See also the vignettes and examples embedded in the help for each
 function for more. Here’s a taste:
@@ -176,6 +182,8 @@ in this package.
 
 ``` r
 ?comorbid
+?comorbid_hcc
+?explain
 ?is_valid
 ```
 
@@ -184,7 +192,8 @@ straightforward as using the various Hadley Wickham tools for doing
 this: knowing the more detailed structure of the data let’s us do this
 better for the case of dealing with ICD codes.
 
-## Advanced
+Advanced
+--------
 
 ### Source Data and SAS format files
 

@@ -1,33 +1,40 @@
 ## ----setup, include=FALSE------------------------------------------------
-
-######## DEBUGGING ONLY ############
-# see https://stackoverflow.com/questions/49308254/how-do-i-debug-a-segfault-which-only-occurs-during-vignette-building?noredirect=1#comment85618697_49308254
-# writeLines(.libPaths(), "/tmp/libpaths.txt")
-
 suppressWarnings({
   suppressPackageStartupMessages({
-    loadNamespace("knitr") # for opts_chunk only
+    requireNamespace("knitr")
     library(icd)
     library(magrittr)
     })
   })
-
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  fig.path = "README-"
+  comment = "#>"
 )
 
 ## ----vermont-charlson----------------------------------------------------
-# typical hospital format data, with many columns for diagnoses
-head(vermont_dx)
-# convert to long format (could use other tools, but the icd version accounts better for known structure of the data.
-head(vermont_dx %>% wide_to_long)
-# calculate charlson scores and summarize
-vermont_dx %>% wide_to_long %>% charlson %>% summary
-# show the first few actual scores: the names are the patient IDs:
-vermont_dx %>% wide_to_long %>% charlson %>% head(25) -> vermont_charlson
-vermont_charlson
-names(vermont_charlson)
-unname(vermont_charlson)
+head(vermont_dx[1:10])
+v <- wide_to_long(vermont_dx)
+head(v)
+charlson(v) %>% summary
+head(charlson(v))
+head(names(charlson(v)))
+
+## ----charlsondf----------------------------------------------------------
+head(charlson(v, return_df = TRUE))
+
+## ----vermontvanwalraven--------------------------------------------------
+`Vermont Van Walraven Scores` <- van_walraven(v)
+hist(`Vermont Van Walraven Scores`)
+
+## ----icd9and10-----------------------------------------------------------
+icd9 <- data.frame(pts = c("A", "A"), c("041.04", "244.9"))
+icd10 <- data.frame(pts = c("A", "A"), c("C82.28", "M08.979"))
+both <- comorbid_elix(icd9) | comorbid_elix(icd10)
+van_walraven_from_comorbid(both)
+
+## ----icd9then10----------------------------------------------------------
+icd9 <- data.frame(pts = c("A", "A"), c("041.04", "244.9"))
+icd10 <- data.frame(pts = c("B", "B"), c("C82.28", "M08.979"))
+both <- rbind(comorbid_elix(icd9), comorbid_elix(icd10))
+van_walraven_from_comorbid(both)
 
