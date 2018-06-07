@@ -1,5 +1,4 @@
 ## ----setup, include=FALSE------------------------------------------------
-
 suppressWarnings({
   suppressPackageStartupMessages({
     loadNamespace("knitr") # for opts_chunk only
@@ -7,12 +6,10 @@ suppressWarnings({
     library(magrittr)
     })
   })
-
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-
 
 ## ----uranium-long--------------------------------------------------------
 uranium_pathology[1:10, ]
@@ -33,4 +30,15 @@ comorbid(patients , map = cholera_typhoid_map)
 
 ## ----htncx---------------------------------------------------------------
 icd10_map_quan_elix$HTNcx
+
+## ----icd10pcs------------------------------------------------------------
+set.seed(1441)
+pts <- data.frame(id = sample(LETTERS, 10),
+                  pc = sample(icd10_pcs[["2018"]]$code, 10))
+res <- icd10_comorbid(pts,
+                      map = icd10_map_ahrq_pcs, 
+                      icd_name = "pc",
+                      return_binary = TRUE)
+print(res)
+colSums(res)
 

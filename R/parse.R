@@ -53,6 +53,7 @@ update_everything <- function() {
   # ICD 10
   icd10_parse_ahrq_sas(save_data = TRUE, offline = FALSE)
   icd10_parse_cc(save_data = TRUE)
+  icd10_parse_ahrq_pcs(save_data = TRUE)
   icd10_generate_map_quan_elix(save_data = TRUE)
   icd10_generate_map_quan_deyo(save_data = TRUE)
   icd10_generate_map_elix(save_data = TRUE)
@@ -61,6 +62,7 @@ update_everything <- function() {
   # reload the newly saved data before generating chapters.
   # The next step depends on icd9cm_billable
   icd9cm_generate_chapters_hierarchy(save_data = TRUE, offline = FALSE, verbose = FALSE)
+  generate_maps_pccc(save_data = TRUE)
 }
 
 # quick sanity checks - full tests of x in test-parse.R
@@ -190,10 +192,10 @@ icd9_parse_leaf_desc_ver <- function(version = icd9cm_latest_edition(),
   stopifnot(!anyNA(reorder))
   stopifnot(!any(grepl(out[["code"]], pattern = "[[:space:]]")))
   stopifnot(!anyDuplicated(reorder))
-  stopifnot(all(1:nrow(out)) %in% reorder)
+  stopifnot(all(seq_len(nrow(out))) %in% reorder)
   # catches a mistaken zero-indexed reorder result
-  stopifnot(length(setdiff(1:nrow(out), reorder)) == 0)
-  stopifnot(length(setdiff(reorder, 1:nrow(out))) == 0)
+  stopifnot(length(setdiff(seq_len(nrow(out)), reorder)) == 0)
+  stopifnot(length(setdiff(reorder, seq_len(nrow(out)))) == 0)
   message("order found")
   out <- out[reorder, ]
   message("reordered")
@@ -270,7 +272,7 @@ icd9cm_generate_chapters_hierarchy <- function(save_data = FALSE,
   # insert the short descriptions from the billable codes text file. Where there
   # is no short description, e.g. for most Major codes, or intermediate codes,
   # just copy the long description over.
-  bill32 <- icd::icd9cm_billable[["32"]]
+  bill32 <- icd9cm_billable[["32"]]
   billable_codes <- get_billable.icd9(out[["code"]], short_code = TRUE)
   billable_rows <- which(out[["code"]] %in% billable_codes)
   title_rows <- which(out[["code"]] %nin% billable_codes)

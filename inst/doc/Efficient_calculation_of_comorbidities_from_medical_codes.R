@@ -3,7 +3,8 @@
 # https://www.jstatsoft.org/pages/view/style
 suppressPackageStartupMessages({
   requireNamespace("knitr")
-  library(icd)
+  library(icd.data, warn.conflicts = FALSE)
+  library(icd, warn.conflicts = FALSE)
 })
 fig.width = 6.5
 knitr::opts_chunk$set(fig.width = fig.width)
@@ -57,13 +58,13 @@ my_kable(termdf, col.names = c("Term", "Description"),
 
 ## ----suckedintoengine----------------------------------------------------
 library(icd)
-explain("V97.33XD")
+explain_code("V97.33XD")
 
 ## ----exampleicdcodewho---------------------------------------------------
-explain(c("S62", "S62.6"))
+explain_code(c("S62", "S62.6"))
 
 ## ----exampleicdcodecm----------------------------------------------------
-explain(c("S62.60", "S62.607", "S62.607S"))
+explain_code(c("S62.60", "S62.607", "S62.607S"))
 
 ## ----examplecodechap-----------------------------------------------------
 icd10_sub_chapters$`Injuries To The Wrist, Hand And Fingers`
@@ -241,7 +242,7 @@ sc <- c("Chronic Obstructive Pulmonary Disease And Allied Conditions",
 icd9_sub_chapters[sc]
 
 ## ----permute497----------------------------------------------------------
-explain(c("947", "749", "794", "479"), warn = FALSE)
+explain_code(c("947", "749", "794", "479"), warn = FALSE)
 
 ## ----charlson497---------------------------------------------------------
 "497" %in% icd9_map_charlson
@@ -270,8 +271,8 @@ head(
 children("441")
 
 ## ----explain4410---------------------------------------------------------
-explain(children("4410"))
+explain_code(children("4410"))
 
 ## ----explaineach4410-----------------------------------------------------
-explain(children("4410"), condense = FALSE)
+explain_code(children("4410"), condense = FALSE)
 

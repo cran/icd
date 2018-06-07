@@ -12,6 +12,8 @@
 \alias{icd10_comorbid_quan_elix}
 \alias{icd9_comorbid_quan_deyo}
 \alias{icd10_comorbid_quan_deyo}
+\alias{icd9_comorbid_charlson}
+\alias{icd10_comorbid_charlson}
 \alias{comorbid_ccs}
 \alias{icd9_comorbid_ccs}
 \alias{icd10_comorbid_ccs}
@@ -28,16 +30,21 @@
 \alias{icd_comorbid_quan_elix}
 \title{Find comorbidities from ICD-9 codes.}
 \usage{
-comorbid(x, map, ...)
+comorbid(x, map, visit_name = NULL, icd_name = NULL,
+  short_code = guess_short(x, icd_name = icd_name),
+  short_map = guess_short(map), return_df = FALSE, return_binary = FALSE,
+  categorize_fun = categorize_simple, ...)
 
 icd10_comorbid(x, map, visit_name = NULL, icd_name = NULL,
   short_code = NULL, short_map = guess_short(map), return_df = FALSE,
-  icd10_comorbid_fun = icd10_comorbid_reduce, ...)
+  return_binary = FALSE, icd10_comorbid_fun = icd10_comorbid_reduce, ...)
 
 icd9_comorbid(x, map, visit_name = NULL, icd_name = NULL,
   short_code = guess_short(x, icd_name = icd_name),
-  short_map = guess_short(map), return_df = FALSE, preclean = TRUE,
-  visitId = NULL, icd9Field = NULL, ...)
+  short_map = guess_short(map), return_df = FALSE, return_binary = FALSE,
+  preclean = TRUE, visitId = NULL, icd9Field = NULL,
+  categorize_fun = categorize_simple, comorbid_fun = comorbidMatMulSimple,
+  ...)
 
 icd9_comorbid_ahrq(x, ..., abbrev_names = TRUE, hierarchy = TRUE)
 
@@ -54,6 +61,10 @@ icd10_comorbid_quan_elix(x, ..., abbrev_names = TRUE, hierarchy = TRUE)
 icd9_comorbid_quan_deyo(x, ..., abbrev_names = TRUE, hierarchy = TRUE)
 
 icd10_comorbid_quan_deyo(x, ..., abbrev_names = TRUE, hierarchy = TRUE)
+
+icd9_comorbid_charlson(...)
+
+icd10_comorbid_charlson(...)
 
 comorbid_ccs(x, icd_name = get_icd_name(x), ...)
 
@@ -100,8 +111,6 @@ is no default: the user should use the family of functions, e.g.
 \code{comorbid_ahrq}, since these also name the fields correctly, apply any
 hierarchical rules (see \code{hierarchy} below)}
 
-\item{...}{arguments passed on to other functions}
-
 \item{visit_name}{The name of the column in the data frame which contains the
 patient or visit identifier. Typically this is the visit identifier, since
 patients come leave and enter hospital with different ICD-9 codes. It is a
@@ -132,10 +141,21 @@ same type, i.e. short or decimal.}
 the \code{visit_id}, and the second being the count. If \code{visit_id} was a factor or named differently in the
 input, this is preserved.}
 
-\item{icd10_comorbid_fun}{function Internal parameter, default will be fast
-and accurate. A function which calculates comorbidities for ICD-10 codes,
-in which the comorbidity map only specifies parent codes, not every
-possible child.}
+\item{return_binary}{Single logical value, if \code{TRUE}, the returned
+\code{matrix} or \code{data.frame} will be composed of \code{1} and
+\code{0}, instead of \code{TRUE} and \code{FALSE}, respectively. This
+conversion can also be done by the internal functions
+\code{icd:::logical_to_binary} and \code{icd:::binary_to_logical}, or using
+other tools, e.g. \code{apply(x, 2, as.integer)}}
+
+\item{categorize_fun}{Internal. Function used for the categorization problem.}
+
+\item{...}{arguments passed on to other functions}
+
+\item{icd10_comorbid_fun}{Internal function Default will be fast and
+accurate. A function which calculates comorbidities for ICD-10 codes, in
+which the comorbidity map only specifies parent codes, not every possible
+child.}
 
 \item{preclean}{single logical value, which, if \code{TRUE} causes ICD-9
 'short' code input to be padded to correct three (or four for E code)
@@ -148,6 +168,8 @@ set to \code{FALSE} to save time.}
 \item{visitId}{Deprecated. Use \code{visit_name} instead.}
 
 \item{icd9Field}{Deprecated. Use \code{icd_name} instead.}
+
+\item{comorbid_fun}{Internal. Function used inside categorization.}
 
 \item{abbrev_names}{single logical value that defaults to \code{TRUE}, in
 which case the shorter human-readable names stored in e.g.
@@ -169,7 +191,7 @@ codes. Some comorbidity schemes have rules, for example, what to do when both
 'hypertension' and 'hypertension with complications' are present. These rules
 are applied by default; if the exact fields from the original mappings are
 needed, use \code{hierarchy = FALSE}. For comorbidity counting, Charlson or
-VanWalraven scores the default should be used to apply the rules. For more
+Van Walraven scores the default should be used to apply the rules. For more
 about computing Hierarchical Condition Codes (HCC), see
 \code{\link{comorbid_hcc}} For more about comorbidities following the
 Clinical Classification Software (CCS) rules from AHRQ, see
@@ -177,12 +199,13 @@ Clinical Classification Software (CCS) rules from AHRQ, see
 }
 \details{
 The order of visits may change depending on the original sequence,
-  and the underlying algorithm used. Usually this would be the order of the
-  first occurence of each visit/patient identifier.
+and the underlying algorithm used. Usually this would be the order of the
+first occurrence of each visit/patient identifier, but this is not
+guaranteed unless \code{restore_id_order} is set to \code{TRUE}.
 
-  The threading of the C++ can be controlled using e.g.
-  \code{option(icd.threads = 4)}. If it is not set, the number of cores in
-  the machine is used. 'OpenMP' environment variables also work.
+The threading of the C++ can be controlled using e.g.
+\code{option(icd.threads = 4)}. If it is not set, the number of cores in
+the machine is used. 'OpenMP' environment variables also work.
 
 \code{data.frame}s of patient data may have columns within them
   which are of class \code{icd9}, \code{icd10} etc., but do not themselves
@@ -215,6 +238,10 @@ codes
 
 \item \code{icd10_comorbid_quan_deyo}: Quan's Deyo (Charlson) comorbidities for ICD-10 codes
 
+\item \code{icd9_comorbid_charlson}: Currently synonym for \code{icd9_comorbid_quan_deyo}
+
+\item \code{icd10_comorbid_charlson}: Currently synonym for \code{icd10_comorbid_quan_deyo}
+
 \item \code{comorbid_ccs}: Use AHRQ CCS for comorbidity classification
 
 \item \code{icd9_comorbid_ccs}: Compute AHRQ Clinical Classifications Software (CCS)
@@ -244,9 +271,9 @@ according to Quan/Deyo ICD categories. Synonymous with
  Future versions of \pkg{icd} will drop
   the \code{icd_} prefix. For example, \code{charlson} should be used in
   favor of \code{icd_charlson}. To distinguish \pkg{icd} function calls,
-  consider using the namespace prefix \code{icd::} instead, e.g.,
-  \code{icd::charlson}. Functions which specifically operate on either ICD-9
-  or ICD-10 codes or their subtypes will retain the prefix. E.g.
+  consider using the prefix \code{icd::} instead, e.g., \code{icd::charlson}.
+  Functions which specifically operate on either ICD-9 or ICD-10 codes or
+  their sub-types will retain the prefix. E.g.
   \code{\link{icd9_comorbid_ahrq}}. \pkg{icd} specific classes also retain
   the prefix, e.g., \code{\link{icd_wide_data}}.
 }

@@ -31,7 +31,7 @@ generate_sysdata <- function(save_data = TRUE) {
   icd9_short_e <- icd9_generate_all_e()
   # we can either use the is_defined functions on these lists, or just grep the
   # canonical list directly to get the numeric, V and E codes.
-  codes <- icd::icd9cm_hierarchy[["code"]]
+  codes <- icd9cm_hierarchy[["code"]]
   icd9_short_n_defined <- vec_to_lookup_pair(grep("^[^VE]+", codes, perl = TRUE, value = TRUE))
   icd9_short_v_defined <- vec_to_lookup_pair(grep("^V", codes, perl = TRUE, value = TRUE))
   icd9_short_e_defined <- vec_to_lookup_pair(grep("^E", codes, perl = TRUE, value = TRUE))
@@ -53,7 +53,7 @@ generate_sysdata <- function(save_data = TRUE) {
           paste(long_fns[long_fns != make.names(long_fns)]))
   message("non-portable short file names: ",
           paste(short_fns[short_fns != make.names(short_fns)]))
-  .nc <- nchar(icd::icd10cm2016[["code"]]) # nolint
+  .nc <- nchar(icd10cm2016[["code"]]) # nolint
   # minimal test here just to use variable names to avoid warnings!
   stopifnot(all(!is.na(.nc)))
   stopifnot(length(icd9_short_n$vec) == length(icd9_short_n$env))
@@ -74,7 +74,7 @@ generate_sysdata <- function(save_data = TRUE) {
   # because these are probably not of interest to a user and would clutter an
   # already busy namespace.
   if (save_data)
-    save(list = sysdata_names, file = path)
+    save(list = sysdata_names, file = path, compress = "xz")
   invisible(mget(sysdata_names))
 }
 
@@ -192,11 +192,129 @@ icd9_generate_sources <- function(save_data = FALSE) {
       "Dtab07.RTF", "Dtab06.rtf"),
     stringsAsFactors = FALSE
   )
-
-  if (save_data)
-    save_in_data_dir(icd9_sources)
-
+  if (save_data) save_in_data_dir(icd9_sources)
   invisible(icd9_sources)
 }
 
+#' Generate list of data source information for ICD-10-CM diagnosis and
+#' procedure codes
+#'
+#' @seealso \url{https://www.cms.gov/Medicare/Coding/ICD10/}
+#' @keywords internal
+generate_icd10_sources <- function(save_data = TRUE) {
+  base_url <- "https://www.cms.gov/Medicare/Coding/ICD10/Downloads/"
+  icd10_sources <- list(
+    # https://www.cms.gov/Medicare/Coding/ICD10/Downloads/2018-ICD-10-PCS-Tables-And-Index.zip
+    # https://www.cms.gov/Medicare/Coding/ICD10/Downloads/2018-ICD-10-PCS-Order-File.zip
+    "2018" = list(
+      base_url = base_url,
+      dx_zip = "2018-ICD-10-Code-Descriptions.zip",
+      dx_xml_zip = "2018-ICD-10-Code-Tables-Index.zip",
+      dx_flat = "icd10cm_codes_2018.txt",
+      pcs_zip = "2018-ICD-10-PCS-Order-File.zip",
+      pcs_xml_zip = "2018-ICD-10-PCS-Tables-And-Index.zip",
+      pcs_flat = "icd10pcs_order_2018.txt"),
+    "2017" = list(
+      base_url = base_url,
+      dx_zip = "2017-ICD10-Code-Descriptions.zip",
+      pcs_zip = "2017-PCS-Long-Abbrev-Titles.zip",
+      pcs_xml_zip = "2017-PCS-Code-Tables.zip",
+      dx_xml_zip = "2017-ICD10-Code-Tables-Index.zip",
+      dx_flat = "icd10cm_codes_2017.txt",
+      # XML PCS codes: https://www.cms.gov/Medicare/Coding/ICD10/Downloads/2017-PCS-Code-Tables.zip
+      # https://www.cms.gov/Medicare/Coding/ICD10/Downloads/2017-PCS-Long-Abbrev-Titles.zip
+      pcs_flat = "icd10pcs_order_2017.txt"),
+    # https://www.cms.gov/Medicare/Coding/ICD10/Downloads/2016-Code-Descriptions-in-Tabular-Order.zip
+    "2016" = list(
+      base_url = base_url,
+      dx_zip = "2016-Code-Descriptions-in-Tabular-Order.zip",
+      dx_xml_zip = "2016-ICD10-Code-Tables-Index.zip",
+      dx_flat = "icd10cm_codes_2016.txt",
+      pcs_zip = "2016-PCS-Long-Abbrev-Titles.zip",
+      pcs_xml_zip = "2016-PCS-Code-Tables.zip",
+      pcs_flat = "icd10pcs_order_2016.txt"),
+    # https://www.cms.gov/Medicare/Coding/ICD10/Downloads/2015-code-descriptions.zip
+    # https://www.cms.gov/Medicare/Coding/ICD10/Downloads/2015-tables-index.zip
+    # https://www.cms.gov/Medicare/Coding/ICD10/Downloads/2015-Code_Tables-and-Index.zip
+    # https://www.cms.gov/Medicare/Coding/ICD10/Downloads/2015-PCS-long-and-abbreviated-titles.zip
+    "2015" = list(
+      base_url = base_url,
+      dx_zip = "2015-code-descriptions.zip",
+      dx_xml_zip = "2015-tables-index.zip",
+      dx_flat = "icd10cm_order_2015.txt",
+      pcs_zip = "2015-PCS-long-and-abbreviated-titles.zip",
+      pcs_xml_zip = "2015-Code_Tables-and-Index.zip",
+      pcs_flat = "icd10pcs_order_2015.txt"),
+    # https://www.cms.gov/Medicare/Coding/ICD10/Downloads/2014-ICD10-Code-Descriptions.zip
+    # https://www.cms.gov/Medicare/Coding/ICD10/Downloads/2014-ICD10-Code-Tables-and-Index.zip
+    # https://www.cms.gov/Medicare/Coding/ICD10/Downloads/2014-Code-Tables-and-Index.zip
+    # https://www.cms.gov/Medicare/Coding/ICD10/Downloads/2014-PCS-long-and-abbreviated-titles.zip
+    "2014" = list(
+      base_url = base_url,
+      dx_zip = "2014-ICD10-Code-Descriptions.zip",
+      dx_xml_zip = "2014-ICD10-Code-Tables-and-Index.zip",
+      dx_flat = "icd10cm_order_2014.txt",
+      pcs_zip = "2014-PCS-long-and-abbreviated-titles.zip",
+      pcs_xml_zip = "2014-Code-Tables-and-Index.zip",
+      pcs_flat = "icd10pcs_order_2014.txt")
+  )
+  if (save_data) save_in_data_dir(icd10_sources)
+  invisible(icd10_sources)
+}
+
+#' Generate ICD-9 and ICD-10 Chapter names and number ranges, transcribed from
+#' the official definitions from WHO and extended by US CMS.
+#' @template save_data
+#' @keywords internal datasets
+generate_icd_chapters <- function(save_data = TRUE) {
+  icd9_chapters <- list(
+    "Infectious And Parasitic Diseases" = c(start = "001", end = "139"),
+    "Neoplasms" = c(start = "140", end = "239"),
+    "Endocrine, Nutritional And Metabolic Diseases, And Immunity Disorders" = c(start = "240", end = "279"),
+    "Diseases Of The Blood And Blood-Forming Organs" = c(start = "280", end = "289"),
+    "Mental Disorders" = c(start = "290", end = "319"),
+    "Diseases Of The Nervous System And Sense Organs" = c(start = "320", end = "389"),
+    "Diseases Of The Circulatory System" = c(start = "390", end = "459"),
+    "Diseases Of The Respiratory System" = c(start = "460", end = "519"),
+    "Diseases Of The Digestive System" = c(start = "520", end = "579"),
+    "Diseases Of The Genitourinary System" = c(start = "580", end = "629"),
+    "Complications Of Pregnancy, Childbirth, And The Puerperium" = c(start = "630", end = "679"),
+    "Diseases Of The Skin And Subcutaneous Tissue" = c(start = "680", end = "709"),
+    "Diseases Of The Musculoskeletal System And Connective Tissue" = c(start = "710", end = "739"),
+    "Congenital Anomalies" = c(start = "740", end = "759"),
+    "Certain Conditions Originating In The Perinatal Period" = c(start = "760", end = "779"),
+    "Symptoms, Signs, And Ill-Defined Conditions" = c(start = "780", end = "799"),
+    "Injury And Poisoning" = c(start = "800", end = "999"),
+    "Supplementary Classification Of Factors Influencing Health Status And Contact With Health Services" = c(start = "V01", end = "V99"),
+    "Supplementary Classification Of External Causes Of Injury And Poisoning" = c(start = "E000", end = "E999")
+  )
+  icd10_chapters <- list(
+    "Certain infectious and parasitic diseases" = c(start = "A00", end = "B99"),
+    "Neoplasms" = c(start = "C00", end = "D49"),
+    "Diseases of the blood and blood-forming organs and certain disorders involving the immune mechanism" = c(start = "D50", end = "D89"),
+    "Endocrine, nutritional and metabolic diseases" = c(start = "E00", end = "E89"),
+    "Mental, Behavioral and Neurodevelopmental disorders" = c(start = "F01", end = "F99"),
+    "Diseases of the nervous system" = c(start = "G00", end = "G99"),
+    "Diseases of the eye and adnexa" = c(start = "H00", end = "H59"),
+    "Diseases of the ear and mastoid process" = c(start = "H60", end = "H95"),
+    "Diseases of the circulatory system" = c(start = "I00", end = "I99"),
+    "Diseases of the respiratory system" = c(start = "J00", end = "J99"),
+    "Diseases of the digestive system" = c(start = "K00", end = "K95"),
+    "Diseases of the skin and subcutaneous tissue" = c(start = "L00", end = "L99"),
+    "Diseases of the musculoskeletal system and connective tissue" = c(start = "M00", end = "M99"),
+    "Diseases of the genitourinary system" = c(start = "N00", end = "N99"),
+    "Pregnancy, childbirth and the puerperium" = c(start = "O00", end = "O9A"),
+    "Certain conditions originating in the perinatal period" = c(start = "P00", end = "P96"),
+    "Congenital malformations, deformations and chromosomal abnormalities" = c(start = "Q00", end = "Q99"),
+    "Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified" = c(start = "R00", end = "R99"),
+    "Injury, poisoning and certain other consequences of external causes" = c(start = "S00", end = "T88"),
+    "External causes of morbidity" = c(start = "V00", end = "Y99"),
+    "Factors influencing health status and contact with health services" = c(start = "Z00", end = "Z99")
+  )
+  if (save_data) {
+    save_in_data_dir(icd9_chapters)
+    save_in_data_dir(icd10_chapters)
+  }
+  invisible(list(icd9_chapters, icd10_chapters))
+}
 #nocov end

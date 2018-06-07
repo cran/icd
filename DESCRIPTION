@@ -1,8 +1,7 @@
 Package: icd
 Title: Tools for Working with ICD-9 and ICD-10 Codes, and Finding
         Comorbidities
-Version: 3.1.2
-Date: 2018-05-08
+Version: 3.2.0
 Authors@R: 
     c(person(given = "Jack O.",
              family = "Wasey",
@@ -46,7 +45,7 @@ Description: Calculate comorbidities, Charlson scores, perform
 License: GPL-3
 URL: https://jackwasey.github.io/icd/
 BugReports: https://github.com/jackwasey/icd/issues
-Depends: R (>= 3.4)
+Depends: R (>= 3.4), icd.data
 Imports: checkmate (>= 1.7.0), magrittr, stats, Rcpp (>= 0.12.3), utils
 Suggests: knitr, roxygen2 (>= 5.0.0), rmarkdown, rticles, testthat (>=
         0.11.1), tinytex, xml2
@@ -62,7 +61,7 @@ LazyData: true
 LazyDataCompression: xz
 RoxygenNote: 6.0.1
 NeedsCompilation: yes
-Packaged: 2018-05-08 20:36:36 UTC; jack
+Packaged: 2018-06-07 10:07:13 UTC; jack
 Author: Jack O. Wasey [aut, cre, cph] (<https://orcid.org/0000-0003-3738-4637>),
   William Murphy [ctb] (Van Walraven scores),
   Anobel Odisho [ctb] (Hierarchical Condition Codes),
@@ -71,4 +70,4 @@ Author: Jack O. Wasey [aut, cre, cph] (<https://orcid.org/0000-0003-3738-4637>),
   Kevin Ushey [ctb] (Code adapted for fast factor generation),
   R Core Team [ctb, cph] (m4 macro for OpenMP detection in configure)
 Repository: CRAN
-Date/Publication: 2018-05-09 08:37:48 UTC
+Date/Publication: 2018-06-07 17:43:27 UTC

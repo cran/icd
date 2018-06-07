@@ -104,40 +104,40 @@ is_valid(c("099.17", "-1.1"), short_code = FALSE)
 is_valid(c("1", "001", "100", "123456", "003.21"), short_code = TRUE)
 
 ## ----explain simple------------------------------------------------------
-explain("1.0") # 'decimal' format code inferred
-explain("0019") # 'short' format code inferred
+explain_code("1.0") # 'decimal' format code inferred
+explain_code("0019") # 'short' format code inferred
 
 ## ----explain complex-----------------------------------------------------
 # we can be explicit about short vs decimal
-explain("434.00", short_code = FALSE)
-explain(c("43410", "43491"), short_code = TRUE)
+explain_code("434.00", short_code = FALSE)
+explain_code(c("43410", "43491"), short_code = TRUE)
 #explain top level code with children
-"391" %>% explain # single three-digit code
+"391" %>% explain_code # single three-digit code
 "391" %>% children # let's see the child codes
-"391" %>% children %>% explain # children condensed to parent code
-"391" %>% children %>% explain(condense = FALSE) # prevent condense
+"391" %>% children %>% explain_code # children condensed to parent code
+"391" %>% children %>% explain_code(condense = FALSE) # prevent condense
 
-## ----explain arbitrary---------------------------------------------------
-explain(list(somecodes = as.icd9(c("001", "391")),
+## ----explainarbitrary----------------------------------------------------
+explain_code(list(somecodes = as.icd9(c("001", "391")),
                  morecodes = as.icd9cm(c("001.1", "001.9"))))
 
 ## ----cholera-------------------------------------------------------------
-explain(list(cholera = "001", rheumatic_heart = "390"))
+explain_code(list(cholera = "001", rheumatic_heart = "390"))
 
 ## ----noexplain, eval = FALSE---------------------------------------------
-#  s <- explain("001.5") # gives warning
+#  s <- explain_code("001.5") # gives warning
 
 ## ----Example Dementia----------------------------------------------------
 length(icd9_map_quan_deyo[["Dementia"]]) # 133 possible ICD-9 codes
 length(icd10_map_quan_deyo[["Dementia"]]) # the ICD-10 map is different
-# explain summarizes these to just two groups:
-icd9_map_quan_deyo[["Dementia"]] %>% explain(warn = FALSE)
+# explain_code summarizes these to just two groups:
+icd9_map_quan_deyo[["Dementia"]] %>% explain_code(warn = FALSE)
 # contrast with:
-icd9_map_quan_deyo[["Dementia"]] %>% explain(condense = TRUE, warn = FALSE)
+icd9_map_quan_deyo[["Dementia"]] %>% explain_code(condense = TRUE, warn = FALSE)
 
 ## ----Show Range Operator-------------------------------------------------
 length("390" %i9da% "392.1")
-"390" %i9da% "392.1" %>% explain(warn = FALSE)
+"390" %i9da% "392.1" %>% explain_code(warn = FALSE)
 
 ## ----Show POA Choices, echo=FALSE----------------------------------------
 poa_choices
@@ -179,7 +179,7 @@ difference <- diff_comorbid(icd9_map_elix, icd9_map_quan_elix,
 str(difference)
 
 ## ----quanonlyphtn--------------------------------------------------------
-difference$PHTN$only.y %>% get_defined %>% explain
+difference$PHTN$only.y %>% get_defined %>% explain_code
 
 ## ----cardiacgrep---------------------------------------------------------
 icd9cm_hierarchy[
@@ -189,7 +189,7 @@ icd9cm_hierarchy[
   "code"] %>% unique -> cardiac
 
 ## ----cardiac Chain Explain Example---------------------------------------
-as.icd9(cardiac) %>% explain(warn = FALSE) %>% head(10)
+as.icd9(cardiac) %>% explain_code(warn = FALSE) %>% head(10)
 
 ## ----speed, eval = FALSE-------------------------------------------------
 #  # codes selected from AHRQ mapping
@@ -208,14 +208,6 @@ ahrq_strict <- lapply(icd9_map_ahrq, get_defined)
 str(icd9_map_ahrq[1:5]) # first five of the original:
 str(ahrq_strict[1:5]) # and first five of the result:
 
-## ----"find three digit billable"-----------------------------------------
-icd9cm_hierarchy$code %>% get_defined -> all_real
-# select the non-V and non-E codes
-three_digit_real <- all_real[icd9_is_n(all_real)]
-# display
-three_digit_df <- data.frame(code = three_digit_real, description = explain(three_digit_real, condense = FALSE))
-print(three_digit_df[1:10, ], row.names = FALSE)
-
 ## ----"compare ICD-9 versions"--------------------------------------------
 new_since_27 <- setdiff(icd9cm_billable[["32"]][["code"]],
                          icd9cm_billable[["27"]][["code"]]) %>% head
@@ -226,7 +218,7 @@ lost_since_27 %<>% as.icd9cm
 lost_since_27 %<>% as.icd9cm
 
 # these are a few which were gained since v27
-data.frame(code = new_since_27, desc = new_since_27 %>% explain)
+data.frame(code = new_since_27, desc = new_since_27 %>% explain_code)
 # these are a few which were lost since v27
-data.frame(code = lost_since_27, desc = lost_since_27 %>% explain)
+data.frame(code = lost_since_27, desc = lost_since_27 %>% explain_code)
 

@@ -20,10 +20,8 @@
 .onAttach <- function(libname, pkgname) {
   packageStartupMessage(
     "Welcome to the 'icd' package for finding comorbidities and interpretation of ICD-9 and ICD-10 codes.\n",
-    "?icd to get started, then see the vignettes and help for details and examples.\n\n",
-    "Suggestions and contributions are welcome at https://github.com/jackwasey/icd . ",
+    "?icd or visit https://jackwasey.github.io/icd to get started.\n",
     "Please cite this package if you find it useful in your published work citation(package = \"icd\")")
-
   if (system.file(package = "icd9") != "")
     packageStartupMessage(
       "The 'icd9' package is now deprecated, and should be removed to avoid conflicts with 'icd'.
@@ -39,37 +37,34 @@ The 'icd' package up to version 2.1 contains tested versions of all the deprecat
 
 release_questions <- function() {
   c(
-    # data:
-    "Have you regenerated icd9cm_hierarchy and other compiled data on Linux?",
-    "Uranium data requires rebuild on Windows for RODBC to extract raw data",
-    "Have you run tools::checkRdaFiles('data') to check everything is saved as xz?",
+    # commands:
+    "update_everything(), then copy data to icd.data package",
+    "aspell_package_Rd_files('.')",
+    "tools/package-registration.r",
+    "autoreconf",
+    "tools/publish.sh to run pkgdown::build_site() then push to gh-pages",
     # documentation:
-    "Have you checked all TODO comments, made into github issues where appropriate",
+    "Check all TODO comments, make into github issues",
     "Do all examples look ok (not just run without errors)?",
     "Have all the fixed github issues been closed",
     "Is NEWS.md updated and contributors credited?",
-    "Is README.Rmd updated and recompiled into README.md?",
     "Does every file have correct licence information?",
-    "Is spelling correct everywhere? E.g. aspell_package_Rd_files('.')",
-    "Are github pages site refreshed by running pkgdown::build_site() in the
-    main branch, then commiting the contents of docs/ to the gh-pages branch?",
     # code quality:
-    "Are you happy with the code coverage?",
+    "Consider results of 'goodpractice' package.",
+    "Are you happy with the _core_ code coverage?",
     "Is every SEXP PROTECT()ed and UNPROTECT()ed, when appropriate?",
     "Are all public S3 classes all exported? use devtools::missing_s3()",
-    "use LLVM scan build by adding 'scan-build before compiler path in .R/Makevars",
-    "regenerate the function registration using tools/package-registration.r or the R 3.4 function",
+    "use LLVM static scan build, scan-build before compiler in .R/Makevars",
     # testing and compilation and different platforms:
     "Have you run tests in tests-deprecated and tests-build-code?",
-    "Have you run autoreconf before building and testing?",
     "Has config.h.win been updated to reflect latest configure.ac results?",
     "Are there skipped tests which should be run?",
-    "Have tests been run with slow and online tests turned on?",
     "Does it compile, test and check fine on travis and appveyor?",
     "Have you checked on Windows, win_builder (if possible with configure.win failure),
       Mac, Ubuntu, UBSAN rocker, and updated my docker image which
       resembles a CRAN maintainers environment?",
     "is R_OPENMP macro updated from R sources: m4/openmp.m4",
+    "look for residual tmp files or dirs after checking, CRAN doesn't tolerate",
     # final manual check:
     "Are all NOTES from R CMD check documented in cran-comments.md",
     "Have all unnecessary files been ignored in built archive? Especially

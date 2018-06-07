@@ -45,7 +45,7 @@
 #' icd9_map_elix$CHF
 #' condense(icd9_map_elix$CHF, warn = FALSE)
 #' # explaining big groups of codes takes advantage of this:
-#' explain(icd9_map_elix$CHF, condense = TRUE, warn = FALSE)
+#' explain_code(icd9_map_elix$CHF, condense = TRUE, warn = FALSE)
 #' @family ICD-9 ranges
 #' @keywords manip
 #' @export
@@ -65,6 +65,9 @@ condense.icd9 <- function(x, short_code = guess_short(x), defined = NULL, warn =
   else
     icd9_condense_decimal(x, defined = defined, warn = warn, ...)
 }
+
+# TODO: condense.icd10, especially thinking of the long lists of ICD-10 codes in
+# PCCC maps.
 
 #' @describeIn condense Condense a set of ICD codes, guessing ICD version
 #'   from input data

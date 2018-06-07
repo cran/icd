@@ -61,11 +61,10 @@
 #'   \code{\link{charlson}} calculates Charlson scores (Charlson Comorbidity
 #'   Indices) directly from your patient data. If you already calculated the
 #'   Charlson comorbidities, it is more efficient to use
-#'   \code{\link{charlson_from_comorbid}}. Analagously,
-#'   \code{\link{van_walraven}} calculates Van Walraven scores (based on the
-#'   Elixhauser comorbidities, instead of Charlson), and
-#'   \code{\link{van_walraven_from_comorbid}} if you already calculated
-#'   Elixhauser comorbidities}
+#'   \code{\link{charlson_from_comorbid}}. Similarly, \code{\link{van_walraven}}
+#'   calculates Van Walraven scores (based on the Elixhauser comorbidities,
+#'   instead of Charlson), and \code{\link{van_walraven_from_comorbid}} if you
+#'   already calculated Elixhauser comorbidities}
 #'
 #'   \item{Validation}{
 #'
@@ -93,33 +92,38 @@
 #'   \code{\link{wide_to_long}} and \code{\link{long_to_wide}} convert the two
 #'   most common data structures containing patient disease data. This is more
 #'   sophisticated and tailored to the problem than base reshaping or packages
-#'   like \pkg{dplyr}, although these could no doubt be used.}
+#'   like \CRANpkg{dplyr}, although these could no doubt be used.}
 #'
 #'   \item{Explanation and decoding}{
 #'
-#'   Use \code{\link{explain}} to convert a list of codes into human-readable
-#'   descriptions. This function can optionally reduce the codes to a their
-#'   top-level groups if all the child members of a group are present.
-#'   \code{\link{diff_comorbid}} allows summary of the differences between
-#'   comorbidity mappings, e.g. to find what has changed from year-to-year or
-#'   between revisions by different authors. \code{\link{icd9cm_hierarchy}} is a
-#'   \code{data.frame} containing the full ICD-9 classification for each
-#'   diagnosis. \code{\link{icd9_chapters}} contains definitions of chapters,
-#'   sub-chapters and three-digit groups.}
-#'
-#'   }
+#'   Use \code{\link{explain_code}} to convert a list of codes into
+#'   human-readable descriptions. This function can optionally reduce the codes
+#'   to a their top-level groups if all the child members of a group are
+#'   present. \code{\link{diff_comorbid}} allows summary of the differences
+#'   between comorbidity mappings, e.g. to find what has changed from
+#'   year-to-year or between revisions by different authors.
+#'   \code{\link{icd9cm_hierarchy}} is a \code{data.frame} containing the full
+#'   ICD-9 classification for each diagnosis. \code{\link{icd9_chapters}}
+#'   contains definitions of chapters, sub-chapters and three-digit groups.} }
 #' @docType package
 #' @name icd-package
 #' @aliases icd icd-package package-icd package-icd9 icd9-package icd10-package
 #'   package-icd10
 #' @author Jack O. Wasey \email{jack@@jackwasey.com}
 #' @keywords misc utilities
-#' @references
-#' \url{http://www.hcup-us.ahrq.gov/toolssoftware/comorbidity/comorbidity.jsp}
 #' @concept ICD-9 ICD-10 comorbidity comorbidities
 #' @useDynLib icd, .registration=TRUE
-#' @import Rcpp checkmate
+#' @importFrom icd.data assign_icd_data
+#' @importFrom Rcpp cppFunction
+#' @importFrom checkmate assert assert_flag assert_list assert_data_frame
+#'   assert_string check_string check_null check_factor check_character
+#'   assert_int expect_numeric check_flag assert_logical assert_character
+#'   check_data_frame check_matrix assert_count expect_data_frame assert_scalar
+#'   assert_environment assert_vector assert_matrix assert_integer
+#'   expect_scalar_na expect_logical assert_integerish expect_character
 #' @importFrom magrittr "%>%" "%<>%" set_names extract2
 #' @importFrom utils head tail read.fwf
 #' @importFrom stats setNames
 "_PACKAGE"
+
+icd.data::assign_icd_data()

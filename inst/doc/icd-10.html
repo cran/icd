@@ -91,6 +91,9 @@ img {
 .tabbed-pane {
   padding-top: 12px;
 }
+.html-widget {
+  margin-bottom: 20px;
+}
 button.code-folding-btn:focus {
   outline: none;
 }
@@ -143,8 +146,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with icd. If not, see <http:#www.gnu.org/licenses/>.
 -->
-<p>This package now includes ICD-10 support, with some sample ICD-10-CM codes, and comorbidity mappings from ICD-10 codes to comorbidities. The sample data are from <a href="https://ustur.wsu.edu/about-us/" class="uri">https://ustur.wsu.edu/about-us/</a> where de-identified diagnoses are given for a few hundred pathology cases relating to uranium exposure.</p>
-<p>The sample data is in the ‘long’ format, i.e. multiple rows per case</p>
+<p>This package now includes ICD-10 support, with some sample ICD-10-CM data, and comorbidity mappings from ICD-10 codes to comorbidities. There are also 2018 ICD-10-CM procedure codes, and a mapping to categorize these from AHRQ. The sample data are from <a href="https://ustur.wsu.edu/about-us/" class="uri">https://ustur.wsu.edu/about-us/</a> where de-identified diagnoses are given for a few hundred pathology cases relating to uranium exposure.</p>
+<p>The sample data is in the ‘long’ format, i.e., multiple rows per case</p>
 <pre class="r"><code>uranium_pathology[1:10, ]
 #&gt;    case icd10
 #&gt; 1     1 F17.9
@@ -194,9 +197,35 @@ comorbid(patients , map = cholera_typhoid_map)
 #&gt; [1] TRUE
 #&gt; attr(,&quot;class&quot;)
 #&gt; [1] &quot;icd10&quot;     &quot;character&quot;</code></pre>
+<div id="procedure-codes" class="section level2">
+<h2>Procedure codes</h2>
+<p>The AHRQ publishes an annually updated categorization of ICD-10-CM procedure codes into four classes, representing diagnostic and therapeutic procedures, each being either minor or major.</p>
+<pre class="r"><code>set.seed(1441)
+pts &lt;- data.frame(id = sample(LETTERS, 10),
+                  pc = sample(icd10_pcs[[&quot;2018&quot;]]$code, 10))
+res &lt;- icd10_comorbid(pts,
+                      map = icd10_map_ahrq_pcs, 
+                      icd_name = &quot;pc&quot;,
+                      return_binary = TRUE)
+print(res)
+#&gt;   Minor Diagnostic Minor Therapeutic Major Diagnostic Major Therapeutic
+#&gt; J                0                 0                0                 1
+#&gt; A                0                 0                0                 1
+#&gt; Z                1                 0                0                 0
+#&gt; L                0                 1                0                 0
+#&gt; H                0                 0                0                 1
+#&gt; D                0                 1                0                 0
+#&gt; E                0                 1                0                 0
+#&gt; C                0                 0                0                 1
+#&gt; W                0                 0                0                 1
+#&gt; T                1                 0                0                 0
+colSums(res)
+#&gt;  Minor Diagnostic Minor Therapeutic  Major Diagnostic Major Therapeutic 
+#&gt;                 2                 3                 0                 5</code></pre>
 <p>For more information on working with ICD-10 codes, see the introduction vignette, and function examples. E.g.</p>
 <pre><code>?comorbid
 ?explain</code></pre>
+</div>
 
 
 

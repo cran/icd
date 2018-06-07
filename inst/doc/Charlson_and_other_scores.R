@@ -12,8 +12,8 @@ knitr::opts_chunk$set(
 )
 
 ## ----vermont-charlson----------------------------------------------------
-head(vermont_dx[1:10])
-v <- wide_to_long(vermont_dx)
+head(icd.data::vermont_dx[1:10])
+v <- wide_to_long(icd.data::vermont_dx)
 head(v)
 charlson(v) %>% summary
 head(charlson(v))
