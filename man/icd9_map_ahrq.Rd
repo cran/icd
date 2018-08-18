@@ -12,8 +12,31 @@
 \url{http://www.hcup-us.ahrq.gov/toolssoftware/comorbidityicd10/comorbidity_icd10.jsp}
 }
 \description{
-This mapping of comorbidities to ICD-9 codes is derived directly from SAS
-code provided by AHRQ, and translated into this R data structure. This is a
-revision of the Elixhauser system, notably excluding cardiac arrythmia.
+These mappings of comorbidities to ICD-9 and ICD-10 codes are derived
+directly from SAS code provided by AHRQ then translated into this R data
+structure. This is a revision of the Elixhauser system, notably excluding
+cardiac arrythmia.
 }
+\seealso{
+\code{\link{comorbid_ahrq}} \code{\link{icd9_comorbid_ahrq}}
+  \code{\link{icd10_comorbid_ahrq}}
+
+Other comorbidity maps: \code{\link{icd10_map_ahrq_pcs}},
+  \code{\link{icd9_map_elix}}, \code{\link{icd9_map_hcc}},
+  \code{\link{icd9_map_pccc}},
+  \code{\link{icd9_map_quan_deyo}},
+  \code{\link{icd9_map_quan_elix}},
+  \code{\link{icd9_map_single_ccs}}
+
+Other comorbidities: \code{\link{comorbid_hcc}},
+  \code{\link{comorbid_pccc_dx}}, \code{\link{comorbid}},
+  \code{\link{icd10_map_ahrq_pcs}},
+  \code{\link{icd9_map_elix}}, \code{\link{icd9_map_hcc}},
+  \code{\link{icd9_map_pccc}},
+  \code{\link{icd9_map_quan_deyo}},
+  \code{\link{icd9_map_quan_elix}},
+  \code{\link{icd9_map_single_ccs}}
+}
+\concept{comorbidities}
+\concept{comorbidity maps}
 \keyword{datasets}

@@ -32,19 +32,20 @@
 \usage{
 comorbid(x, map, visit_name = NULL, icd_name = NULL,
   short_code = guess_short(x, icd_name = icd_name),
-  short_map = guess_short(map), return_df = FALSE, return_binary = FALSE,
-  categorize_fun = categorize_simple, ...)
+  short_map = guess_short(map), return_df = FALSE,
+  return_binary = FALSE, categorize_fun = categorize_simple, ...)
 
 icd10_comorbid(x, map, visit_name = NULL, icd_name = NULL,
   short_code = NULL, short_map = guess_short(map), return_df = FALSE,
-  return_binary = FALSE, icd10_comorbid_fun = icd10_comorbid_reduce, ...)
+  return_binary = FALSE, icd10_comorbid_fun = icd10_comorbid_reduce,
+  ...)
 
 icd9_comorbid(x, map, visit_name = NULL, icd_name = NULL,
   short_code = guess_short(x, icd_name = icd_name),
-  short_map = guess_short(map), return_df = FALSE, return_binary = FALSE,
-  preclean = TRUE, visitId = NULL, icd9Field = NULL,
-  categorize_fun = categorize_simple, comorbid_fun = comorbidMatMulSimple,
-  ...)
+  short_map = guess_short(map), return_df = FALSE,
+  return_binary = FALSE, preclean = TRUE, visitId = NULL,
+  icd9Field = NULL, categorize_fun = categorize_simple,
+  comorbid_fun = comorbidMatMulSimple, ...)
 
 icd9_comorbid_ahrq(x, ..., abbrev_names = TRUE, hierarchy = TRUE)
 
@@ -203,10 +204,6 @@ and the underlying algorithm used. Usually this would be the order of the
 first occurrence of each visit/patient identifier, but this is not
 guaranteed unless \code{restore_id_order} is set to \code{TRUE}.
 
-The threading of the C++ can be controlled using e.g.
-\code{option(icd.threads = 4)}. If it is not set, the number of cores in
-the machine is used. 'OpenMP' environment variables also work.
-
 \code{data.frame}s of patient data may have columns within them
   which are of class \code{icd9}, \code{icd10} etc., but do not themselves
   have a class: therefore, the S3 mechanism for dispatch is not suitable. I
@@ -325,4 +322,18 @@ comorbid(two_pts, map = my_map)
 Consider using \code{\link{comorbid_ahrq}} instead of
   \code{\link{comorbid_elix}} for more recently updated mappings based on the
   Elixhauser scheme.
+
+Other comorbidity computations: \code{\link{comorbid_hcc}},
+  \code{\link{comorbid_pccc_dx}}
+
+Other comorbidities: \code{\link{comorbid_hcc}},
+  \code{\link{comorbid_pccc_dx}},
+  \code{\link{icd10_map_ahrq_pcs}},
+  \code{\link{icd9_map_ahrq}}, \code{\link{icd9_map_elix}},
+  \code{\link{icd9_map_hcc}}, \code{\link{icd9_map_pccc}},
+  \code{\link{icd9_map_quan_deyo}},
+  \code{\link{icd9_map_quan_elix}},
+  \code{\link{icd9_map_single_ccs}}
 }
+\concept{comorbidities}
+\concept{comorbidity computations}

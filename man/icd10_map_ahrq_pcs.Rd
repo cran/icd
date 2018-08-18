@@ -5,13 +5,43 @@
 \alias{icd10_map_ahrq_pcs}
 \title{AHRQ ICD-10-PCS categories}
 \description{
-The AHRQ has categorized each of the ICD-10-PCS (Procedure Codes) into one of
-four groups: minor diagnostic, minor therapeutic, major diagnostic or major
-therapeutic. This mapping can be used to get the type(s) of procedure(s)
-performed on a patient from a \code{data.frame} of patients and associated
-procedure codes in 'long' format. See the ICD-10 vignette for an example.
+The AHRQ has categorized each of the ICD-10-PCS (Procedure Codes)
+into one of four groups: minor diagnostic, minor therapeutic, major
+diagnostic or major therapeutic. This mapping can be used to get the
+type(s) of procedure(s) performed on a patient from a
+\code{data.frame} of patients and associated procedure codes in
+'long' format. See the ICD-10 vignette for an example.
+}
+\details{
+Currently there is no specific comorbidity function to use this data,
+so the generic \code{\link{comorbid}} \code{\link{icd9_comorbid}}
+\code{\link{icd10_comorbid}} should be used, and this data specified
+as the \code{map}.
+}
+\examples{
+  icd10_map_ahrq_pcs[["Major Diagnostic"]][1:5]
+  icd10_map_ahrq_pcs[["Minor Therapeutic"]][1:5]
 }
 \seealso{
-\url{https://www.hcup-us.ahrq.gov/toolssoftware/procedureicd10/procedure_icd10.jsp}
+\code{\link{comorbid}} \code{\link{icd9_comorbid}}
+  \code{\link{icd10_comorbid}}
+  \url{https://www.hcup-us.ahrq.gov/toolssoftware/procedureicd10/procedure_icd10.jsp}
+
+Other comorbidity maps: \code{\link{icd9_map_ahrq}},
+  \code{\link{icd9_map_elix}}, \code{\link{icd9_map_hcc}},
+  \code{\link{icd9_map_pccc}},
+  \code{\link{icd9_map_quan_deyo}},
+  \code{\link{icd9_map_quan_elix}},
+  \code{\link{icd9_map_single_ccs}}
+
+Other comorbidities: \code{\link{comorbid_hcc}},
+  \code{\link{comorbid_pccc_dx}}, \code{\link{comorbid}},
+  \code{\link{icd9_map_ahrq}}, \code{\link{icd9_map_elix}},
+  \code{\link{icd9_map_hcc}}, \code{\link{icd9_map_pccc}},
+  \code{\link{icd9_map_quan_deyo}},
+  \code{\link{icd9_map_quan_elix}},
+  \code{\link{icd9_map_single_ccs}}
 }
+\concept{comorbidities}
+\concept{comorbidity maps}
 \keyword{datasets}

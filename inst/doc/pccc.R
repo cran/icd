@@ -1,6 +1,6 @@
 ## ----setup, include=FALSE------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
-library(icd)
+library("icd")
 n <- 10000
 set.seed(1441)
 dat <- data.frame(id = n + seq(n),
@@ -21,7 +21,7 @@ head(pcs)
 
 ## ----calc----------------------------------------------------------------
 pccc_dx <- comorbid_pccc_dx(dx)
-pccc_pcs <- icd10_comorbid_pccc_pcs(pcs, map = icd10_map_pccc_pcs, 
+pccc_pcs <- icd10_comorbid_pccc_pcs(pcs, 
                                     visit_name = "id", icd_name = "pcs")
 res <- pccc_dx | pccc_pcs
 

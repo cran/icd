@@ -2,8 +2,8 @@
 suppressWarnings({
   suppressPackageStartupMessages({
     loadNamespace("knitr") # for opts_chunk only
-    library(icd)
-    library(magrittr)
+    library("icd")
+    library("magrittr")
     })
   })
 knitr::opts_chunk$set(

@@ -10,12 +10,33 @@
 These were transcribed directly from the Quan paper referenced.
 }
 \references{
-Quan, Hude, Vijaya Sundararajan, Patricia Halfon, Andrew Fong,
-  Bernard Burnand, Jean-Christophe Luthi, L. Duncan Saunders, Cynthia A.
-  Beck, Thomas E. Feasby, and William A. Ghali. "Coding Algorithms for
-  Defining Comorbidities in ICD-9-CM and ICD-10 Administrative Data." Medical
-  Care 43, no. 11 (November 1, 2005): 1130-39.
-  \url{http://www.ncbi.nlm.nih.gov/pubmed/16224307}
+Quan, Hude, Vijaya Sundararajan, Patricia Halfon, Andrew
+  Fong, Bernard Burnand, Jean-Christophe Luthi, L. Duncan Saunders,
+  Cynthia A. Beck, Thomas E. Feasby, and William A. Ghali. "Coding
+  Algorithms for Defining Comorbidities in ICD-9-CM and ICD-10
+  Administrative Data." Medical Care 43, no. 11 (November 1, 2005):
+  1130-39. \url{http://www.ncbi.nlm.nih.gov/pubmed/16224307}
   \url{http://web.archive.org/web/20110225042437/http://www.chaps.ucalgary.ca/sas}
 }
+\seealso{
+\code{\link{comorbid_quan_elix}}
+  \code{\link{icd9_comorbid_quan_elix}}
+  \code{\link{icd10_comorbid_quan_elix}}
+
+Other comorbidity maps: \code{\link{icd10_map_ahrq_pcs}},
+  \code{\link{icd9_map_ahrq}}, \code{\link{icd9_map_elix}},
+  \code{\link{icd9_map_hcc}}, \code{\link{icd9_map_pccc}},
+  \code{\link{icd9_map_quan_deyo}},
+  \code{\link{icd9_map_single_ccs}}
+
+Other comorbidities: \code{\link{comorbid_hcc}},
+  \code{\link{comorbid_pccc_dx}}, \code{\link{comorbid}},
+  \code{\link{icd10_map_ahrq_pcs}},
+  \code{\link{icd9_map_ahrq}}, \code{\link{icd9_map_elix}},
+  \code{\link{icd9_map_hcc}}, \code{\link{icd9_map_pccc}},
+  \code{\link{icd9_map_quan_deyo}},
+  \code{\link{icd9_map_single_ccs}}
+}
+\concept{comorbidities}
+\concept{comorbidity maps}
 \keyword{datasets}

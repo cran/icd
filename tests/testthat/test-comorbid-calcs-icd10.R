@@ -127,20 +127,6 @@ test_that("ICD-10 map reduction is sane", {
   expect_true(all(unname(unlist(red_map)) %in% uranium_short_codes))
 })
 
-test_that("using reduction method for ICD-10", {
-  if (!exists("icd10_comorbid_reduce"))
-    skip("icd10_comorbid_reduce not available")
-  res <- icd10_comorbid(uranium_pathology, map = icd10_map_ahrq, icd10_comorbid_fun = icd10_comorbid_reduce)
-  expect_equal(ncol(res), 30)
-  gold <- icd10_comorbid_parent_search_use_cpp(
-    uranium_pathology, icd10_map_ahrq, visit_name = "case", icd_name = "icd10",
-    short_code = FALSE, short_map = TRUE, return_df = FALSE)
-  redc <- icd10_comorbid_reduce(
-    uranium_pathology, icd10_map_ahrq, visit_name = "case", icd_name = "icd10",
-    short_code = FALSE, short_map = TRUE, return_df = FALSE)
-  expect_identical(gold, redc)
-})
-
 test_that("providing icd_name to `comorbid` actually works", {
   x <- icd10_all_quan_elix
   names(x) <- c("col1", "col0")
@@ -177,7 +163,7 @@ test_that("NA icd10 code", {
   d <- data.frame(visit = c("visit 1", "visit 1"), icd10 = c(NA, "G809"))
   res <- icd10_comorbid_ahrq(d)
   d <- data.frame(visit = c("visit 1", "visit 1"), icd10 = c(NA, "sillycode"))
-  expect_error(res <- icd10_comorbid_ahrq(d), regex = "icd_name")
+  expect_error(res <- icd10_comorbid_ahrq(d), regexp = "icd_name")
   res <- icd10_comorbid_ahrq(d, icd_name = "icd10")
   d <- data.frame(visit = c("visit 1", "visit 2"), icd10 = c("badcode", NA))
   res <- icd10_comorbid_ahrq(d, visit_name = "visit", icd_name = "icd10")
@@ -206,68 +192,14 @@ test_that("NA example which crashed during devel", {
 })
 
 test_that("ICD-10 comorbidities from uranium", {
-  expect_error(regex = NA, comorbid(uranium_pathology, icd10_map_quan_elix))
-  expect_error(regex = NA, comorbid(uranium_pathology, icd10_map_quan_deyo))
-  expect_error(regex = NA, comorbid(uranium_pathology, icd10_map_elix))
-  expect_error(regex = NA, comorbid(uranium_pathology, icd10_map_ahrq))
+  expect_error(regexp = NA, comorbid(uranium_pathology, icd10_map_quan_elix))
+  expect_error(regexp = NA, comorbid(uranium_pathology, icd10_map_quan_deyo))
+  expect_error(regexp = NA, comorbid(uranium_pathology, icd10_map_elix))
+  expect_error(regexp = NA, comorbid(uranium_pathology, icd10_map_ahrq))
 })
 
-test_that("mix and match comorbidity functions", {
-  skip("no requirement for these functions to handle each other's input data")
-  u <- uranium_pathology[!is.na(uranium_pathology$icd10), ]
-  all_ahrq <- unique(unlist(unname(icd10_map_ahrq)))
-  umap <- icd:::simplify_map_lex(u$icd10, icd10_map_ahrq)
-  vmap <- lapply(umap, as.factor)
-  wmap <- lapply(icd10_map_ahrq, as.factor)
-  xmap <- lapply(icd10_map_ahrq, factor, levels = all_ahrq)
-  maps <- list(umap = umap, vmap = vmap, wmap = wmap, xmap = xmap)
-  cat_fun_names <- c("categorize", "categorize_simple")
-  cmb_fun_names <- c("comorbidMatMul", "comorbidMatMulSimple")
-  results <- list()
-  for (map_name in names(maps)) {
-    for (cat_fun_name in cat_fun_names) {
-      for (cmb_fun_name in cmb_fun_names) {
-        inf <- paste(map_name, cat_fun_name, cmb_fun_name, sep = "_")
-        args <- list(
-          x = uranium_pathology,
-          map = maps[[map_name]],
-          id_name = "case", code_name = "icd10",
-          comorbid_fun = as.name(cmb_fun_name)
-        )
-        call_expr <- call(cat_fun_name,
-                          x = quote(u),
-                          map = quote(maps[[map_name]]),
-                          id_name = "case", code_name = "icd10",
-                          comorbid_fun = as.name(cmb_fun_name))
-        expect_error(
-          regex = NA,
-          res <- eval(call_expr),
-          info = inf
-        )
-        results[[inf]] <- res
-      }
-    }
-  }
-  for (r in names(results)[-1])
-    expect_identical(results[[r]], results[[1]], info = r)
-  expect_error(
-    regex = NA,
-    icd:::categorize_simple(uranium_pathology, icd10_map_ahrq,
-                            id_name = "case", code_name = "icd10",
-                            comorbid_fun = icd:::comorbidMatMul)
-  )
-
-
-  expect_error(
-    regex = NA,
-    icd:::categorize(uranium_pathology, icd10_map_ahrq,
-                     id_name = "case", code_name = "icd10",
-                     comorbid_fun = icd:::comorbidMatMul)
-  )
-  expect_error(
-    regex = NA,
-    icd:::categorize(uranium_pathology, umap,
-                     id_name = "case", code_name = "icd10",
-                     comorbid_fun = icd:::comorbidMatMulSimple)
-  )
+test_that("Alcoholic fatty liver", {
+  dat <- data.frame(id = 1:3, icd10 = c("K700", "K7030", "K709"))
+  res <- icd10_comorbid_quan_elix(dat)
+  expect_true(all(res[, "Alcohol"]))
 })

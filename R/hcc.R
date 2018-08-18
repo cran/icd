@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with icd. If not, see <http:#www.gnu.org/licenses/>.
 
+globalVariables(c("icd10_map_cc", "icd9_map_cc", "icd_map_cc_hcc"))
+
 #' Get Hierarchical Condition Codes (HCC)
 #'
 #' Applying CMS Hierarchical Condition Categories \code{comorbid_hcc} works
@@ -31,6 +33,8 @@
 #'   Default value is 'date'.
 #' @template visit_name
 #' @template icd_name
+#' @family comorbidity computations
+#' @family comorbidities
 #' @export
 comorbid_hcc <- function(x, date_name = "date",
                          visit_name = get_visit_name(x),
@@ -47,7 +51,7 @@ icd9_comorbid_hcc <- function(x,
                               visit_name = NULL,
                               icd_name = NULL)
   comorbid_hcc_worker(x,
-                      map = icd::icd9_map_cc,
+                      map = icd9_map_cc,
                       date_name = date_name,
                       visit_name = visit_name,
                       icd_name = icd_name)
@@ -59,7 +63,7 @@ icd10_comorbid_hcc <- function(x,
                                visit_name = NULL,
                                icd_name = NULL) {
   comorbid_hcc_worker(x,
-                      map = icd::icd10_map_cc,
+                      map = icd10_map_cc,
                       date_name = date_name,
                       visit_name = visit_name,
                       icd_name = icd_name)
@@ -84,7 +88,9 @@ comorbid_hcc_worker <- function(x,
   # Add column for year
   x$year <- as.numeric(format(x[[date_name]], "%Y"))
   # merge CCs to patient data based on ICD and year drop ICD info
-  x <- merge(x, map, all.x = TRUE)
+  x <- merge(x, map, all.x = TRUE,
+             by.x = c(icd_name, "year"),
+             by.y = c("icd_code", "year"))
   # Drop missing CC and convert to numeric
   # Not all ICDs resolve to a CC by definition
   x <- x[!is.na(x$cc), ]
@@ -95,7 +101,7 @@ comorbid_hcc_worker <- function(x,
   # Multiple ICDs for a patient can resolve to same CC
   x <- unique(x)
   # Duplicate the ifcc column needed for future matching
-  hierarchy <- icd::icd_map_cc_hcc
+  hierarchy <- icd_map_cc_hcc
   hierarchy$cc <- hierarchy$ifcc
   # Merge hierarchy rules with patient data
   x <- merge(x, hierarchy, all.x = TRUE)
@@ -111,12 +117,14 @@ comorbid_hcc_worker <- function(x,
   todrop <- do.call(rbind, todrop)
   # Remove all NAs from CC field
   todrop <- todrop[!is.na(todrop$cc), ]
-  # Set flag for all of the CCs to be dropped
-  todrop$todrop <- TRUE
-  # Merge drop flags with patient data
-  x <- merge(x, todrop, all.x = TRUE)
-  # Drop flagged patients and keep columns of interest
-  x <- x[is.na(x$todrop), ]
+  if (nrow(todrop) > 0) {
+    # Set flag for all of the CCs to be dropped
+    todrop$todrop <- TRUE
+    # Merge drop flags with patient data
+    x <- merge(x, todrop, all.x = TRUE)
+    # Drop flagged patients and keep columns of interest
+    x <- x[is.na(x$todrop), ]
+  }
   x <- x[, c(visit_name, date_name, "cc")]
   names(x) <- c(visit_name, date_name, "hcc")
   x

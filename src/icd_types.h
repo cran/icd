@@ -19,9 +19,10 @@
 #define ICD_TYPES_H_
 
 #include <Rcpp.h>
-#include "config.h" // to know whether we have OpenMP, Eigen, etc. which have typedefs
 #include <vector>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 typedef std::string Str;
 typedef std::vector<Str> VecStr;
 typedef std::vector<int> VecInt;
@@ -45,9 +46,6 @@ typedef Rcpp::CharacterVector CV;
 #include <RcppEigen.h> // also add LinkingTo element in DESCRIPTION to enable
 #include <Eigen/SparseCore>
 
-// using the typedef confuses Rcpp?
-//typedef Eigen::SparseMatrix<char, Eigen::RowMajor> SparseOut; // bool, char or int?
-// https://eigen.tuxfamily.org/dox/group__TutorialSparse.html
 typedef int SparseValue;
 typedef Eigen::Triplet<SparseValue> Triplet;
 typedef Eigen::SparseMatrix<SparseValue, Eigen::RowMajor> PtsSparse;

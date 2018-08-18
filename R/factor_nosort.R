@@ -64,60 +64,6 @@ factor_nosort_rcpp <- function(x, levels, na.rm = FALSE) {
   #TODO SLOW - if re-factoring, there is a faster way
 }
 
-#' (re-)factor and split into matched and unmatched elements
-#'
-#' I think this is now obsolete, now I have better integer-based re-factoring in
-#' C++.
-#'
-#' Critically, this function does not convert factor to character vector and
-#' back to factor in order to modify factor levels, resulting in huge speed
-#' improvements for long vectors.
-#' @examples
-#' icd:::factor_nosort_rcpp(c("1", NA)) # NA becomes a level
-#' icd:::factor_nosort_rcpp(c("1", "2"), "1") # NA not a level, just dropped!
-#' icd:::factor_nosort_rcpp(c("1", "2"), c("1", NA)) # NA IS a level
-#' \dontrun{
-#' x <- c("A", "B", "C", "d", "A", "C")
-#' levels <- c("A", "B")
-#' stopifnot(
-#'   identical(icd:::factor_split_na(factor(x), levels),
-#'             icd:::factor_split_na(x, levels))
-#' )
-#' y <- c("A", NA, "B", "A", NA)
-#' yf <- factor(y)
-#' yf_na <- factor(y, levels = c("A", NA, "B"), exclude = NULL)
-#' stopifnot(
-#'   identical(icd:::factor_split_na(y, "A"),
-#'             icd:::factor_split_na(yf, "A"))
-#' )
-#' stopifnot(
-#'   identical(icd:::factor_split_na(y, "A"),
-#'             icd:::factor_split_na(yf_na, "A"))
-#' )
-#' }
-#' @keywords internal manip
-factor_split_na <- function(x, levels, factor_fun = factor_nosort_rcpp) {
-  # input may have no levels!
-  message("use refactor C++ instead")
-  if (is.factor(x)) {
-    xi <- as.integer(x)
-    lx <- levels(x)
-    any_na_xlevels <- anyNA(lx)
-    no_na_xlevels <- if (any_na_xlevels) lx[!is.na(lx)] else lx
-    new_level_idx <- match(no_na_xlevels, levels)
-    f <- new_level_idx[xi]
-    inc_mask <- !is.na(f)
-    f <- f[inc_mask]
-    attr(f, "levels") <- levels
-    class(f) <- "factor"
-  } else {
-    f <- factor_fun(x, levels)
-    inc_mask <- !is.na(f)
-    f <- f[inc_mask]
-  }
-  list(factor = f, inc_mask = inc_mask)
-}
-
 #' Refactor by integer matching levels in C++
 #'
 #' Slightly slower for small factors, three times faster for one hundred million
@@ -136,8 +82,10 @@ factor_split_na <- function(x, levels, factor_fun = factor_nosort_rcpp) {
 #' @md
 #' @keywords internal manip
 refactor <- function(x, levels, na.rm = FALSE, exclude_na = TRUE) {
-  checkmate::assert_factor(x)
-  checkmate::assert_character(levels)
+  assert_factor(x)
+  assert_character(levels)
+  assert_flag(na.rm)
+  assert_flag(exclude_na)
   if (na.rm)
     refactor_narm_worker(x, levels)
   else

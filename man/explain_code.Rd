@@ -16,7 +16,6 @@
 \alias{icd_explain.icd9}
 \alias{icd_explain.icd9cm}
 \alias{icd_explain.list}
-\alias{icd_explain}
 \title{Explain ICD-9 and ICD-10 codes in English}
 \usage{
 explain_code(...)
@@ -102,7 +101,8 @@ ICD version
 
 \item \code{icd9cm}: explain character vector of ICD-9-CM codes
 
-\item \code{icd10cm}: ICD-10-CM explanation, current a minimal implementation
+\item \code{icd10cm}: ICD-10-CM explanation, current a minimal
+implementation
 
 \item \code{icd10}: ICD-10 explanation, falls back on ICD-10-CM until
 ICD-10 WHO copyright workaround is available

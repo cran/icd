@@ -2,9 +2,9 @@
 suppressWarnings({
   suppressPackageStartupMessages({
     loadNamespace("knitr") # for opts_chunk only
-    library(icd)
-    library(magrittr)
-    library(utils)
+    library("icd")
+    library("magrittr")
+    library("utils")
     })
   })
 
@@ -21,13 +21,14 @@ patients_icd9 <- data.frame(
   )
 
 ## ----quickstart----------------------------------------------------------
+library(icd)
 head(uranium_pathology, 10)
 head(comorbid_charlson(uranium_pathology))
 comorbid_charlson(uranium_pathology, return_df = TRUE)[1:5, 1:5]
 hist(charlson(uranium_pathology))
 
 ## ----pkgdesc, results='asis', echo = FALSE-------------------------------
-cat(packageDescription("icd")$Description)
+cat(utils::packageDescription("icd")$Description)
 
 ## ----show data formats, echo=TRUE----------------------------------------
 # long format ICD-9-CM codes, with present-on-arrival flags

@@ -29,7 +29,6 @@ icd10cm_get_flat_file <- function(...) {
     file_name = "icd10cm_order_2016.txt", ...)
 }
 
-
 #' Fetch ICD-10-CM data from the CMS web site
 #'
 #' YEAR-ICD10-Code-Descriptions has flat files, YEAR-ICD10-Code-Tables-Index has

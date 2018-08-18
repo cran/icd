@@ -1,3 +1,12 @@
+|                           |
+|---------------------------|
+| title: icd Readme         |
+| output:                   |
+| md\_document:             |
+| variant: markdown\_github |
+| date: “August 08, 2018”   |
+| author: Jack O. Wasey     |
+
 <!--
 Copyright (C) 2014 - 2018  Jack O. Wasey
 
@@ -16,19 +25,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with icd. If not, see <http:#www.gnu.org/licenses/>.
 -->
-<!-- README.md is generated from README.Rmd. Please edit that file and render with 
-rmarkdown::render("README.Rmd")
+<!-- README.md is generated from README.Rmd. Please edit that file and render with rmarkdown::render("README.Rmd")
 -->
 icd
 ===
 
 [![CRAN](https://www.r-pkg.org/badges/version/icd "CRAN")](https://cran.r-project.org/package=icd)
-[![GitHub](https://img.shields.io/badge/devel%20version-3.1.2-blue.svg?style=flat "GitHub")](https://github.com/jackwasey/icd)
+[![GitHub](https://img.shields.io/badge/devel%20version-3.2.1-blue.svg?style=flat "GitHub")](https://github.com/jackwasey/icd)
 [![Travis](https://travis-ci.org/jackwasey/icd.svg?branch=master "Travis Build Status")](https://travis-ci.org/jackwasey/icd)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/9ncfgxht3n5i8t60/branch/master?svg=true "Appveyor Build Status")](https://ci.appveyor.com/project/jackwasey/icd/branch/master)
 [![codecov.io](https://codecov.io/github/jackwasey/icd/coverage.svg?branch=master "Core Code Coverage")](https://codecov.io/github/jackwasey/icd?branch=master)
-[![CRAN RStudio mirror
-downloads](https://cranlogs.r-pkg.org/badges/icd "RStudio Mirror Downloads")](https://cran.r-project.org/package=icd)
+[![CII Best
+Practices](https://bestpractices.coreinfrastructure.org/projects/2092/badge)](https://bestpractices.coreinfrastructure.org/projects/2092)
+[![CRAN RStudio mirror downloads last calendar
+month](https://cranlogs.r-pkg.org/badges/icd "RStudio Mirror Downloads Last Calendar Month")](https://cran.r-project.org/package=icd)
+[![CRAN RStudio mirror downloads last
+week](https://cranlogs.r-pkg.org/badges/last-week/icd "RStudio Mirror Downloads Last Week")](https://cran.r-project.org/package=icd)
 
 Comorbidities from ICD-9 and ICD-10 codes, manipulation and validation
 ======================================================================
@@ -39,7 +51,7 @@ Features
 -   find comorbidities of patients based on admission or discharge ICD-9
     or ICD-10 codes, e.g. Cancer, Heart Disease
     -   several standard mappings of ICD codes to comorbidities are
-        included (Quan, Deyo, Elixhauser, AHRQ)
+        included (Quan, Deyo, Elixhauser, AHRQ, PCCC)
     -   very fast assignment of ICD codes to comorbidities (using matrix
         multiplication with C and C++ internally)
 -   summarizing groups of ICD codes in natural language
@@ -70,13 +82,13 @@ install.packages("icd")
 Introduction
 ------------
 
-Calculate comorbidities, Charlson scores, perform fast and accurate
-validation, conversion, manipulation, filtering and comparison of ICD-9
-and ICD-10 codes. This package enables a work flow from raw lists of ICD
-codes in hospital databases to comorbidities. ICD-9 and ICD-10
-comorbidity mappings from Quan (Deyo and Elixhauser versions),
-Elixhauser and AHRQ included. Common ambiguities and code formats are
-handled.
+Calculate comorbidities, Charlson and van Walraven scores, perform fast
+and accurate validation, conversion, manipulation, filtering and
+comparison of ICD-9 and ICD-10 codes. This package enables a work flow
+from raw lists of ICD codes in hospital databases to comorbidities.
+ICD-9 and ICD-10 comorbidity mappings from Quan (Deyo and Elixhauser
+versions), Elixhauser and AHRQ included. Common ambiguities and code
+formats are handled.
 
 Relevance
 ---------

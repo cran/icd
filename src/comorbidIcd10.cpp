@@ -15,99 +15,23 @@
 // You should have received a copy of the GNU General Public License
 // along with icd. If not, see <http://www.gnu.org/licenses/>.
 
-// [[Rcpp::interfaces(r, cpp)]]
-// [[Rcpp::plugins(openmp)]]
-#include "config.h"
-#include "local.h" // for DEBUG
+#include "icd_types.h"
+#include "local.h"
 #include "comorbidIcd10.h"
 #include <string.h>                         // for strlen, strncpy
 #include <string>                           // for string
-#include "Rcpp.h"                           // for wrap
-#include "icd_types.h"                      // for CV
+#include "Rcpp.h"
 extern "C" {
 #include <cstddef>                          // for size_t
 }
 
-using Rcpp::IntegerVector;
-using Rcpp::LogicalMatrix;
-using Rcpp::String;
-using Rcpp::wrap;
-using Rcpp::any;
-using Rcpp::as;
+using namespace Rcpp;
 
-//' Internal function to find ICD-10 parents
-//' @param x Character vector (not factor)
-//' @template mapping
-//' @template visit_name
-//' @template icd_name
-//' @seealso \url{https://github.com/s-u/fastmatch/blob/master/src/fastmatch.c}
-//' @keywords internal
-// [[Rcpp::export(icd10_comorbid_parent_search_cpp)]]
-Rcpp::LogicalMatrix icd10ComorbidParentSearchCpp(Rcpp::DataFrame x,
-                                                 Rcpp::List map,
-                                                 std::string visit_name,
-                                                 std::string icd_name) {
-  CV icd_codes = x[icd_name];
-  LogicalMatrix intermed(icd_codes.size(), map.size()); // zero-filled
-  // simplest code (and maybe fastest) is to calc comorbidity for each code,
-  // then aggregate on patient code
-  String code;
-  std::size_t codeNchar; // or char? we know it'll be short
-  CV oneCbd;
-  // this must be longer than any code plus one for zero terminator. Some risk
-  // of buffer overflow here.
-  char codeCur[16];
-
-  for (R_xlen_t i = 0; i != icd_codes.size(); ++i) {
-    // look backwards from length of current code in characters. This seems
-    // terrible, but when there are so many miniscule subdivisions of ICD-10-CM,
-    // we can't easily or efficiently extrapolate all these current and future
-    // possibilities without a lot of memory use (and more time searching those
-    // lookups)
-    code = icd_codes[i];
-    const char * code_cstring = code.get_cstring();
-    codeNchar = strlen(code_cstring);
-    if (codeNchar > 15)
-      Rcpp::stop("ICD-10 codes must all be less than 16 characters long.");
-    if (codeNchar <3) {
-      // abort to avoid segfault. will need to do better than this and
-      // replace with NA and go to next item
-      //Rcpp::stop("ICD-10 codes must be at least three characters long.");
-      continue;
-    }
-    size_t codeCurChar;
-    for (R_xlen_t j = 0; j != map.size(); ++j) {
-      oneCbd = map[j];
-      for (codeCurChar = 3; codeCurChar != codeNchar + 1; ++codeCurChar) {
-        strncpy(codeCur, code_cstring,  codeCurChar); // write codeCurChar chars to codeCur
-        codeCur[codeCurChar] = '\0'; // place the null terminator
-        SEXP test_str = PROTECT(Rf_mkString(codeCur));
-        CV lookup_code = test_str;
-        Rcpp::IntegerVector matched_indices = Rcpp::match(lookup_code, oneCbd);
-        if (matched_indices[0] > 0) {
-          intermed(i, j) = true; // the rest are zero filled
-          // we've found the comorbidity for the current code, so break out of
-          // comorbidity loop
-          UNPROTECT(1);
-          goto got_comorbid;
-        }
-        UNPROTECT(1);
-      } // for chars in a single code
-      got_comorbid: // just placeholder for the goto target
-        ;
-    } // each comorbidity
-  } // each row of input data
-  // haven't aggregated yet, so there is a row for each row of the input data
-  intermed.attr("dimnames") = Rcpp::List::create(x[visit_name], map.names());
-  return intermed;
-}
-
-//' @title Internal function to simplify a comorbidity map by only including codes
-//' which are parents, or identical to, a given list of codes.
-//' @description
-//' Specifically, this is useful for ICD-10 codes where there are a huge number
-//' of possible codes, but we do not want to make a comorbidity map with such a
-//' large number of codes in it.
+//' @title Internal function to simplify a comorbidity map by only including
+//'   codes which are parents, or identical to, a given list of codes.
+//' @description Specifically, this is useful for ICD-10 codes where there are a
+//' huge number of possible codes, but we do not want to make a comorbidity map
+//' with such a large number of codes in it.
 //' @param x Character vector (not factor)
 //' @template mapping
 //' @template visit_name
@@ -122,15 +46,10 @@ Rcpp::LogicalMatrix icd10ComorbidParentSearchCpp(Rcpp::DataFrame x,
 //' stopifnot(simple_map$PHTN != character(0))
 //' stopifnot(simple_map$PVD == "I26019")
 //' umap <- icd:::simplify_map_lex(uranium_pathology$icd10, icd10_map_ahrq)
-//' head(icd:::categorize(uranium_pathology, icd10_map_ahrq,
-//'                       id_name = "case", code_name = "icd10",
-//'                       comorbid_fun = icd:::comorbidMatMul))
-//' head(icd:::categorize(uranium_pathology, icd10_map_ahrq,
-//'                       id_name = "case", code_name = "icd10",
-//'                       comorbid_fun = icd:::comorbidMatMul))
+//' head(icd:::categorize_simple(uranium_pathology, icd10_map_ahrq,
+//'                       id_name = "case", code_name = "icd10"))
 //' head(icd:::categorize_simple(uranium_pathology, umap,
-//'                              id_name = "case", code_name = "icd10",
-//'                              comorbid_fun = icd:::comorbidMatMulSimple))
+//'                              id_name = "case", code_name = "icd10"))
 //' @keywords internal
 // [[Rcpp::export(simplify_map_lex)]]
 Rcpp::List simplifyMapLexicographic(const CV pt_codes, const Rcpp::List map) {
@@ -138,42 +57,55 @@ Rcpp::List simplifyMapLexicographic(const CV pt_codes, const Rcpp::List map) {
   size_t searchLen;
   size_t pos;
   size_t cmb_len;
-  CV icd_codes = Rcpp::unique(pt_codes); // hmm, would be nice to only scan the pt_codes once, but I don't want to write my own hash map code....
+  // hmm, would be nice to only scan the pt_codes once, but I don't want to
+  // write my own hash map code....
+  CV icd_codes = Rcpp::unique(pt_codes);
+  DEBUG_VEC(icd_codes);
   std::vector<std::unordered_set<std::string> > newMapStd(map.length());
   for (R_xlen_t i = 0; i != icd_codes.size(); ++i) {
     ptCode = icd_codes[i];
+    DEBUG("i = " << i << ", and ptCode = " << ptCode);
     size_t codeLen = ptCode.length();
-    if (codeLen < 3)
-      continue; // cannot be a valid ICD-10 code
-// cannot break or goto in openmp loops #pragma omp parallel for private(searchLen, pos, cmb_len)
+    if (codeLen < 3) continue; // cannot be a valid ICD-10 code
+    DEBUG("code len >=3 chars");
     for (R_xlen_t j = 0; j < map.size(); ++j) {
+      DEBUG("cmb, j = " << j);
       const CV &cmbCodes = map[j];
       for (R_xlen_t k = 0; k != cmbCodes.length(); ++k) {
         cmb_len = cmbCodes[k].size();
-        if (cmb_len > codeLen)
-          continue; // if map code is longer than the patient's code, it'll never match
-        // we always have at least three characters, so spare looping inside strcmp
+        // if map code is longer than the patient's code, it'll never match
+        if (cmb_len > codeLen) continue; // TODO: or != ???
+        // we always have at least 3 characters, so spare looping inside strcmp
+        TRACE("cmbCodes[k][0] = " << cmbCodes[k][0]);
+        TRACE("cmbCodes[k][1] = " << cmbCodes[k][1]);
+        TRACE("cmbCodes[k][2] = " << cmbCodes[k][2]);
+        TRACE("ptCode[k][0] = " << ptCode[0]);
+        TRACE("ptCode[k][1] = " << ptCode[1]);
+        TRACE("ptCode[k][2] = " << ptCode[2]);
         if (cmbCodes[k][0] != ptCode[0] ||
             cmbCodes[k][1] != ptCode[1] ||
             cmbCodes[k][2] != ptCode[2])
           goto no_match;
         searchLen = std::min(cmb_len, codeLen);
+        DEBUG("searchLen = " << searchLen);
         pos = 3;
         while(pos != searchLen) {
-          if (cmbCodes[k][pos] != ptCode[pos])
-            goto no_match;
+          if (cmbCodes[k][pos] != ptCode[pos]) {
+          DEBUG("mismatch, going to no_match");
+          goto no_match;
+          }
           ++pos;
         }
         // push the patient's ICD code, not the original comorbidity ICD code
-        // onto the new map. This should be okay with openmp without critical
-        // pragma, but goto is not.
+        // onto the new map.
         newMapStd[j].insert(ptCode);
-        goto next_ptCode;
-        no_match:
-          ;
+        DEBUG("Going to next comorbidity");
+        goto next_comorbidity;
+        no_match:;
       } // end of codes in current comorbidity
+      next_comorbidity:;
     } // each comorbidity
-    next_ptCode:;
+    DEBUG("finished a comorbidity");
   } // each row of input data
   Rcpp::List newMap = Rcpp::List::create();
   for (auto cmbSet : newMapStd) {

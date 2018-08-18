@@ -386,8 +386,6 @@ test_that("filter valid - data frame input", {
   expect_true(is.icd_long_data(tfinvalid))
   # arg order irrelevant, but can be mixed up in S3 dispatch.
   expect_equal(icd9_filter_valid(pts_invalid_mix, short_code = FALSE, invert = TRUE), pts_invalid_mix)
-
-  # use invert and isShort args:
   expect_equal(icd9_filter_valid(pts_invalid_mix, short_code = TRUE, invert = TRUE), pts_invalid_mix[2, ])
   expect_equal(icd9_filter_valid(pts_invalid_mix, short_code = TRUE, invert = FALSE), pts_invalid_mix[c(1, 3), ])
 })
@@ -462,22 +460,6 @@ test_that("an invalid short code is not billable decimal", {
   expect_true(icd_is_billable("41000", short_code = TRUE))
   expect_false(icd_is_billable("410.00", short_code = TRUE))
   expect_true(icd_is_billable("410.00", short_code = FALSE))
-})
-
-
-test_that("valid short n", {
-  x <- icd9RandomShortN(100)
-  expect_true(all(icd9_is_valid_short_n(x)))
-})
-
-test_that("valid short v", {
-  x <- icd9RandomShortV(100)
-  expect_true(all(icd9_is_valid_short_v(x)))
-})
-
-test_that("valid short e", {
-  x <- icd9RandomShortE(100)
-  expect_true(all(icd9_is_valid_short_e(x)))
 })
 
 test_that("icd9 and icd10 get valid gives same type as input", {

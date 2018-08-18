@@ -19,8 +19,6 @@ context("Generic comorbidity calculation")
 
 test_that("comorbid quick test", {
   testres <- icd9_comorbid(two_pts, two_map, return_df = TRUE)
-  testres_cat <- categorize(two_pts, two_map, return_df = TRUE,
-                            id_name = "visit_id", code_name = "icd9")
   testres_cat_simple <- categorize_simple(two_pts, two_map, return_df = TRUE,
                                           id_name = "visit_id", code_name = "icd9")
   trueres <- data.frame("visit_id" = c("v01", "v02"),
@@ -28,7 +26,6 @@ test_that("comorbid quick test", {
                         "ailment" = c(TRUE, FALSE),
                         stringsAsFactors = FALSE)
   expect_equal(testres, trueres)
-  expect_equal(testres_cat, trueres)
   expect_equal(testres_cat_simple, trueres)
   testmat <- icd9_comorbid(two_pts, two_map, return_df = FALSE)
   truemat <- matrix(c(FALSE, TRUE, TRUE, FALSE), nrow = 2,
@@ -50,8 +47,8 @@ test_that("failing example", {
                      icd9 = c("441", "412.93", "042"))
   cmb <- icd9_comorbid_quan_deyo(mydf, short_code = FALSE, hierarchy = TRUE)
   expect_false("names" %in% names(attributes(cmb)))
-  charlson(mydf, isShort = FALSE)
-  expect_is(charlson(mydf, isShort = FALSE, return_df = TRUE), "data.frame")
+  charlson(mydf, short_code = FALSE)
+  expect_is(charlson(mydf, short_code = FALSE, return_df = TRUE), "data.frame")
   charlson_from_comorbid(cmb)
 })
 
@@ -65,34 +62,6 @@ test_that("disordered visit_ids works by default", {
   expect_equal(sum(tres), sum(cres))
   expect_true(setequal(rownames(tres), rownames(cres)))
   expect_equal(colnames(tres), colnames(cres))
-})
-
-test_that("smaller test case based on random input", {
-  small_ccs_df <- data.frame(
-    visit_id = c("p1", "p2", "p1"),
-    code = c("C", "B", "A")
-  )
-  small_ccs_map <- list(X = "C",
-                        Y = "B",
-                        Z = "A")
-  # this simple map results in the map being the identity matrix
-  expected_res <- matrix(byrow = TRUE,
-                         data = c(TRUE, FALSE, TRUE,
-                                  FALSE, TRUE, FALSE),
-                         nrow = 2, ncol = 3,
-                         dimnames = list(c("p1", "p2"),
-                                         c("X", "Y", "Z"))
-  )
-  res <- comorbid_common(small_ccs_df, map = small_ccs_map,
-                         visit_name = "visit_id", icd_name = "code")
-  res2 <- comorbid_common(small_ccs_df, map = small_ccs_map,
-                          visit_name = "visit_id", icd_name = "code",
-                          categorize_fun = categorize,
-                          comorbid_fun = icd:::icd9ComorbidShortCpp)
-  # compare all three ways, for development only
-  expect_identical(res, expected_res)
-  expect_identical(res2, expected_res)
-  expect_identical(res, res2)
 })
 
 context("ICD-9 comorbidity calculations")
@@ -438,9 +407,6 @@ test_that("code appearing in two icd9 comorbidities", {
                    matrix(c(TRUE, TRUE), nrow = 1, dimnames = list("1", c("a", "b")))
   )
   dat_clean <- data.frame(id = "1", icd9 = factor("123"), stringsAsFactors = FALSE)
-  expect_identical(res, icd9_comorbid(dat_clean, map,
-                                      comorbid_fun = icd:::icd9ComorbidShortCpp,
-                                      categorize_fun = categorize))
 })
 
 test_that("comorbid for icd9 gives binary values if asked for matrices", {
@@ -466,17 +432,6 @@ test_that("comorbid for icd9 gives binary values if asked for data.frames", {
   expect_identical(res_log, binary_to_logical(res_bin))
 })
 
-test_that("binary output for PCCC", {
-  res_bin <- comorbid_pccc_dx(random_test_patients,
-                              return_binary = TRUE, return_df = TRUE)
-  res_log <- comorbid_pccc_dx(random_test_patients,
-                              return_binary = FALSE, return_df = TRUE)
-  expect_true(all(vapply(res_bin[-1], is.integer, logical(1))))
-  expect_true(all(vapply(res_log[-1], is.logical, logical(1))))
-  expect_identical(res_bin, logical_to_binary(res_log))
-  expect_identical(res_log, binary_to_logical(res_bin))
-})
-
 test_that("binary output for CCS", {
   res_bin <- comorbid_ccs(random_test_patients,
                           return_binary = TRUE, return_df = TRUE)
@@ -493,7 +448,7 @@ test_that("integer visit IDs", {
   d$visit_id <- -1L
   mat_res <- comorbid_ahrq(d)
   expect_identical(rownames(mat_res), as.character(unique(d$visit_id)))
-  df_res <- comorbid_ahrq(d, return_df = TRUE, preserve_visit_id_type = TRUE)
+  df_res <- comorbid_ahrq(d, return_df = TRUE, preserve_id_type = TRUE)
   expect_identical(df_res$visit_id, d[1, "visit_id"])
 })
 
@@ -502,6 +457,6 @@ test_that("float visit IDs", {
   d$visit_id <- -1.7
   mat_res <- comorbid_ahrq(d)
   expect_identical(rownames(mat_res), as.character(unique(d$visit_id)))
-  df_res <- comorbid_ahrq(d, return_df = TRUE, preserve_visit_id_type = TRUE)
+  df_res <- comorbid_ahrq(d, return_df = TRUE, preserve_id_type = TRUE)
   expect_identical(df_res$visit_id, d[1, "visit_id"])
 })

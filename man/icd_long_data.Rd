@@ -7,7 +7,6 @@
 \alias{icd_wide_data}
 \alias{is.icd_long_data}
 \alias{is.icd_wide_data}
-\alias{icd_long_data}
 \title{Convert between and identify 'long' and 'wide' patient data formats}
 \usage{
 as.icd_long_data(x)
@@ -55,13 +54,17 @@ Long or wide format ICD data is expected to be in a data frame. It
 \code{icd_wide_data}. To convert long to wide data, use
 \code{\link{long_to_wide}}.
 
-\item \code{icd_long_data}: Construct a \code{data.frame}, adding the \code{icd_long_data} class.
+\item \code{icd_long_data}: Construct a \code{data.frame}, adding the
+\code{icd_long_data} class.
 
-\item \code{icd_wide_data}: Construct a \code{data.frame}, adding the \code{icd_wide_data} class.
+\item \code{icd_wide_data}: Construct a \code{data.frame}, adding the
+\code{icd_wide_data} class.
 
-\item \code{is.icd_long_data}: Return \code{TRUE} if \code{x} has the \code{icd_long_data} class.
+\item \code{is.icd_long_data}: Return \code{TRUE} if \code{x} has the
+\code{icd_long_data} class.
 
-\item \code{is.icd_wide_data}: Return \code{TRUE} if \code{x} has the \code{icd_wide_data} class.
+\item \code{is.icd_wide_data}: Return \code{TRUE} if \code{x} has the
+\code{icd_wide_data} class.
 }}
 
 \seealso{
@@ -71,3 +74,4 @@ Other ICD code conversion: \code{\link{convert}},
 Other ICD code conversion: \code{\link{convert}},
   \code{\link{long_to_wide}}, \code{\link{wide_to_long}}
 }
+\concept{ICD code conversion}

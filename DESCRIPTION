@@ -1,7 +1,6 @@
 Package: icd
-Title: Tools for Working with ICD-9 and ICD-10 Codes, and Finding
-        Comorbidities
-Version: 3.2.0
+Title: Comorbidity Calculations and Tools for ICD-9 and ICD-10 Codes
+Version: 3.2.1
 Authors@R: 
     c(person(given = "Jack O.",
              family = "Wasey",
@@ -30,44 +29,44 @@ Authors@R:
       person(given = "Kevin",
              family = "Ushey",
              role = "ctb",
-             comment = "Code adapted for fast factor generation"),
-      person(given = "R Core Team",
-             role = c("ctb", "cph"),
-             comment = "m4 macro for OpenMP detection in configure"))
+             comment = "Code adapted for fast factor generation"))
 Maintainer: Jack O. Wasey <jack@jackwasey.com>
-Description: Calculate comorbidities, Charlson scores, perform
-    fast and accurate validation, conversion, manipulation, filtering and
-    comparison of ICD-9 and ICD-10 codes. This package enables a work flow
-    from raw lists of ICD codes in hospital databases to
-    comorbidities. ICD-9 and ICD-10 comorbidity mappings from Quan (Deyo
-    and Elixhauser versions), Elixhauser and AHRQ included.  Common
-    ambiguities and code formats are handled.
+Description: Calculate comorbidities, Charlson and van Walraven
+    scores, perform fast and accurate validation, conversion,
+    manipulation, filtering and comparison of ICD-9 and ICD-10 codes. This
+    package enables a work flow from raw lists of ICD codes in hospital
+    databases to comorbidities.  ICD-9 and ICD-10 comorbidity mappings
+    from Quan (Deyo and Elixhauser versions), Elixhauser and AHRQ
+    included.  Common ambiguities and code formats are handled.
 License: GPL-3
 URL: https://jackwasey.github.io/icd/
 BugReports: https://github.com/jackwasey/icd/issues
 Depends: R (>= 3.4), icd.data
-Imports: checkmate (>= 1.7.0), magrittr, stats, Rcpp (>= 0.12.3), utils
+Imports: checkmate (>= 1.7.0), magrittr, methods, stats, Rcpp (>=
+        0.12.3), utils
 Suggests: knitr, roxygen2 (>= 5.0.0), rmarkdown, rticles, testthat (>=
         0.11.1), tinytex, xml2
-LinkingTo: Rcpp, RcppEigen, testthat
+LinkingTo: Rcpp (>= 0.12.3), RcppEigen, testthat
 VignetteBuilder: knitr
 ByteCompile: true
+SystemRequirements: pandoc >= 2.2 to build the JSS vignette
 Classification/ACM-2012: Social and professional topics~Medical
         records, Applied computing~Health care information systems,
         Applied computing~Health informatics, Applied
         computing~Bioinformatics
 Copyright: See file (inst/)COPYRIGHTS
+Encoding: UTF-8
+Language: en-US
 LazyData: true
 LazyDataCompression: xz
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 NeedsCompilation: yes
-Packaged: 2018-06-07 10:07:13 UTC; jack
+Packaged: 2018-08-13 13:07:43 UTC; jack
 Author: Jack O. Wasey [aut, cre, cph] (<https://orcid.org/0000-0003-3738-4637>),
   William Murphy [ctb] (Van Walraven scores),
   Anobel Odisho [ctb] (Hierarchical Condition Codes),
   Vitaly Druker [ctb] (AHRQ CCS),
   Ed Lee [ctb] (explain codes in table format),
-  Kevin Ushey [ctb] (Code adapted for fast factor generation),
-  R Core Team [ctb, cph] (m4 macro for OpenMP detection in configure)
+  Kevin Ushey [ctb] (Code adapted for fast factor generation)
 Repository: CRAN
-Date/Publication: 2018-06-07 17:43:27 UTC
+Date/Publication: 2018-08-18 17:30:02 UTC

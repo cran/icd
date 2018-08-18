@@ -15,14 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with icd. If not, see <http://www.gnu.org/licenses/>.
 
-// [[Rcpp::interfaces(r, cpp)]]
-#include "icd_types.h"                       // for VecStr, CV, Str
+#include "icd_types.h"
+#include "is.h"                              // for icd9IsASingleVE
 #include <string.h>                          // for strlen
 #include <algorithm>                         // for fill
 #include <iterator>                          // for distance
 #include <string>                            // for basic_string, operator!=
 #include <vector>                            // for vector, vector<>::iterator
-#include "is.h"                              // for icd9IsASingleVE
 
 //' Convert \code{mjr} and \code{mnr} vectors to single code
 //'
@@ -125,10 +124,6 @@ CV icd9MajMinToDecimal(const CV mjr, const CV mnr) {
   return icd9MajMinToCode(mjr, mnr, false);
 }
 
-//' append minor to major using std
-//'
-//' benefits from having reserve string size of 5
-//' @keywords internal
 // [[Rcpp::export]]
 void icd9AppendMinors(VecStr& m, const VecStr& mnr, bool isShort) {
   VecStr::size_type mjsz = m.size();

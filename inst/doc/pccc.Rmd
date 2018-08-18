@@ -1,16 +1,19 @@
 ---
 title: "Pediatric Complex Chronic Conditions"
 author: "Jack O. Wasey"
-date: "May 18, 2018"
-output: html_document
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
 vignette: >
   %\VignetteIndexEntry{Pediatric Complex Chronic Conditions}
   %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteDepends{}
   \usepackage[utf8]{inputenc}
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(icd)
+library("icd")
 n <- 10000
 set.seed(1441)
 dat <- data.frame(id = n + seq(n),
@@ -25,7 +28,7 @@ dat <- data.frame(id = n + seq(n),
 
 ## Introduction
 
-The adult comorbidities defined by authors such as Charlson, Quan and Elixhuaser are not suitable for pediatric research. Feudtner and others produced comorbidity definitions suitable for infants and children, with mappings defined for both ICD-9 and ICD-10 codes. These are now included in `icd`.
+The adult comorbidities defined by authors such as Charlson, Quan and Elixhuaser are not suitable for pediatric research. Feudtner and others produced comorbidity definitions suitable for infants and children, with mappings defined for both ICD-9 and ICD-10 codes. These are now included in the [icd package](https://cran.r-project.org/package=icd) for R, which enables [fast calculation of comorbidities](introduction.html) for PCCC and other ICD code to comorbidity maps.
 
 ## Calculating PCCC comorbidities.
 
@@ -44,7 +47,7 @@ head(pcs)
 Now the PCCC comorbidity classes can be computed and summarized in a plot:
 ```{r calc}
 pccc_dx <- comorbid_pccc_dx(dx)
-pccc_pcs <- icd10_comorbid_pccc_pcs(pcs, map = icd10_map_pccc_pcs, 
+pccc_pcs <- icd10_comorbid_pccc_pcs(pcs, 
                                     visit_name = "id", icd_name = "pcs")
 res <- pccc_dx | pccc_pcs
 ```

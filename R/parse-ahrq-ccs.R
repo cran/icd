@@ -45,7 +45,9 @@ icd10_fetch_ahrq_ccs <- function(version = "2018.1", offline) {
   version <- gsub(".", "_", version, fixed = TRUE)
   # all information in one file, no need for single vs multi
   unzip_to_data_raw(
-    url = paste0("https://www.hcup-us.ahrq.gov/toolssoftware/ccs10/ccs_dx_icd10cm_", version, ".zip"),
+    url = paste0(
+      "https://www.hcup-us.ahrq.gov/toolssoftware/ccs10/ccs_dx_icd10cm_",
+      version, ".zip"),
     file_name = paste0("ccs_dx_icd10cm_", version, ".csv"),
     offline = offline)
 }
@@ -63,13 +65,14 @@ icd10_fetch_ahrq_ccs <- function(version = "2018.1", offline) {
 #' @importFrom utils read.csv
 #' @examples
 #' \dontrun{
-#'   icd:::icd9_parse_ahrq_ccs(single = TRUE, save_data = FALSE, offline = FALSE)
-#'   icd:::icd9_parse_ahrq_ccs(single = TRUE, save_data = FALSE, offline = TRUE)
-#'   icd:::icd9_parse_ahrq_ccs(single = FALSE, save_data = FALSE, offline = FALSE)
-#'   icd:::icd9_parse_ahrq_ccs(single = FALSE, save_data = FALSE, offline = TRUE)
+#'   icd:::icd9_parse_ahrq_ccs(single = TRUE, offline = FALSE)
+#'   icd:::icd9_parse_ahrq_ccs(single = TRUE, offline = TRUE)
+#'   icd:::icd9_parse_ahrq_ccs(single = FALSE, offline = FALSE)
+#'   icd:::icd9_parse_ahrq_ccs(single = FALSE, offline = TRUE)
 #' }
 #' @keywords internal manip
-icd9_parse_ahrq_ccs <- function(single = TRUE, save_data = FALSE, offline = TRUE) {
+icd9_parse_ahrq_ccs <- function(single = TRUE, save_data = FALSE,
+                                offline = TRUE) {
   assert_flag(single)
   assert_flag(save_data)
   assert_flag(offline)
@@ -90,7 +93,8 @@ icd9_parse_ahrq_ccs <- function(single = TRUE, save_data = FALSE, offline = TRUE
     lvls <- lvls %>%
       unlist %>%
       as.numeric %>%
-      matrix(ncol = number_splits, byrow = TRUE, dimnames  = list(rownames = lvls_names[lvls_names != " "]))
+      matrix(ncol = number_splits, byrow = TRUE,
+             dimnames  = list(rownames = lvls_names[lvls_names != " "]))
     # complicated call needed or order using all columns of matrix
     lvls <- lvls[do.call(order, as.data.frame(lvls)), ]
     if (is.null(dim(lvls)))
@@ -120,7 +124,8 @@ icd9_parse_ahrq_ccs <- function(single = TRUE, save_data = FALSE, offline = TRUE
       save_in_data_dir("icd9_map_multi_ccs")
     out <- icd9_map_multi_ccs
   } else {
-    ahrq_df <- read.csv(ahrq_ccs$file_path, quote = "'\"", colClasses = "character", skip = 1)
+    ahrq_df <- read.csv(ahrq_ccs$file_path, quote = "'\"",
+                        colClasses = "character", skip = 1)
     icd9_map_single_ccs <-
       tapply(ahrq_df[["ICD.9.CM.CODE"]], trimws(ahrq_df$CCS.CATEGORY), clean_icd9) %>%
       resort_lvls %>%
@@ -188,9 +193,9 @@ icd10_parse_ahrq_ccs <- function(version = "2018.1",
       )
     # complicated call needed or order using all columns of matrix
     lvls <- lvls[do.call(order, as.data.frame(lvls)), ]
+    # if only looking at lvl1, then this becomes a vector, not a matrix
     if (is.null(dim(lvls)))
-      lvls <-
-      names(lvls) # if only looking at lvl1, then this becomes a vector, not a matrix
+      lvls <- names(lvls)
     else
       lvls <- rownames(lvls)
     if (lvls_has_empty)

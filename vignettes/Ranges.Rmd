@@ -1,15 +1,14 @@
 ---
 title: "Ranges of ICD codes"
 author: "Jack O. Wasey"
-date: "8 May, 2018"
+date: "`r Sys.Date()`"
 output:
   html_document:
-    toc: yes
-  pdf_document:
     toc: yes
 vignette: >
   %\VignetteIndexEntry{Ranges of ICD codes}
   %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteDepends{magrittr, utils}
   \usepackage[utf8]{inputenc}
 ---
 <!--
@@ -34,9 +33,9 @@ along with icd. If not, see <http:#www.gnu.org/licenses/>.
 suppressWarnings({
   suppressPackageStartupMessages({
     loadNamespace("knitr") # for opts_chunk only
-    library(icd)
-    library(magrittr)
-    library(utils)
+    library("icd")
+    library("magrittr")
+    library("utils")
     })
   })
 

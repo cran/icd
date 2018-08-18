@@ -4,12 +4,12 @@
 \alias{rtf_parse_year}
 \title{parse RTF description of entire ICD-9-CM for a specific year}
 \source{
-http://ftp.cdc.gov/pub/Health_Statistics/NCHS/Publications/ICD9-CM/2011/Dtab12.zip
-and similar files run from 1996 to 2011.
+\url{https://www.cdc.gov/nchs/icd/icd9cm.htm} Navigate to
+'Dtab12.zip' in the 2011 data. and similar files run from 1996 to 2011.
 }
 \usage{
-rtf_parse_year(year = "2011", ..., save_data = FALSE, verbose = FALSE,
-  offline = TRUE)
+rtf_parse_year(year = "2011", ..., save_data = FALSE,
+  verbose = FALSE, offline = TRUE)
 }
 \arguments{
 \item{year}{from 1996 to 2012 (this is what CDC has published). Only 2012
@@ -30,4 +30,5 @@ CDC release is \code{Dtab12.rtf} from 2011.
 The file itself is 7 bit ASCII, but has its own internal encoding using
 'CP1252.' Test 'Meniere's' disease with lines 24821 to 24822 from 2012 RTF
 }
+\keyword{datagen}
 \keyword{internal}
