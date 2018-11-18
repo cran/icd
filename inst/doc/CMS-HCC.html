@@ -12,7 +12,7 @@
 <meta name="author" content="Andrew Cooper (original)" />
 <meta name="author" content="Jack Wasey (minor updates)" />
 
-<meta name="date" content="2018-08-13" />
+<meta name="date" content="2018-11-18" />
 
 <title>Using Hierarchical Condition Codes</title>
 
@@ -311,7 +311,7 @@ $(document).ready(function () {
 <h1 class="title toc-ignore">Using Hierarchical Condition Codes</h1>
 <h4 class="author"><em>Andrew Cooper (original)</em></h4>
 <h4 class="author"><em>Jack Wasey (minor updates)</em></h4>
-<h4 class="date"><em>2018-08-13</em></h4>
+<h4 class="date"><em>2018-11-18</em></h4>
 
 </div>
 
@@ -320,8 +320,9 @@ $(document).ready(function () {
 <p>HCC is designed to categorize the risk level of a patient with chronic or serious illness using diagnoses and demographic information. Healthcare providers implement HCC in payment models for patients, as it can help predict the amount of services a patient will need in the future. HCC can be a useful tool in analysis with ICD codes, and the ICD package provides methods to use them.</p>
 <p>HCC first assigns ICD codes to Condition Categories (CC). Condition categories are numeric values ranked based on severity/risk. If an ICD code belongs to more than one CC, the most severe CC is assigned. In other words, HCC classifies patients based on their most severe conditions.</p>
 <p>We can see the mapping of ICD-9 and ICD-10 codes to HCC with the <code>icd9_map_cc</code> and <code>icd10_map_cc</code> data.</p>
-<pre class="r"><code>library(&quot;icd&quot;)
-head(icd9_map_cc)</code></pre>
+<pre class="r"><code>library(&quot;icd&quot;)</code></pre>
+<pre><code>## Loading required package: icd.data</code></pre>
+<pre class="r"><code>head(icd9_map_cc)</code></pre>
 <pre><code>##   icd_code  cc year
 ## 1     0031   2 2007
 ## 2    00322 112 2007

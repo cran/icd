@@ -14,6 +14,9 @@ knitr::opts_chunk$set(
 ## ----uranium-long--------------------------------------------------------
 uranium_pathology[1:10, ]
 
+## ----explain10-----------------------------------------------------------
+explain_code("R55")
+
 ## ----uranium-wide--------------------------------------------------------
 uranium_pathology %>% long_to_wide %>% head
 
@@ -25,7 +28,8 @@ quan_comorbidities[1:6, 3:10]
 ## ----cholera-------------------------------------------------------------
 # create trivial comorbidity map:
 cholera_typhoid_map <- list(cholera = "A00", typhoid = "A01")
-patients <- data.frame(patient = c("0001", "0001", "0002"), code = c("A001234567", "A01", "A019"))
+patients <- data.frame(patient = c("0001", "0001", "0002"), 
+                       code = c("A001234567", "A01", "A019"))
 comorbid(patients , map = cholera_typhoid_map)
 
 ## ----htncx---------------------------------------------------------------

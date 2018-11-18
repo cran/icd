@@ -3,7 +3,7 @@
 #include <stdlib.h> // for NULL
 #include <R_ext/Rdynload.h>
 
-/* FIXME: 
+/* FIXME:
    Check these declarations against the C/Fortran source code.
 */
 
@@ -24,7 +24,6 @@ extern SEXP _icd_icd9AddLeadingZeroes(SEXP, SEXP);
 extern SEXP _icd_icd9AddLeadingZeroesMajor(SEXP);
 extern SEXP _icd_icd9AddLeadingZeroesMajorSingle(SEXP);
 extern SEXP _icd_icd9AddLeadingZeroesMajorSingleStd(SEXP);
-extern SEXP _icd_icd9AppendMinors(SEXP, SEXP, SEXP);
 extern SEXP _icd_icd9ChildrenCpp(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_icd9ChildrenDecimalCpp(SEXP, SEXP, SEXP);
 extern SEXP _icd_icd9ChildrenShort(SEXP, SEXP, SEXP);
@@ -33,7 +32,7 @@ extern SEXP _icd_icd9DecimalToPartsCpp(SEXP, SEXP);
 extern SEXP _icd_icd9DecimalToShort(SEXP);
 extern SEXP _icd_icd9ExpandMinor(SEXP, SEXP);
 extern SEXP _icd_icd9GetMajor(SEXP, SEXP);
-extern SEXP _icd_icd9LongToWideCpp(SEXP, SEXP, SEXP, SEXP);
+extern SEXP _icd_longToWideCpp(SEXP, SEXP, SEXP, SEXP);
 extern SEXP _icd_icd9MajMinToCode(SEXP, SEXP, SEXP);
 extern SEXP _icd_icd9MajMinToDecimal(SEXP, SEXP);
 extern SEXP _icd_icd9MajMinToParts(SEXP, SEXP);
@@ -74,7 +73,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_icd_icd9AddLeadingZeroesMajor",          (DL_FUNC) &_icd_icd9AddLeadingZeroesMajor,          1},
     {"_icd_icd9AddLeadingZeroesMajorSingle",    (DL_FUNC) &_icd_icd9AddLeadingZeroesMajorSingle,    1},
     {"_icd_icd9AddLeadingZeroesMajorSingleStd", (DL_FUNC) &_icd_icd9AddLeadingZeroesMajorSingleStd, 1},
-    {"_icd_icd9AppendMinors",                   (DL_FUNC) &_icd_icd9AppendMinors,                   3},
     {"_icd_icd9ChildrenCpp",                    (DL_FUNC) &_icd_icd9ChildrenCpp,                    4},
     {"_icd_icd9ChildrenDecimalCpp",             (DL_FUNC) &_icd_icd9ChildrenDecimalCpp,             3},
     {"_icd_icd9ChildrenShort",                  (DL_FUNC) &_icd_icd9ChildrenShort,                  3},
@@ -83,7 +81,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_icd_icd9DecimalToShort",                 (DL_FUNC) &_icd_icd9DecimalToShort,                 1},
     {"_icd_icd9ExpandMinor",                    (DL_FUNC) &_icd_icd9ExpandMinor,                    2},
     {"_icd_icd9GetMajor",                       (DL_FUNC) &_icd_icd9GetMajor,                       2},
-    {"_icd_icd9LongToWideCpp",                  (DL_FUNC) &_icd_icd9LongToWideCpp,                  4},
+    {"_icd_longToWideCpp",                      (DL_FUNC) &_icd_longToWideCpp,                  4},
     {"_icd_icd9MajMinToCode",                   (DL_FUNC) &_icd_icd9MajMinToCode,                   3},
     {"_icd_icd9MajMinToDecimal",                (DL_FUNC) &_icd_icd9MajMinToDecimal,                2},
     {"_icd_icd9MajMinToParts",                  (DL_FUNC) &_icd_icd9MajMinToParts,                  2},

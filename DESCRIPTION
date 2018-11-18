@@ -1,6 +1,6 @@
 Package: icd
 Title: Comorbidity Calculations and Tools for ICD-9 and ICD-10 Codes
-Version: 3.2.1
+Version: 3.3
 Authors@R: 
     c(person(given = "Jack O.",
              family = "Wasey",
@@ -25,11 +25,7 @@ Authors@R:
       person(given = "Ed",
              family = "Lee",
              role = "ctb",
-             comment = "explain codes in table format"),
-      person(given = "Kevin",
-             family = "Ushey",
-             role = "ctb",
-             comment = "Code adapted for fast factor generation"))
+             comment = "explain codes in table format"))
 Maintainer: Jack O. Wasey <jack@jackwasey.com>
 Description: Calculate comorbidities, Charlson and van Walraven
     scores, perform fast and accurate validation, conversion,
@@ -59,14 +55,13 @@ Encoding: UTF-8
 Language: en-US
 LazyData: true
 LazyDataCompression: xz
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 NeedsCompilation: yes
-Packaged: 2018-08-13 13:07:43 UTC; jack
+Packaged: 2018-11-18 13:13:28 UTC; jack
 Author: Jack O. Wasey [aut, cre, cph] (<https://orcid.org/0000-0003-3738-4637>),
   William Murphy [ctb] (Van Walraven scores),
   Anobel Odisho [ctb] (Hierarchical Condition Codes),
   Vitaly Druker [ctb] (AHRQ CCS),
-  Ed Lee [ctb] (explain codes in table format),
-  Kevin Ushey [ctb] (Code adapted for fast factor generation)
+  Ed Lee [ctb] (explain codes in table format)
 Repository: CRAN
-Date/Publication: 2018-08-18 17:30:02 UTC
+Date/Publication: 2018-11-18 17:40:07 UTC

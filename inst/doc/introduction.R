@@ -24,8 +24,12 @@ patients_icd9 <- data.frame(
 library(icd)
 head(uranium_pathology, 10)
 head(comorbid_charlson(uranium_pathology))
-comorbid_charlson(uranium_pathology, return_df = TRUE)[1:5, 1:5]
-hist(charlson(uranium_pathology))
+comorbid_charlson(uranium_pathology, 
+                  return_df = TRUE,
+                  return_binary = TRUE)[1:5, 1:5]
+hist(charlson(uranium_pathology), 
+     main = "Histogram of Charlson scores in Uranium data",
+     xlab = "Charlson Score")
 
 ## ----pkgdesc, results='asis', echo = FALSE-------------------------------
 cat(utils::packageDescription("icd")$Description)
@@ -63,8 +67,9 @@ vermont_cmb <- vermont_dx %>% wide_to_long %>%
 
 head(vermont_cmb)
 
-barplot(colSums(vermont_cmb[,1:5]),
-        main = "Histogram of Elixhauser Comorbidities in Vermont data")
+barplot(colSums(vermont_cmb[, 1:5]),
+        main = "Incidence of Elixhauser Comorbidities in Vermont data")
+
 
 
 ## ----lots of brackets, eval = FALSE--------------------------------------
@@ -150,7 +155,6 @@ patients_icd9 %>% filter_poa_yes
 patients_icd9 %>% filter_poa_not_no
 
 ## ----ahrq----------------------------------------------------------------
-#icd9_map_ahrq <- icd:::sas_parse_ahrq() # user doesn't need to do this
 names(icd9_map_ahrq)
 icd9_map_ahrq$CHF[1:5]
 icd10_map_ahrq$CHF[1:5]

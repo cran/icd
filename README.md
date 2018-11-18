@@ -1,12 +1,3 @@
-|                           |
-|---------------------------|
-| title: icd Readme         |
-| output:                   |
-| md\_document:             |
-| variant: markdown\_github |
-| date: “August 08, 2018”   |
-| author: Jack O. Wasey     |
-
 <!--
 Copyright (C) 2014 - 2018  Jack O. Wasey
 
@@ -27,11 +18,12 @@ along with icd. If not, see <http:#www.gnu.org/licenses/>.
 -->
 <!-- README.md is generated from README.Rmd. Please edit that file and render with rmarkdown::render("README.Rmd")
 -->
+
 icd
 ===
 
 [![CRAN](https://www.r-pkg.org/badges/version/icd "CRAN")](https://cran.r-project.org/package=icd)
-[![GitHub](https://img.shields.io/badge/devel%20version-3.2.1-blue.svg?style=flat "GitHub")](https://github.com/jackwasey/icd)
+[![GitHub](https://img.shields.io/badge/devel%20version-3.2.2-blue.svg?style=flat "GitHub")](https://github.com/jackwasey/icd)
 [![Travis](https://travis-ci.org/jackwasey/icd.svg?branch=master "Travis Build Status")](https://travis-ci.org/jackwasey/icd)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/9ncfgxht3n5i8t60/branch/master?svg=true "Appveyor Build Status")](https://ci.appveyor.com/project/jackwasey/icd/branch/master)
 [![codecov.io](https://codecov.io/github/jackwasey/icd/coverage.svg?branch=master "Core Code Coverage")](https://codecov.io/github/jackwasey/icd?branch=master)
@@ -45,40 +37,6 @@ week](https://cranlogs.r-pkg.org/badges/last-week/icd "RStudio Mirror Downloads 
 Comorbidities from ICD-9 and ICD-10 codes, manipulation and validation
 ======================================================================
 
-Features
---------
-
--   find comorbidities of patients based on admission or discharge ICD-9
-    or ICD-10 codes, e.g. Cancer, Heart Disease
-    -   several standard mappings of ICD codes to comorbidities are
-        included (Quan, Deyo, Elixhauser, AHRQ, PCCC)
-    -   very fast assignment of ICD codes to comorbidities (using matrix
-        multiplication with C and C++ internally)
--   summarizing groups of ICD codes in natural language
--   Charlson and Van Walraven score calculations
--   Hierarchical Condition Codes (HCC) from CMS
--   Clinical Classifcations Software (CCS) comorbidities from AHRQ
--   Pediatric Complex Chronic Condition comorbidities
--   AHRQ ICD-10 procedure code classification
--   validation of ICD codes from different annual revisions of ICD-9-CM
-    and ICD-10-CM
--   correct conversion between different representations of ICD codes,
-    with and without a decimal points, leading and trailing characters
-    (this is not trivial for ICD-9-CM). ICD-9 to ICD-10 cross-walk is
-    not yet implemented
--   comprehensive test suite to increase confidence in accurate
-    processing of ICD codes
--   all internal ICD and comorbidity data is extracted directly from
-    publically available data or code, increasing confidence in the
-    results
-
-Install
--------
-
-``` r
-install.packages("icd")
-```
-
 Introduction
 ------------
 
@@ -89,6 +47,86 @@ from raw lists of ICD codes in hospital databases to comorbidities.
 ICD-9 and ICD-10 comorbidity mappings from Quan (Deyo and Elixhauser
 versions), Elixhauser and AHRQ included. Common ambiguities and code
 formats are handled.
+
+`icd` is used by many researchers around the world who work in public
+health, epidemiology, clinical research, nutrition, journalism, health
+administration and more. I’m grateful for contact from people in these
+fields for their feedback and code contributions, and I’m pleased to say
+that `icd` has been used in works like the [Pulitzer
+finalist](http://www.pulitzer.org/finalists/staff-propublica) work on
+[maternal death](http://www.pulitzer.org/finalists/staff-propublica) by
+[ProPublica](https://www.propublica.org).
+
+Features
+--------
+
+-   find comorbidities of patients based on ICD-9 or ICD-10 codes,
+    e.g. Cancer, Heart Disease
+    -   several standard mappings of ICD codes to comorbidities are
+        included (Quan, Deyo, Elixhauser, AHRQ, PCCC)
+    -   *very fast* assignment of ICD codes to comorbidities (using
+        novel matrix multiplication algorithm and C++ internally)
+-   use your existing data format, minimizing requirements for
+    pre-processing
+-   summarize groups of ICD codes in natural language
+-   Charlson and Van Walraven score calculations
+-   Hierarchical Condition Codes (HCC) from CMS
+-   Clinical Classifcations Software (CCS) comorbidities from AHRQ
+-   Pediatric Complex Chronic Condition comorbidities
+-   AHRQ ICD-10 procedure code classification
+-   annual revisions of ICD-9-CM and ICD-10-CM
+-   correct conversion between different representations of ICD codes,
+    with and without a decimal points, leading and trailing characters
+    (this is not trivial for ICD-9-CM). ICD-9 to ICD-10 cross-walk is
+    not yet implemented
+-   comprehensive test suite to increase confidence in accurate
+    processing of ICD codes
+-   all internal ICD and comorbidity data is extracted directly from
+    public data or code, allowing end-to-end reproducibility
+-   used, tested and benchmarked against other comorbidity calculators
+    on hardware from laptops to big servers
+
+Examples
+--------
+
+See also the vignettes and examples embedded in the help for each
+function for more. Here’s a taste:
+
+``` r
+# install.packages("icd")
+library(icd)
+
+# Typical diagnostic code data, with many-to-many relationship
+patient_data
+#>   visit_id  icd9
+#> 1     1000 40201
+#> 2     1000  2258
+#> 3     1000  7208
+#> 4     1000 25001
+#> 5     1001 34400
+#> 6     1001  4011
+#> 7     1002  4011
+#> 8     1000  <NA>
+
+# get comorbidities using Quan's application of Deyo's Charlson comorbidity groups
+comorbid_charlson(patient_data)
+#>         MI   CHF   PVD Stroke Dementia Pulmonary Rheumatic   PUD LiverMild
+#> 1000 FALSE  TRUE FALSE  FALSE    FALSE     FALSE     FALSE FALSE     FALSE
+#> 1001 FALSE FALSE FALSE  FALSE    FALSE     FALSE     FALSE FALSE     FALSE
+#> 1002 FALSE FALSE FALSE  FALSE    FALSE     FALSE     FALSE FALSE     FALSE
+#>         DM  DMcx Paralysis Renal Cancer LiverSevere  Mets   HIV
+#> 1000  TRUE FALSE     FALSE FALSE  FALSE       FALSE FALSE FALSE
+#> 1001 FALSE FALSE      TRUE FALSE  FALSE       FALSE FALSE FALSE
+#> 1002 FALSE FALSE     FALSE FALSE  FALSE       FALSE FALSE FALSE
+
+# or go straight to the Charlson scores:
+charlson(patient_data)
+#> 1000 1001 1002 
+#>    2    2    0
+
+# for more examples, see this and other vignettes
+vignette("introduction", package = "icd")
+```
 
 Relevance
 ---------
@@ -142,63 +180,27 @@ ICD-10, but comorbidities can be generated from older ICD-9 codes and
 newer ICD-10 codes in parallel, and the comorbidities can then be
 compared.
 
-Examples
---------
-
-See also the vignettes and examples embedded in the help for each
-function for more. Here’s a taste:
-
-``` r
-patient_data
-#>   visit_id  icd9  poa
-#> 1     1000 40201    Y
-#> 2     1000  2258 <NA>
-#> 3     1000  7208    N
-#> 4     1000 25001    Y
-#> 5     1001 34400    X
-#> 6     1001  4011    Y
-#> 7     1002  4011    E
-
-# get comorbidities using Quan's application of Deyo's Charlson comorbidity groups
-comorbid_charlson(patient_data)
-#>         MI   CHF   PVD Stroke Dementia Pulmonary Rheumatic   PUD LiverMild
-#> 1000 FALSE  TRUE FALSE  FALSE    FALSE     FALSE     FALSE FALSE     FALSE
-#> 1001 FALSE FALSE FALSE  FALSE    FALSE     FALSE     FALSE FALSE     FALSE
-#> 1002 FALSE FALSE FALSE  FALSE    FALSE     FALSE     FALSE FALSE     FALSE
-#>         DM  DMcx Paralysis Renal Cancer LiverSevere  Mets   HIV
-#> 1000  TRUE FALSE     FALSE FALSE  FALSE       FALSE FALSE FALSE
-#> 1001 FALSE FALSE      TRUE FALSE  FALSE       FALSE FALSE FALSE
-#> 1002 FALSE FALSE     FALSE FALSE  FALSE       FALSE FALSE FALSE
-
-# or go straight to the Charlson scores:
-charlson(patient_data)
-#> 1000 1001 1002 
-#>    2    2    0
-
-# get comorbidities based on present-on-arrival diagnoses, use magrittr to flow the data
-patient_data %>% filter_poa %>% comorbid_elix
-#>        CHF Arrhythmia Valvular  PHTN   PVD   HTN Paralysis NeuroOther
-#> 1000 FALSE      FALSE    FALSE FALSE FALSE FALSE     FALSE      FALSE
-#> 1001 FALSE      FALSE    FALSE FALSE FALSE  TRUE     FALSE      FALSE
-#>      Pulmonary    DM  DMcx Hypothyroid Renal Liver   PUD   HIV Lymphoma
-#> 1000     FALSE  TRUE FALSE       FALSE FALSE FALSE FALSE FALSE    FALSE
-#> 1001     FALSE FALSE FALSE       FALSE FALSE FALSE FALSE FALSE    FALSE
-#>       Mets Tumor Rheumatic Coagulopathy Obesity WeightLoss FluidsLytes
-#> 1000 FALSE FALSE     FALSE        FALSE   FALSE      FALSE       FALSE
-#> 1001 FALSE FALSE     FALSE        FALSE   FALSE      FALSE       FALSE
-#>      BloodLoss Anemia Alcohol Drugs Psychoses Depression
-#> 1000     FALSE  FALSE   FALSE FALSE     FALSE      FALSE
-#> 1001     FALSE  FALSE   FALSE FALSE     FALSE      FALSE
-```
+How to get help
+---------------
 
 Look at the help files for details and examples of almost every function
-in this package.
+in this package. There are several vignettes showing the main features.
+Many users have emailed me directly for help, and I’ll do what I can,
+but it is often better to examine or add to the list of
+[issues](https://github.com/jackwasey/icd) so we can help each other.
+Advanced users may look at the [source
+code](https://github.com/jackwasey/icd), particularly the extensive test
+suite which exercises all the key functions.
 
 ``` r
 ?comorbid
 ?comorbid_hcc
 ?explain_code
 ?is_valid
+
+# first show the list
+vignette(package = "icd")
+vignette("pccc", package = "icd")
 ```
 
 Note that reformatting from wide to long and back is not as
@@ -206,20 +208,8 @@ straightforward as using the various Hadley Wickham tools for doing
 this: knowing the more detailed structure of the data let’s us do this
 better for the case of dealing with ICD codes.
 
-Advanced
---------
-
-### Source Data and SAS format files
-
-In the spirit of reproducible research, all the R data files in this
-package can be recreated from source. The size of the source files makes
-it cumbersome to include them in the R package available on CRAN. Using
-the github source, you can pull the original data and SAS format files,
-and rebuild the data; or use the tools provided by this package to
-update the data using new source data files, e.g. when ICD-10-CM 2017 is
-released.
-
-### Development version
+Development version
+-------------------
 
 The latest version is available in [github
 icd](https://github.com/jackwasey/icd), and can be installed with:
@@ -229,20 +219,22 @@ icd](https://github.com/jackwasey/icd), and can be installed with:
     devtools::install_github("jackwasey/icd")
 ```
 
-The *master* branch at github should always build and pass all tests and
-R CMD check, and will be similar or identical to the most recent CRAN
-release. The CRAN releases are stable milestones. Contributions and bug
-reports are encouraged and essential for this package to remain current
-and useful to the many people who have installed it.
-
-### Contributing and Building
+Contributing and Building
+-------------------------
 
 A substantial amount of code has now been contributed to the package.
 Contributions of any kind to `icd` are very welcome. See the \[GitHub
-issues page\]\](<https://github.com/jackwasey/icd/issues>) to see jobs
-and feature requests. Documentation, vignettes and examples are very
-welcome, especially if accompanied by some real-world data.
+issues
+page\]\](<a href="https://github.com/jackwasey/icd/issues" class="uri">https://github.com/jackwasey/icd/issues</a>)
+to see open issues and feature requests. Documentation, vignettes and
+examples are very welcome, especially if accompanied by some real-world
+data.
 
 To build `icd`, `Rcpp` must be compiled from source. This happens
-automatically on Linux, but on Mac and Windows, the following may be
-required: `install.packages("Rcpp", type="source")`
+automatically on Linux, but on Mac and Windows, the following may
+sometimes be required, especially after upgrading R itself. This is a
+limitation of the R build system.
+
+``` r
+install.packages("Rcpp", type = "source")
+```
