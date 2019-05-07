@@ -1,72 +1,52 @@
-// Copyright (C) 2014 - 2018  Jack O. Wasey
-//
-// This file is part of icd.
-//
-// icd is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// icd is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with icd. If not, see <http://www.gnu.org/licenses/>.
-
-#include "local.h"
 #include "icd_types.h"
+#include "local.h"
 extern "C" {
-#include "cutil.h"                            // for getRListOrDfElement
+#include "cutil.h" // for getRListOrDfElement
 }
 
-using Rcpp::LogicalVector;
+using namespace Rcpp;
 
 // [[Rcpp::export]]
 bool guessShortPlusFactorCpp(SEXP x_, int n = 1000L) {
   CV x;
-  switch(TYPEOF(x_)) {
+  switch (TYPEOF(x_)) {
   case STRSXP: {
-    x = Rcpp::as<CV>(x_);
+    x = as<CV>(x_);
     break;
   }
   case INTSXP: {
-    if (Rf_isFactor(x_))
-      x = Rf_getAttrib(x_, R_LevelsSymbol);
+    if (Rf_isFactor(x_)) x = Rf_getAttrib(x_, R_LevelsSymbol);
     break;
   }
   case LGLSXP: {
     // we will accept all logical values, if all are NA, which defauts to
     // logical unless otherwise specified. We don't know whether
     // a vector of NAs is short or decimal, Default to short.
-    Rcpp::LogicalVector xl = Rcpp::LogicalVector(x_);
+    LogicalVector xl = LogicalVector(x_);
 
-    if (Rcpp::all(is_na(xl)))
-      return true;
+    if (all(is_na(xl))) return true;
     // if there were non-NA logicals, this is an error. We only looked at
     // logical vectors because a single or more NA values, are given type
     // logical by R. Don't fall through so the logical is explicit and avoid
     // compiler warning.
-    Rcpp::stop("only NA_logical_ , character vectors and factors are accepted");
+    stop("only NA_logical_ , character vectors and factors are accepted");
   }
-  default: {
-    Rcpp::stop("Character vectors and factors are accepted");
-  }
+  default: { stop("Character vectors and factors are accepted"); }
   }
   n = std::min((int)x.length(), n);
-  const char * b;
-  const char * ob;
-  Rcpp::String bs;
+  const char *b;
+  const char *ob;
+  String bs;
   for (R_xlen_t i = 0; i != n; ++i) {
     bs = x[i];
-    b = bs.get_cstring();
+    b  = bs.get_cstring();
     ob = b;
     while (*b) {
       if (*b == '.') return false;
       ++b;
     }
-    // stop when we first get a five digit code. There are four digit major E codes.
+    // stop when we first get a five digit code. There are four digit major E
+    // codes.
     if ((b - ob) == 5) return true;
   }
   return true;
@@ -90,21 +70,19 @@ bool guessShortPlusFactorCpp(SEXP x_, int n = 1000L) {
 // [[Rcpp::export(guess_short)]]
 bool guessShortCompleteCpp(SEXP x_,
                            SEXP short_code = R_NilValue,
-                           int n = 1000L,
-                           SEXP icd_name = R_NilValue) {
-  if (!Rf_isNull(short_code))
-    return Rf_asLogical(short_code);
-  Rcpp::RObject isd_maybe_null = ((Rcpp::RObject)x_).attr("icd_short_diag");
+                           int n           = 1000L,
+                           SEXP icd_name   = R_NilValue) {
+  if (!Rf_isNull(short_code)) return Rf_asLogical(short_code);
+  RObject isd_maybe_null = ((RObject)x_).attr("icd_short_diag");
   if (!isd_maybe_null.isNULL()) {
-    Rcpp::LogicalVector icd_short_diag = (Rcpp::LogicalVector)isd_maybe_null;
+    LogicalVector icd_short_diag = (LogicalVector)isd_maybe_null;
     return icd_short_diag[0];
   }
   if (Rf_inherits(x_, "data.frame")) {
     std::string ns("icd");
-    Rcpp::Function get_icd_name("get_icd_name", ns);
-    Rcpp::DataFrame rdf(x_);
-    if (((Rcpp::RObject)icd_name).isNULL())
-      icd_name = get_icd_name(rdf, icd_name);
+    Function get_icd_name("get_icd_name", ns);
+    DataFrame rdf(x_);
+    if (((RObject)icd_name).isNULL()) icd_name = get_icd_name(rdf, icd_name);
     SEXP icdCol = getRListOrDfElement(x_, CHAR(STRING_ELT(icd_name, 0)));
     return guessShortPlusFactorCpp(icdCol, n);
   }
@@ -112,5 +90,6 @@ bool guessShortCompleteCpp(SEXP x_,
     // don't unlist (it's complicated), just guess based on first element
     return guessShortPlusFactorCpp(VECTOR_ELT(x_, 0));
   }
-  return guessShortPlusFactorCpp(x_, n);;
+  return guessShortPlusFactorCpp(x_, n);
+  ;
 }

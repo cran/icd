@@ -1,21 +1,4 @@
-# Copyright (C) 2014 - 2018  Jack O. Wasey
-#
-# This file is part of icd.
-#
-# icd is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# icd is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with icd. If not, see <http:#www.gnu.org/licenses/>.
-
-#nocov start
+# nocov start
 
 #' Extract assignments from a SAS FORMAT definition
 #'
@@ -26,38 +9,38 @@
 #' @param sas_lines is a character vector, with one item per line, e.g. from
 #'   \code{readLines}
 #' @references
+# nolint start
 #' \url{http://support.sas.com/documentation/cdl/en/proc/61895/HTML/default/viewer.htm#a002473474.htm}
+# nolint end
 #' @return list (of lists)
 #' @keywords programming list internal
+#' @noRd
 sas_format_extract <- function(sas_lines) {
-
   # collapse everything onto one big line, so we can filter multi-line
   # commments. No ability to do multiline regex along a vector.
   sas_lines <- paste(sas_lines, collapse = " \\n")
-
   # sas comments are in the form /* ... */ inline/multiline, or * ... ;
   sas_lines <- gsub(pattern = "/\\*.*?\\*/", replacement = "", x = sas_lines) # nolint
   sas_lines <- gsub(pattern = "\\n\\*.*?;", replacement = "\\n", x = sas_lines) # nolint
-
   sas_lines <- strsplit(sas_lines, split = "\\;")[[1]]
-
-  #strip white space and ?undetected newline characters, replace with single
-  #spaces.
+  # strip white space and ?undetected newline characters, replace with single
+  # spaces.
   sas_lines <- gsub(pattern = "\\\\n", "", sas_lines) # nolint
   sas_lines <- gsub(pattern = "[[:space:]]+", " ", sas_lines)
-  sas_lines <- trim(sas_lines)
-
+  sas_lines <- trimws(sas_lines)
   # drop everything except VALUE statements
-  sas_lines <- grep(pattern = "^VALUE.*", x = sas_lines, ignore.case = TRUE, value = TRUE)
-
+  sas_lines <- grep(
+    pattern = "^VALUE.*", x = sas_lines, ignore.case = TRUE,
+    value = TRUE
+  )
   # put each VALUE declaration in a vector element
-  all_sas_assignments <- str_match_all(
+  sma1 <- .str_match_all(
     string = sas_lines,
-    pattern = "^V(?:ALUE|alue)[[:space:]]+([[:graph:]]+)[[:space:]]+(.+)[[:space:]]*$"
-  ) %>% lapply(`[`, c(2, 3))
-
+    pattern =
+      "^V(?:ALUE|alue)[[:space:]]+([[:graph:]]+)[[:space:]]+(.+)[[:space:]]*$"
+  )
+  all_sas_assignments <- lapply(sma1, `[`, c(2, 3))
   out <- list()
-
   for (m in all_sas_assignments) {
     out[m[[1]]] <- list(sas_parse_assignments(m[[2]]))
   }
@@ -76,6 +59,7 @@ sas_format_extract <- function(sas_lines) {
 #'
 #'   so \code{RENLFAIL} needs special treatment
 #' @keywords internal
+#' @noRd
 sas_format_extract_rcomfmt <- function(sas_lines) {
   # ignore DRG assignments
   sas_format_extract(sas_lines)[["$RCOMFMT"]]
@@ -100,8 +84,10 @@ sas_icd10_assignments_to_list <- function(x) {
 #' @return list with each list item containing a matrix of "char ranges",
 #'   "assigned value" pairs
 #' @keywords internal programming list
-sas_parse_assignments <- function(x, strip_whitespace = TRUE, strip_quotes = TRUE) {
-  assert_string(x)
+#' @noRd
+sas_parse_assignments <- function(x, strip_whitespace = TRUE,
+                                  strip_quotes = TRUE) {
+  stopifnot(is.character(x), length(x) == 1)
   assert_flag(strip_whitespace)
   assert_flag(strip_quotes)
   # splitting with clever regex to separate each pair of assignments seems
@@ -116,42 +102,54 @@ sas_parse_assignments <- function(x, strip_whitespace = TRUE, strip_quotes = TRU
   if (length(halfway) == 2) {
     # we have just a single name value pair so just set name to value and return
     # list of one item.
-    if (strip_whitespace) halfway <- gsub(pattern = "[[:space:]]*",
-                                          replacement = "",
-                                          halfway)
+    if (strip_whitespace) {
+      halfway <- gsub(
+        pattern = "[[:space:]]*",
+        replacement = "",
+        halfway
+      )
+    }
     if (strip_quotes) halfway <- gsub(pattern = '"', replacement = "", halfway)
     out <- list()
     out[[halfway[[2]]]] <- unlist(strsplit(x = halfway[[1]], split = ","))
     return(out)
   }
-
-  threequarters <- c(halfway[[1]],
-                     halfway[seq(2, length(halfway) - 1)] %>%
-                       str_match_all(pattern = '^([^"]|"[^"]*")*? (.*)') %>%
-                       lapply(`[`, -1) %>%
-                       unlist,
-                     halfway[[length(halfway)]])
-
-  if (strip_quotes)
+  mid_tmp <- unlist(
+    lapply(
+      .str_match_all(
+        halfway[seq(2, length(halfway) - 1)],
+        pattern = '^([^"]|"[^"]*")*? (.*)'
+      ),
+      `[`, -1
+    )
+  )
+  threequarters <- c(
+    halfway[[1]],
+    mid_tmp,
+    halfway[[length(halfway)]]
+  )
+  if (strip_quotes) {
     threequarters <- gsub(pattern = '"', replacement = "", threequarters)
-
-  #spaces may matter still, so don't randomly strip them?
-
-
+  }
+  # spaces may matter still, so don't randomly strip them?
   out <- list()
   for (pair in seq(from = 1, to = length(threequarters), by = 2)) {
     if (strip_whitespace) {
-      outwhite <- gsub(pattern = "[[:space:]]*",
-                       replacement = "",
-                       threequarters[pair])
+      outwhite <- gsub(
+        pattern = "[[:space:]]*",
+        replacement = "",
+        threequarters[pair]
+      )
     } else {
       outwhite <- threequarters[pair]
     }
     # combine here in case there are duplicate labels, e.g. RENLFAIL twice in
     # ICD-10 AHRQ
-    out[[threequarters[pair + 1]]] <- c(out[[threequarters[pair + 1]]],
-                                        unlist(strsplit(x = outwhite, split = ","))
-    )
+    out[[threequarters[pair + 1]]] <-
+      c(
+        out[[threequarters[pair + 1]]],
+        unlist(strsplit(x = outwhite, split = ","))
+      )
   }
   out
 }
@@ -165,11 +163,12 @@ sas_parse_assignments <- function(x, strip_whitespace = TRUE, strip_quotes = TRU
 #' @param x is a vector of character strings, typically taken from something
 #'   like \code{readLines(some_sas_file_path)}
 #' @keywords internal programming list
+#' @noRd
 sas_extract_let_strings <- function(x) {
   let_rex <-
     "%LET ([[:alnum:]]+)[[:space:]]*=[[:space:]]*%STR\\(([[:print:]]+?)\\)"
-  a <- str_match_all(x, let_rex)
-  a <- lapply(a, trim)
+  a <- .str_match_all(x, let_rex)
+  a <- lapply(a, trimws)
   a <- a[vapply(a, FUN = function(x) length(x) != 0, FUN.VALUE = logical(1))]
 
   vls <- vapply(a, FUN = `[[`, 3, FUN.VALUE = "")
@@ -182,20 +181,31 @@ sas_extract_let_strings <- function(x) {
 
 # horrible kludge for difficult source data
 sas_expand_range <- function(start, end) {
-  if (end == "0449")
-    end <- start # HIV codes changed
-
-  reals <- expand_range.icd9(start, end, short_code = TRUE, defined = TRUE,
-                                 # hmmm, maybe get the diff and test all children of ambigs present later
-                                 ex_ambig_start = FALSE, ex_ambig_end = TRUE)
+  if (end == "0449") {
+    end <- start
+  } # HIV codes changed
+  # hmmm, maybe get the diff and test all children of ambigs present later
+  reals <- expand_range.icd9(start, end,
+    short_code = TRUE, defined = TRUE,
+    ex_ambig_start = FALSE, ex_ambig_end = TRUE
+  )
   real_parents <- condense.icd9(reals, defined = TRUE, short_code = TRUE)
   merged <- unique(c(reals, real_parents))
-  real_parents_of_merged <- condense.icd9(merged, defined = TRUE, short_code = TRUE)
-  halfway <- children.icd9(real_parents_of_merged, defined = FALSE, short_code = TRUE)
-  nonrealrange <- expand_range.icd9(start, end, defined = FALSE, short_code = TRUE,
-                                        ex_ambig_start = TRUE,
-                                        ex_ambig_end = TRUE)
-  sort_icd.icd9(unique(c(halfway, nonrealrange)), short_code = TRUE)
+  real_parents_of_merged <- condense.icd9(merged,
+    defined = TRUE,
+    short_code = TRUE
+  )
+  halfway <- children.icd9(real_parents_of_merged,
+    defined = FALSE,
+    short_code = TRUE
+  )
+  nonrealrange <- expand_range.icd9(start, end,
+    defined = FALSE,
+    short_code = TRUE,
+    ex_ambig_start = TRUE,
+    ex_ambig_end = TRUE
+  )
+  sort.icd9(unique(c(halfway, nonrealrange)), short_code = TRUE)
 }
 
-#nocov end
+# nocov end

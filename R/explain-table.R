@@ -1,20 +1,3 @@
-# Copyright (C) 2014 - 2018  Jack O. Wasey
-#
-# This file is part of icd.
-#
-# icd is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# icd is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with icd. If not, see <http:#www.gnu.org/licenses/>.
-
 #' Explain ICD-9 and ICD-10 codes in English from decimal  (123.45 style),
 #' Tabulates the decimal format alongside converted non-decimal format.
 #'
@@ -44,26 +27,38 @@
 #'   ordering is in the same order as input, including rows filled with NA for
 #'   invalid input codes
 #' @export
-explain_table <- function(...)
+explain_table <- function(...) {
   UseMethod("explain_table")
+}
 
 #' @describeIn explain_table explaining ICD codes from a character vector,
 #'   guessing ICD version
 #' @details If the input x is of mixed type it will choose to convert by
 #' @export
 #' @keywords internal
-explain_table.default <- function(x, short_code = guess_short(x),
-                                  condense = FALSE, brief = TRUE,
-                                  warn = TRUE, ...) {
+explain_table.default <- function(x,
+                                  short_code = guess_short(x),
+                                  condense = FALSE,
+                                  brief = TRUE,
+                                  warn = TRUE,
+                                  ...) {
   ver <- guess_version(x, short_code = short_code)
-  if (ver %in% icd9_classes)
+  if (ver %in% icd9_classes) {
     return(
-      explain_table.icd9cm(x, short_code = short_code, condense = condense,
-                           brief = brief, warn = warn, ...))
-  if (ver %in% icd10_classes)
+      explain_table.icd9cm(x,
+        short_code = short_code, condense = condense,
+        brief = brief, warn = warn, ...
+      )
+    )
+  }
+  if (ver %in% icd10_classes) {
     return(
-      explain_table.icd10cm(x, short_code = short_code, condense = condense,
-                            brief = brief, warn = warn, ...))
+      explain_table.icd10cm(x,
+        short_code = short_code, condense = condense,
+        brief = brief, warn = warn, ...
+      )
+    )
+  }
   stop("Unknown ICD version in explain_table.default.
        Check the class of the input data, or call either
        explain_table.icd9 or explain_table.icd10 directly.")
@@ -101,51 +96,95 @@ shortcode_icd10 <- function(x, short_code = guess_short(x))
 #' @keywords internal
 explain_table_worker <- function(x, hierarchy, short_code, condense,
                                  brief, warn, ...) {
-  assert(check_character(x), check_factor(x))
-  assert(check_data_frame(hierarchy))
-  assert_flag(short_code)
-  assert_flag(condense)
-  assert_flag(brief)
-  assert_flag(warn)
+  stopifnot(is.character(x) || is.factor(x))
+  stopifnot(is.data.frame(hierarchy))
+  stopifnot(is.logical(short_code))
+  stopifnot(is.logical(condense))
+  stopifnot(is.logical(brief))
+  stopifnot(is.logical(warn))
   x <- as_char_no_warn(x)
   xs <- if (!short_code) decimal_to_short.icd9(x) else x
   exptable <- merge(data.frame(code = xs, stringsAsFactors = FALSE),
-                    hierarchy, all.x = TRUE)
+    hierarchy,
+    all.x = TRUE
+  )
   # merge has reordered...
-  exptable[["is_major"]] <- exptable[["three_digit"]] == exptable[["code"]]
+  exptable[["is_major"]] <-
+    as_char_no_warn(exptable[["three_digit"]]) == exptable[["code"]]
   exptable[["valid_icd9"]] <- is_valid.icd9(xs, short_code = TRUE)
   exptable[["valid_icd10"]] <- is_valid.icd10(xs, short_code = TRUE)
-  if (condense)
+  if (condense) {
     condense_explain_table(exptable)
-  else
+  } else {
     exptable[match(xs, exptable[["code"]]), ]
+  }
 }
 
 #' @describeIn explain_table explain character vector of ICD1-10-CM codes
 #' @author Ed Lee
 #' @export
 #' @keywords internal
-explain_table.icd9cm <- function(x, short_code = guess_short(x),
-                                 condense = FALSE, brief = TRUE,
-                                 warn = TRUE, ...)
-  explain_table_worker(x = x, hierarchy = icd9cm_hierarchy,
-                       short_code = short_code, condense = condense,
-                       brief = brief, warn = warn, ...)
+explain_table.icd9cm <- function(x,
+                                 short_code = guess_short(x),
+                                 condense = FALSE,
+                                 brief = TRUE,
+                                 warn = TRUE,
+                                 ...) {
+  explain_table_worker(
+    x = x,
+    hierarchy = icd9cm_hierarchy,
+    short_code = short_code,
+    condense = condense,
+    brief = brief,
+    warn = warn,
+    ...
+  )
+}
 
 #' @describeIn explain_table explain character vector of ICD1-10-CM codes
 #' @author Ed Lee
 #' @export
 #' @keywords internal
-explain_table.icd10cm <- function(x, short_code = guess_short(x),
-                                  condense = FALSE, brief = TRUE,
-                                  warn = TRUE, ...)
-  explain_table_worker(x = x, hierarchy = icd10cm2016,
-                       short_code = short_code, condense = condense,
-                       brief = brief, warn = warn, ...)
+explain_table.icd10cm <- function(x,
+                                  short_code = guess_short(x),
+                                  condense = FALSE,
+                                  brief = TRUE,
+                                  warn = TRUE,
+                                  ...) {
+  explain_table_worker(
+    x = x,
+    hierarchy = get_icd10cm_active(),
+    short_code = short_code,
+    condense = condense,
+    brief = brief,
+    warn = warn,
+    ...
+  )
+}
 
-#' condense \code{explain_table} output down to major codes
+#' @describeIn explain_table explain character vector of ICD1-10-CM codes
+#' @export
+#' @keywords internal
+explain_table.icd10who <- function(x,
+                                   short_code = guess_short(x),
+                                   condense = FALSE,
+                                   brief = TRUE,
+                                   warn = TRUE,
+                                   ...) {
+  explain_table_worker(
+    x = x,
+    hierarchy = get_icd10who2016(),
+    short_code = short_code,
+    condense = condense,
+    brief = brief,
+    warn = warn,
+    ...
+  )
+}
+
+#' Condense \code{explain_table} output down to major codes
 #'
-#' if a major code appears in the code column, and any children of that major
+#' If a major code appears in the code column, and any children of that major
 #' code, the children are aggregated to a list and added to the major code row.
 #' This does currently not 'condense' e.g. middle-order codes
 #'
@@ -154,6 +193,7 @@ explain_table.icd10cm <- function(x, short_code = guess_short(x),
 #' the input. Size of the output will also be different if any condensing was
 #' done.
 #' @keywords internal
+#' @noRd
 condense_explain_table <- function(x) {
   condensed_majors <- condense_explain_table_worker(x)
   if (nrow(condensed_majors) == 0) {
@@ -165,9 +205,10 @@ condense_explain_table <- function(x) {
   x <- x[x[["three_digit"]] %nin% x[["code"]] | x$is_major, ]
   # add condensed merge existing major rows
   out <- merge(x, condensed_majors,
-               by.x = "code",
-               by.y = "three_digit",
-               all.x = TRUE)
+    by.x = "code",
+    by.y = "three_digit",
+    all.x = TRUE
+  )
   # NA values are un-condensed, so just fill out:
   out[is.na(out$condensed_codes), "condensed_codes"] <-
     out[is.na(out$condensed_codes), "code"]
@@ -179,13 +220,17 @@ condense_explain_table <- function(x) {
 #'
 #' @return details for rows which can be condensed
 #' @keywords internal
+#' @noRd
 condense_explain_table_worker <- function(x) {
   # we can only condense when we have three_digit major
   x <- x[!is.na(x[["three_digit"]]), ]
-  if (nrow(x) == 0) return(data.frame())
+  if (nrow(x) == 0) {
+    return(data.frame())
+  }
   condensed <- aggregate(x["code"],
-                         by = list(x[["three_digit"]]),
-                         paste, sep = ", ", collapse = ", ")
+    by = list(x[["three_digit"]]),
+    paste, sep = ", ", collapse = ", "
+  )
   # code column in result is now a factor, by default
   names(condensed) <- c("three_digit", "condensed_codes")
   condensed[["condensed_num"]] <-

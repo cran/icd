@@ -1,36 +1,31 @@
-// Copyright (C) 2014 - 2018  Jack O. Wasey
-//
-// This file is part of icd.
-//
-// icd is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// icd is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with icd. If not, see <http://www.gnu.org/licenses/>.
-
 #ifndef RANGES_H_
 #define RANGES_H_
 
 #include "icd_types.h"
 #include "range-const.h"
 
-CV icd9ChildrenShort(CV icd9Short,
-                     const VecStr& icd9cmReal,
-                     bool onlyReal = true);
-CV icd9ChildrenShortUnordered(CV icd9Short,
-                              const VecStr& icd9cmReal,
-                              bool onlyReal = true);
-CV icd9ChildrenDecimalCpp(CV icd9Decimal,
-                          const VecStr& icd9cmReal,
-                          bool onlyReal = true);
 CV icd9ExpandMinor(const Str& mnr,
                    bool isE = false);
-
+CV icd9ChildrenShortUndefined(const CV& icd9Short);
+CV icd9ChildrenShortDefined(const CV& icd9Short,
+                            const VecStr& icd9cmReal);
+CV icd9ChildrenShort(const CV& icd9Short,
+                     const VecStr& icd9cmReal,
+                     bool onlyReal = true);
+CV icd9ChildrenShortUnorderedUndefined(const CV& icd9Short);
+CV icd9ChildrenShortUnorderedDefined(const CV& icd9Short,
+                                     const VecStr& icd9cmReal);
+CV icd9ChildrenShortUnordered(const CV& icd9Short,
+                              const VecStr& icd9cmReal,
+                              bool onlyReal = true);
+CV icd9ChildrenDecimal(const CV& icd9Decimal,
+                       const VecStr& icd9cmReal,
+                       bool onlyReal = true);
+CV icd9ChildrenDecimalUnordered(const CV& icd9Decimal,
+                                const VecStr& icd9cmReal,
+                                bool onlyReal);
+CV icd9Children(const CV& icd9,
+                bool isShort,
+                const VecStr& icd9cmReal,
+                bool onlyReal = true);
 #endif /* RANGES_H_ */

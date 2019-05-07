@@ -24,7 +24,7 @@ knitr::opts_chunk$set(
 
 ## ----ranges, eval = FALSE------------------------------------------------
 #  # get all possible codes
-#  "003" %i9sa% "0033" %>% head(9) # show first 9 of 111 values
+#  head("003" %i9sa% "0033", n = 9) # show first 9 of 111 values
 #  # just get the ones which correspond to diagnoses (keeping the 3-digit chapters)
 #  "494" %i9s% "4941"
 #  
@@ -39,8 +39,9 @@ knitr::opts_chunk$set(
 icd:::expand_range("4820", "4823") # default, equivalent to %i9s%
 icd:::expand_range("4820", "4823", defined = FALSE)
 # see the first few differences (which are by definition not 'real' codes):
-setdiff(icd:::expand_range("4820", "4823", defined = FALSE),
-        icd:::expand_range("4820", "4823")) %>% head
+head(
+  setdiff(icd:::expand_range("4820", "4823", defined = FALSE),
+          icd:::expand_range("4820", "4823")))
 
 ## ----"childrenReal"------------------------------------------------------
 children("391")

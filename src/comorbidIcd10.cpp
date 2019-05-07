@@ -1,23 +1,6 @@
-// Copyright (C) 2014 - 2018  Jack O. Wasey
-//
-// This file is part of icd.
-//
-// icd is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// icd is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with icd. If not, see <http://www.gnu.org/licenses/>.
-
 #include "icd_types.h"
 #include "local.h"
-#include <string>                           // for string
+#include <string> // for string
 
 using namespace Rcpp;
 
@@ -45,25 +28,26 @@ using namespace Rcpp;
 //' head(icd:::categorize_simple(uranium_pathology, umap,
 //'                              id_name = "case", code_name = "icd10"))
 //' @keywords internal
+//' @noRd
 // [[Rcpp::export(simplify_map_lex)]]
-Rcpp::List simplifyMapLexicographic(const CV pt_codes, const Rcpp::List map) {
+Rcpp::List simplifyMapLexicographic(const CV &pt_codes, const List map) {
   std::string ptCode;
   size_t searchLen;
   size_t pos;
   size_t cmb_len;
   // hmm, would be nice to only scan the pt_codes once, but I don't want to
   // write my own hash map code....
-  CV icd_codes = Rcpp::unique(pt_codes);
+  CV icd_codes = unique(pt_codes);
   DEBUG_VEC(icd_codes);
-  std::vector<std::unordered_set<std::string> > newMapStd(map.length());
+  std::vector<std::unordered_set<std::string>> newMapStd(map.length());
   for (R_xlen_t i = 0; i != icd_codes.size(); ++i) {
     ptCode = icd_codes[i];
-    DEBUG("i = " << i << ", and ptCode = " << ptCode);
+    TRACE("i = " << i << ", and ptCode = " << ptCode);
     size_t codeLen = ptCode.length();
     if (codeLen < 3) continue; // cannot be a valid ICD-10 code
-    DEBUG("code len >=3 chars");
+    TRACE("code len >=3 chars");
     for (R_xlen_t j = 0; j < map.size(); ++j) {
-      DEBUG("cmb, j = " << j);
+      TRACE("cmb, j = " << j);
       const CV &cmbCodes = map[j];
       for (R_xlen_t k = 0; k != cmbCodes.length(); ++k) {
         cmb_len = cmbCodes[k].size();
@@ -76,37 +60,34 @@ Rcpp::List simplifyMapLexicographic(const CV pt_codes, const Rcpp::List map) {
         TRACE("ptCode[k][0] = " << ptCode[0]);
         TRACE("ptCode[k][1] = " << ptCode[1]);
         TRACE("ptCode[k][2] = " << ptCode[2]);
-        if (cmbCodes[k][0] != ptCode[0] ||
-            cmbCodes[k][1] != ptCode[1] ||
+        if (cmbCodes[k][0] != ptCode[0] || cmbCodes[k][1] != ptCode[1] ||
             cmbCodes[k][2] != ptCode[2])
           goto no_match;
         searchLen = std::min(cmb_len, codeLen);
-        DEBUG("searchLen = " << searchLen);
+        TRACE("searchLen = " << searchLen);
         pos = 3;
-        while(pos != searchLen) {
+        while (pos != searchLen) {
           if (cmbCodes[k][pos] != ptCode[pos]) {
-          DEBUG("mismatch, going to no_match");
-          goto no_match;
+            TRACE("mismatch, going to no_match");
+            goto no_match;
           }
           ++pos;
         }
         // push the patient's ICD code, not the original comorbidity ICD code
         // onto the new map.
         newMapStd[j].insert(ptCode);
-        DEBUG("Going to next comorbidity");
+        TRACE("Going to next comorbidity");
         goto next_comorbidity;
-        no_match:;
+      no_match:;
       } // end of codes in current comorbidity
-      next_comorbidity:;
+    next_comorbidity:;
     } // each comorbidity
     DEBUG("finished a comorbidity");
   } // each row of input data
-  Rcpp::List newMap = Rcpp::List::create();
-  for (auto cmbSet : newMapStd) {
+  List newMap = List::create();
+  for (const auto &cmbSet : newMapStd) {
     CV cmbOut;
-    for (auto cmbCode : cmbSet) {
-      cmbOut.push_back(cmbCode);
-    }
+    for (const auto &cmbCode : cmbSet) { cmbOut.push_back(cmbCode); }
     cmbOut.attr("class") = ((CV)map[0]).attr("class");
     newMap.push_back(cmbOut);
   }

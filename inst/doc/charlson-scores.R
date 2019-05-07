@@ -12,18 +12,17 @@ knitr::opts_chunk$set(
 )
 
 ## ----vermont-charlson----------------------------------------------------
-head(icd.data::vermont_dx[1:10])
-v <- wide_to_long(icd.data::vermont_dx)
-head(v)
-charlson(v) %>% summary
-head(charlson(v))
-head(names(charlson(v)))
+head(vermont_dx[1:10])
+vch <- charlson(vermont_dx)
+summary(vch)
+head(vch)
+head(names(vch))
 
 ## ----charlsondf----------------------------------------------------------
-head(charlson(v, return_df = TRUE))
+head(charlson(vermont_dx, return_df = TRUE))
 
 ## ----vermontvanwalraven--------------------------------------------------
-`Vermont Van Walraven Scores` <- van_walraven(v)
+`Vermont Van Walraven Scores` <- van_walraven(vermont_dx)
 hist(`Vermont Van Walraven Scores`)
 
 ## ----icd9and10-----------------------------------------------------------

@@ -20,23 +20,19 @@ as.short_diag(x, value = TRUE)
 
 as.icd_short_diag(x, value = TRUE)
 
-is.decimal_diag(x, must_work = FALSE)
+is.decimal_diag(x)
 
-is.icd_decimal_diag(x, must_work = FALSE)
+is.icd_decimal_diag(x)
 
-is.short_diag(x, must_work = FALSE)
+is.short_diag(x)
 
-is.icd_short_diag(x, must_work = FALSE)
+is.icd_short_diag(x)
 }
 \arguments{
 \item{x}{ICD data}
 
 \item{value}{\code{TRUE} or \code{FALSE}, default is \code{TRUE} which sets
 the attribute to whatever is indicated in the function name. See examples.}
-
-\item{must_work}{single logical value, if \code{FALSE} (the default) this may
-return \code{NULL} if the attribute is not present. If \code{TRUE}, then
-either \code{TRUE} or \code{FALSE} is returned.}
 }
 \description{
 Get or set whether ICD codes have have an attribute indicating 'short' or
@@ -44,10 +40,8 @@ Get or set whether ICD codes have have an attribute indicating 'short' or
 }
 \section{Getting the attribute}{
  \code{is.short_diag} tests for presence of an
-  attribute, not whether the code is a valid ICD code. If \code{must_work} is
-  \code{TRUE} then \code{NULL} (i.e. no attribute set) returns \code{FALSE},
-  otherwise \code{NULL} is returned. To test validity, see
-  \code{\link{is_valid}}.
+  attribute, not whether the code is a valid ICD code. To test validity of
+  the codes themselves, see \code{\link{is_valid}}.
 }
 
 \section{Setting the attribute}{
@@ -58,19 +52,19 @@ Get or set whether ICD codes have have an attribute indicating 'short' or
 
   The attribute \code{icd_short_code} should be either \code{TRUE} or
   \code{FALSE}. There is no attribute named \code{icd_decimal_code}. These
-  functions set and get the attribute safely.
+  functions set and get the attribute safely. If the attribute is not
+  present, both \code{is.icd_short_diag} and \code{is.icd_decimal_diag} (or
+  their synonyms \code{is.short_diag} and \code{is.decimal_diag}) will return
+  \code{FALSE}.
 }
 
 \examples{
+library(icd)
 as.icd_short_diag("6670")
-
 as.icd_short_diag("667.0") # no warning or error!
-
 is.icd_short_diag(decimal_to_short("667.0"))
-
 decimal_type_code <- as.icd_short_diag("667.0", FALSE)
 stopifnot(is.icd_decimal_diag(decimal_type_code))
-
 codes <- as.icd9(c("100.1", "441.3"))
 codes <- as.decimal_diag(codes)
 codes

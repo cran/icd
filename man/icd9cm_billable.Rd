@@ -3,25 +3,25 @@
 \docType{data}
 \name{icd9cm_billable}
 \alias{icd9cm_billable}
-\alias{icd9Billable}
-\title{list of annual versions of billable leaf nodes of ICD-9-CM}
-\description{
-These are derived from the CMS published updates, with versions 23 to 32
-currently available going back to 2004/5. The source files back to version 27
-have short and long descriptions. The short descriptions are in ASCII with no
-special characters, whereas the long descriptions contain accented characters
-which seem to be interpreted as Unicode, \code{latin-1} or \code{cp1252}.
-This all done during package creation, but can be repeated by package users,
-including pulling the data from the web pages directly. Despite my best
-efforts, current locale can give different results, but this packaged data is
-correct, with some \code{UTF-8} encoded strings.
+\title{Deprecated name for the list of annual ICD-9-CM billable/leaf descriptions}
+\format{list of data frames with columns \code{code}, \code{short_desc}, and
+  \code{long_desc}, containing just the leaf (in USA, \sQuote{billable})
+  codes, and their descriptions.}
+\source{
+\url{http://www.cms.gov/Medicare/Coding/ICD9ProviderDiagnosticCodes/codes.html}
 }
-\details{
-Format:  list of data frames. Each list item is named by the version as a
-  string, e.g. "32". The constituent data frames have columns \code{icd9},
-  \code{shortDesc}, and \code{longDesc}.
+\description{
+This now just contains the final version (2014, version number 32). This is
+actually the same from 2011 to 2014. Use \code{get_xxx} functions such as
+\code{\link{get_icd9cm2014}} instead.
 }
 \seealso{
-\code{\link[icd.data]{ls_icd_data}}
+For 2005 -- 2014, the following functions provide ICD-9-CM data:
+  \code{\link{get_icd9cm2009}} and \code{\link{get_icd9cm2013_leaf}}. The
+  former includes three-digit \sQuote{major} down to the leaf/billable level,
+  and any intermediate descriptors, e.g. if a four-digit code is not
+  billable, and encompasses some five-digit codes, then the four digit code
+  would appear in \code{\link{get_icd9cm2014}} but not
+  \code{\link{get_icd9cm2014_leaf}}.
 }
 \keyword{datasets}

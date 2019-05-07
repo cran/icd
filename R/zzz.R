@@ -1,30 +1,55 @@
-# Copyright (C) 2014 - 2018  Jack O. Wasey
-#
-# This file is part of icd.
-#
-# icd is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# icd is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with icd. If not, see <http:#www.gnu.org/licenses/>.
-
 # nocov start
+.make_icd9cm_leaf_parsers()
+.make_icd9cm_rtf_parsers()
+.make_icd10cm_parsers()
+.make_getters_and_fetchers()
+# Set up an environment to cache chars_in_icd10cm
+.lookup_chars_in_icd10cm <- new.env(parent = emptyenv())
+
+.onLoad <- function(libname, pkgname) {
+  if (.icd_data_dir_okay()) {
+    .set_opt(offline = FALSE, overwrite = FALSE)
+  }
+  if (is.null(getOption("icd.data.who_url"))) {
+    options("icd.data.who_url" = "https://icd.who.int/browse10")
+  }
+}
 
 .onAttach <- function(libname, pkgname) {
-  if (system.file(package = "icd9") != "")
-    packageStartupMessage(paste(
-      "The 'icd9' package is now deprecated, and should be removed to avoid",
-      "conflicts with 'icd'. The 'icd' package up to version 2.1 contains",
-      "tested versions of all the deprecated function names which overlap with",
-      "those in the old 'icd9' package, e.g. 'icd9ComorbidAhrq'. It is",
-      "strongly recommended to run the command: remove.packages(\"icd9\")"))
+  if (system.file(package = "icd9") != "") {
+    packageStartupMessage(
+      paste(
+        "The", sQuote("icd9"), "package is deprecated, and should be removed to",
+        "avoid conflicts with ", sQuote("icd"), ". The", sQuote("icd"),
+        "package up to version 2.1 contains",
+        "tested versions of all the deprecated function names which overlap with",
+        "those in the old", sQuote("icd9"), "package, e.g.,",
+        sQuote("icd9ComorbidAhrq"), "'. It is",
+        "highly recommended to run the command:",
+        sQuote("remove.packages(\"icd9\")")
+      )
+    )
+  }
+  if (interactive()) {
+    if (!.exists_icd_data_dir()) {
+      packageStartupMessage(
+        sQuote("icd"), " downloads data when needed. ",
+        "set_icd_data_dir() creates a data directory. "
+      )
+      packageStartupMessage(
+        "Default location is: ", sQuote(.default_icd_data_dir())
+      )
+    }
+    if (system.file(package = "icd.data") != "") {
+      packageStartupMessage(
+        "N.b. the ", sQuote("icd.data"),
+        " package is deprecated from ",
+        sQuote("icd"), " version 4.0. ",
+        "The content from ", sQuote("icd.data"),
+        " is now available via ", sQuote("icd"), "."
+      )
+    }
+  }
 }
 
 .onUnload <- function(libpath) {
@@ -34,27 +59,40 @@
 release_questions <- function() {
   c(
     # commands:
-    "update_everything(), then copy data to icd.data package",
+    "clena data then download and update everything on all platforms",
     "aspell_package_Rd_files('.')",
-    "tools/package-registration.r",
     # documentation:
-    "Check all TODO comments, make into github issues",
+    "manual rebuild efficiency & country-lang-vers vignettes, check in tarball",
     "Do all examples look ok (not just run without errors)?",
-    "Have all the fixed github issues been closed",
-    "Does every file have correct licence information?",
     # code quality:
-    "Is every SEXP PROTECT()ed and UNPROTECT()ed, when appropriate?",
-    "Are all public S3 classes all exported? use devtools::missing_s3()",
-    "use LLVM static scan build, scan-build before compiler in .R/Makevars",
+    ".test_slow(TRUE); test_all()",
+    "icd::download_all_icd_data() and other major functions pre-library call",
+    "codetools::checkUsagePackage('icd', all = TRUE, suppressLocal = TRUE)",
+    "devtools::missing_s3()", # http://r-pkgs.had.co.nz/namespace.html
+    "Use clang scan-build, with latest version of clang",
     # testing and compilation and different platforms:
-    "Have you run tests in tests-deprecated and tests-build-code?",
-    "Are there no skipped tests which should be run?",
-    "Does it compile, test and check fine on travis and appveyor?",
-    "Have you checked on Windows, win_builder,
-      Mac, Ubuntu, UBSAN rocker, and updated my docker image which
-      resembles a CRAN maintainers environment?",
+    "Are there any skipped tests which should be run?",
+    "MacOS, Windows, Linux, r-hub, win-builder, travis, appveyor",
+    "Download and set data dir in vanilla bash and R, without library(icd)",
+    "styler::style_pkg()",
     # final manual check:
-    "Are all NOTES from R CMD check documented in cran-comments.md",
-    "Have all unnecessary files been ignored in built archive?")
+    "Have all unnecessary files been ignored in built source package?",
+    # post-release
+    "Have all the fixed github issues been closed",
+    "update version number to devel",
+    "make new git branch for devel",
+    "pkgdown::build_site() reports no errors"
+  )
 }
+
+utils::globalVariables(c(
+  "icd9_sub_chapters",
+  "icd9_chapters",
+  "icd9_majors",
+  "icd10_sub_chapters",
+  "icd10_chapters",
+  "icd10cm2019",
+  "icd9cm_hierarchy"
+))
+
 # nocov end

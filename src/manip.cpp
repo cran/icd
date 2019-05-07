@@ -1,33 +1,16 @@
-// Copyright (C) 2014 - 2018  Jack O. Wasey
-//
-// This file is part of icd.
-//
-// icd is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// icd is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with icd. If not, see <http://www.gnu.org/licenses/>.
-
-#include "Rcpp.h"
 #include "manip.h"
-#include <string.h>                       // for strlen
-#include "convert.h"                      // for icd9DecimalToPartsCpp, icd9...
-#include "is.h"                           // for icd9IsASingleV, icd9IsASingleE
+#include "convert.h"
+#include "is.h"
+#include <string.h> // for strlen
+
+using namespace Rcpp;
 
 //' Simpler add leading zeroes without converting to parts and back
 //' @keywords internal manip
+//' @noRd
 // [[Rcpp::export]]
-Rcpp::String icd9AddLeadingZeroesMajorSingle(Rcpp::String mjr) {
-  if (mjr == NA_STRING) {
-    return (NA_STRING);
-  }
+String icd9AddLeadingZeroesMajorSingle(String mjr) {
+  if (mjr == NA_STRING) return (NA_STRING);
   std::string m(mjr);
   if (!icd9IsASingleVE(mjr.get_cstring())) {
     switch (strlen(mjr.get_cstring())) {
@@ -60,12 +43,13 @@ Rcpp::String icd9AddLeadingZeroesMajorSingle(Rcpp::String mjr) {
         return (m);
       }
     case 4:
-      if (icd9IsASingleE(m.c_str()))
-        return (m);
+      if (icd9IsASingleE(m.c_str())) return (m);
       // # nocov start
+      // avoid fallthrough warning
+      stop("Major length invalid");
     default:
-      Rcpp::stop("Major length invalid");
-    // # nocov end
+      stop("Major length invalid");
+      // # nocov end
     }
   }
   return NA_STRING;
@@ -73,7 +57,7 @@ Rcpp::String icd9AddLeadingZeroesMajorSingle(Rcpp::String mjr) {
 
 // [[Rcpp::export]]
 std::string icd9AddLeadingZeroesMajorSingleStd(std::string m) {
-  const char * cs = m.c_str();
+  const char *cs                   = m.c_str();
   const std::string::size_type len = m.length();
   if (!icd9IsASingleVE(cs)) {
     switch (len) {
@@ -106,8 +90,7 @@ std::string icd9AddLeadingZeroesMajorSingleStd(std::string m) {
         return (m);
       }
     case 4:
-      if (icd9IsASingleE(cs))
-        return (m);
+      if (icd9IsASingleE(cs)) return (m);
     }
   }
   return "";
@@ -115,7 +98,7 @@ std::string icd9AddLeadingZeroesMajorSingleStd(std::string m) {
 
 // [[Rcpp::export(icd9_add_leading_zeroes_major)]]
 CV icd9AddLeadingZeroesMajor(CV mjr) {
-  return Rcpp::sapply(mjr, icd9AddLeadingZeroesMajorSingle);
+  return sapply(mjr, icd9AddLeadingZeroesMajorSingle);
 }
 
 //' @title Add leading zeroes to incomplete ICD-9 codes
@@ -126,18 +109,18 @@ CV icd9AddLeadingZeroesMajor(CV mjr) {
 //' @template short_code
 //' @return character vector of ICD-9 codes with leading zeroes
 //' @keywords internal manip
-// [[Rcpp::export(icd9_add_leading_zeroes_cpp)]]
+//' @noRd
+// [[Rcpp::export(icd9_add_leading_zeroes_rcpp)]]
 CV icd9AddLeadingZeroes(CV x, bool short_code) {
   if (short_code) {
     // a shortcut for when short codes is just to add the appropriate leading
     // zeros when the total length is <3. Even then decimal may be quicker by
     // converting from short than calculating by parts.
-    Rcpp::List parts = icd9ShortToPartsCpp(x, "");
+    List parts   = icd9ShortToParts(x, "");
     parts["mjr"] = icd9AddLeadingZeroesMajor(parts["mjr"]);
     return icd9PartsToShort(parts);
-  }
-  else {
-    Rcpp::List parts = icd9DecimalToPartsCpp(x);
+  } else {
+    List parts   = icd9DecimalToParts(x);
     parts["mjr"] = icd9AddLeadingZeroesMajor(parts["mjr"]);
     return icd9PartsToDecimal(parts);
   }

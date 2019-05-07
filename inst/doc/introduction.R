@@ -10,7 +10,10 @@ suppressWarnings({
 
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  out.width = "100%",
+  fig.width = 14,
+  fig.height = 10.5
 )
 
 patients_icd9 <- data.frame(
@@ -24,11 +27,11 @@ patients_icd9 <- data.frame(
 library(icd)
 head(uranium_pathology, 10)
 head(comorbid_charlson(uranium_pathology))
-comorbid_charlson(uranium_pathology, 
+comorbid_charlson(uranium_pathology,
                   return_df = TRUE,
                   return_binary = TRUE)[1:5, 1:5]
-hist(charlson(uranium_pathology), 
-     main = "Histogram of Charlson scores in Uranium data",
+hist(charlson(uranium_pathology),
+     main = "Uranium data",
      xlab = "Charlson Score")
 
 ## ----pkgdesc, results='asis', echo = FALSE-------------------------------
@@ -47,33 +50,36 @@ vermont_dx[1:5, c(1, 6:15)]
 ## ----getcomorbidities----------------------------------------------------
 # use AHRQ revision of Elixhauser comorbidities, show only first eight columns
 comorbid_ahrq(patients_icd9)[, 1:8]
+# use Elixhauser (Quan revision) comorbidities, show first few results
+comorbid_quan_elix(vermont_dx)[1:5, 1:8]
 
 ## ----getcomorbidities2---------------------------------------------------
 # find Elixhauser comorbidities which were present-on-arrival
-patients_icd9 %>% filter_poa %>% comorbid_elix
+patients_icd9 %>%
+  filter_poa %>%
+  comorbid_elix
 
-# same as above, then summarize five columns:
+# same as above, then summarize:
 patients_icd9 %>%
   filter_poa %>%
   comorbid_elix %>%
-  extract(, 5:10) %>%
   colSums
 
-# convert vermont discharge data to wide format, 
+# Take Vermont discharge data (wide to long conversion no longer needed)
 # find comorbidities, convert TRUE to 1 and show first few
-vermont_cmb <- vermont_dx %>% wide_to_long %>% 
-  icd9_comorbid_quan_deyo %>%
+vermont_cmb <- vermont_dx %>%
+  icd9_comorbid_quan_elix %>%
   apply(2, as.integer) # convert logical to integer
 
 head(vermont_cmb)
-
 barplot(colSums(vermont_cmb[, 1:5]),
-        main = "Incidence of Elixhauser Comorbidities in Vermont data")
-
-
+        main = "Incidence of five Elixhauser comorbidities in Vermont data")
+# Use built-in summary plot, this time for AHRQ comorbidities
+plot_comorbid(vermont_dx, comorbid_fun = comorbid_ahrq,
+        main = "Incidence of all AHRQ Comorbidities in Vermont data")
 
 ## ----lots of brackets, eval = FALSE--------------------------------------
-#  head(apply(icd9_comorbid_quan_deyo(wide_to_long(vermont_dx)), 2, as.integer))
+#  head(apply(icd9_comorbid_quan_deyo(vermont_dx), 2, as.integer))
 
 ## ----type guessing-------------------------------------------------------
 is_valid("100") # valid ICD-9 code
@@ -205,25 +211,11 @@ as.icd9(cardiac) %>% explain_code(warn = FALSE) %>% head(10)
 
 ## ----arbitrary Mapping---------------------------------------------------
 names(icd9_chapters)[c(1:5, 14)]
-my_map <- icd:::icd9_chapters_to_map(icd9_chapters[c(2, 5, 14)])
-icd9_comorbid(patients_icd9, my_map) # no positive 
+my_map <- icd:::chapters_to_map(icd9_chapters[c(2, 5, 14)])
+icd9_comorbid(patients_icd9, my_map) # no positive
 
 ## ----realmapping---------------------------------------------------------
 ahrq_strict <- lapply(icd9_map_ahrq, get_defined)
 str(icd9_map_ahrq[1:5]) # first five of the original:
 str(ahrq_strict[1:5]) # and first five of the result:
-
-## ----"compare ICD-9 versions"--------------------------------------------
-new_since_27 <- setdiff(icd9cm_billable[["32"]][["code"]],
-                         icd9cm_billable[["27"]][["code"]]) %>% head
-lost_since_27 <- setdiff(icd9cm_billable[["27"]][["code"]],
-                         icd9cm_billable[["32"]][["code"]]) %>% tail
-# we know this is an ICD-9-CM code, so declare this using nice magrittr motif:
-lost_since_27 %<>% as.icd9cm
-lost_since_27 %<>% as.icd9cm
-
-# these are a few which were gained since v27
-data.frame(code = new_since_27, desc = new_since_27 %>% explain_code)
-# these are a few which were lost since v27
-data.frame(code = lost_since_27, desc = lost_since_27 %>% explain_code)
 

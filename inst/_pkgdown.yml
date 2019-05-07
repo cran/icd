@@ -1,0 +1,101 @@
+url: https://jackwasey.github.io/icd/
+
+title: Comorbidity calculations and tools for ICD-9 and ICD-10 codes
+desc: >
+    Calculate comorbidities, medical risk scores, and
+    work quickly and precisely with ICD-9 and ICD-10 codes. This package
+    enables a work flow from raw tables of ICD codes in hospital databases
+    to comorbidities. ICD-9 and ICD-10 comorbidity mappings from Quan
+    (Deyo and Elixhauser versions), Elixhauser and AHRQ included.  Common
+    ambiguities and code formats are handled. Comorbidity computation
+    includes Hierarchical Condition Codes, and a reimplementation of the
+    AHRQ Clinical Classifications Software. Risk scores include those of
+    Charlson and van Walraven.  US Clinical Modification, Word Health
+    Organization, Belgian and French ICD-10 codes are supported through
+    the 'icd.data' package, some of which are downloaded on demand.
+template:
+  params:
+    docsearch:
+      api_key: 797795ae271734faa8bc9b1f4aaae82b
+      index_name: icd
+
+articles:
+- title: Journal of Statistical Software
+  desc: This manuscript was submitted to JSS
+  contents:
+  - '`efficiency`'
+
+- title: All vignettes
+  desc: ~
+  contents:
+  - '`introduction`'
+  - '`charlson-scores`'
+  - '`CMS-HCC`'
+  - '`ICD-10`'
+  - '`PCCC`'
+  - '`ranges`'
+  - '`compare-maps`'
+
+reference:
+
+- title: Package overview
+  desc: ~
+  contents:
+  - '`icd-package`'
+
+- title: Comorbidity and risk score calculations
+  desc: ~
+  contents:
+  - '`comorbid`'
+  - '`comorbid_hcc`'
+  - '`comorbid_pccc_dx`'
+  - '`charlson`'
+  - '`charlson_from_comorbid`'
+  - '`van_walraven`'
+  - '`count_codes`'
+  - '`count_codes_wide`'
+  - '`count_comorbid`'
+
+- title: Comorbidity to ICD code maps
+  desc: ~
+  contents:
+  - '`icd9_map_ahrq`'
+  - '`icd9_map_elix`'
+  - '`icd9_map_hcc`'
+  - '`icd9_map_pccc`'
+  - '`icd9_map_quan_deyo`'
+  - '`icd9_map_quan_elix`'
+  - '`icd9_map_single_ccs`'
+  - '`icd10_map_ahrq_pcs`'
+
+- title: Transforming ICD data
+  desc: ~
+  contents:
+  - '`comorbid_df_to_mat`'
+  - '`comorbid_mat_to_df`'
+  - '`long_to_wide`'
+  - '`wide_to_long`'
+  - '`convert`'
+
+- title: Metadata
+  desc: Optionally describe the type and structure of your data.
+  contents:
+  - '`as.icd_long_data`'
+  - '`as.decimal_diag`'
+  - '`is.icd9`'
+
+- title: Manipulation
+  desc: Working with codes and the ICD hierarchies
+  contents:
+  - '`children`'
+  - '`combine`'
+  - '`diff_comorbid`'
+  - '`filter_poa`'
+  - '`filter_valid`'
+  - '`get_defined`'
+#  - '`poa_choices`'
+#  - '`print.comorbidity_map`'
+#  - '`[[.comorbidity_map`'
+  - '`subset`'
+#  - '`unzip_single`'
+  - '`icd10_map_ahrq`'

@@ -1,20 +1,3 @@
-# Copyright (C) 2014 - 2018  Jack O. Wasey
-#
-# This file is part of icd.
-#
-# icd is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# icd is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with icd. If not, see <http:#www.gnu.org/licenses/>.
-
 #' show the difference between two comorbidity mappings
 #'
 #' Compares two comorbidity to ICD code mappings. The results are returned
@@ -58,19 +41,25 @@ diff_comorbid <- function(x, y, all_names = NULL, x_names = NULL,
 #' @export
 diff_comorbid.list <- function(x, y, all_names = NULL, x_names = NULL,
                                y_names = NULL, show = TRUE, explain = TRUE) {
-  assert_list(x, min.len = 1, any.missing = FALSE,
-              types = c("character"), names = "unique")
-  assert_list(y, min.len = 1, any.missing = FALSE,
-              types = c("character"), names = "unique")
+  assert_list(x,
+    min.len = 1, any.missing = FALSE,
+    types = c("character"), names = "unique"
+  )
+  assert_list(y,
+    min.len = 1, any.missing = FALSE,
+    types = c("character"), names = "unique"
+  )
   assert_flag(show)
   assert_flag(explain)
   stopifnot(all(x_names %in% names(x)), all(y_names %in% names(y)))
 
-  if (!is.null(names) && (!is.null(x_names) | !is.null(y_names)))
+  if (!is.null(names) && (!is.null(x_names) | !is.null(y_names))) {
     stop("if 'all_names' is specified, 'x_names' and 'y_names' should not be")
+  }
 
-  if (!is.null(all_names))
+  if (!is.null(all_names)) {
     x_names <- y_names <- all_names
+  }
 
   if (is.null(x_names)) x_names <- names(x)
   if (is.null(y_names)) y_names <- names(y)
@@ -97,16 +86,30 @@ diff_comorbid.list <- function(x, y, all_names = NULL, x_names = NULL,
         next
       }
       if (length(only.x) > 0) {
-        cat(sprintf("\n%s has %d codes not in %s. First few are: ",
-                    x.title, length(only.x), y.title))
-        lapply(explain_code(only.x, condense = TRUE, brief = TRUE, warn = FALSE)[1:5],
-               function(s) if (!is.na(s)) cat(sprintf("'%s' ", s)))
+        cat(sprintf(
+          "\n%s has %d codes not in %s. First few are: ",
+          x.title, length(only.x), y.title
+        ))
+        lapply(
+          explain_code(only.x,
+            condense = TRUE,
+            brief = TRUE, warn = FALSE
+          )[1:5],
+          function(s) if (!is.na(s)) cat(sprintf("'%s' ", s))
+        )
       }
       if (length(only.y) > 0) {
-        cat(sprintf("\n%s has %d codes not in %s. First few are: ",
-                    y.title, length(only.y), x.title))
-        lapply(explain_code(only.y, condense = TRUE, brief = TRUE, warn = FALSE)[1:5],
-               function(s) if (!is.na(s)) cat(sprintf("'%s' ", s)))
+        cat(sprintf(
+          "\n%s has %d codes not in %s. First few are: ",
+          y.title, length(only.y), x.title
+        ))
+        lapply(
+          explain_code(only.y,
+            condense = TRUE,
+            brief = TRUE, warn = FALSE
+          )[1:5],
+          function(s) if (!is.na(s)) cat(sprintf("'%s' ", s))
+        )
       }
       cat("\n")
     }

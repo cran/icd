@@ -1,24 +1,8 @@
-# Copyright (C) 2014 - 2018  Jack O. Wasey
-#
-# This file is part of icd.
-#
-# icd is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or.
-# (at your option) any later version.
-#
-# icd is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with icd. If not, see <http:#www.gnu.org/licenses/>.
-
 #' @details \describe{ \item{Comorbidities}{ \code{\link{comorbid}} determines
 #'   comorbidities for a set of patients with one or more ICD codes each. All
-#'   the comorbidity functions attempt to guess which are your identifier and
-#'   ICD code fields, and these can also be specified exactly.
+#'   the comorbidity functions guess which columns are the identifiers and which
+#'   are ICD code fields. You may also specify these. Most 'long' or 'wide' data
+#'   can simply be passed directly, e.g.: \code{comorbid(patient_data_frame)}.
 #'
 #'   \itemize{
 #'
@@ -45,10 +29,10 @@
 #'   Elixhauser comorbidities can be calculated directly from patient data using
 #'   \code{\link{comorbid_elix}}.
 #'
-#'   \item AHRQ publishes Hierarchical Condition Codes (HCC) which are
-#'   essentially comorbidity maps with very many comorbidities, complicated by a
-#'   single- or multi-level system. These categories can be computed using
-#'   \code{\link{comorbid_hcc}}.
+#'   \item The US Center for Medicare and Medicare services (CMS) publishes
+#'   Hierarchical Condition Codes (HCC) which are essentially comorbidity maps
+#'   with very many comorbidities, complicated by a single- or multi-level
+#'   system. These categories can be computed using \code{\link{comorbid_hcc}}.
 #'
 #'   \item AHRQ also publishes Clinical Classification Software (CCS) which
 #'   provides another set of disease groups, and this SAS code is implemented in
@@ -68,10 +52,26 @@
 #'
 #'   \item{Validation}{
 #'
-#'   \code{\link{is_valid}} checks whether ICD-9 codes are syntactically valid
-#'   (although not necessarily genuine ICD-9 diagnoses). In contrast,
-#'   \code{\link{is_defined}} checks whether ICD-9 codes correspond to diagnoses
-#'   in the current ICD-9-CM definition from CMS.}
+#'   \code{\link{is_valid}} checks whether ICD codes are syntactically valid
+#'   (although not necessarily genuine ICD diagnoses). In contrast,
+#'   \code{\link{is_defined}} checks whether ICD-9 codes correspond to defined
+#'   diagnoses or diagnostic groups in the hierarchy of ICD codes.
+#'   \code{\link{is_leaf}} (and for the US, \code{\link{is_billable}}) determine
+#'   whether given codes are leaves in the hierarchy, or not. \pkg{icd} may need
+#'   to download data due to package size or copyright restrictions on
+#'   redistributing data, and needs a cache directory and your permission to do
+#'   this. Use \code{\link{set_icd_data_dir}} to do this, e.g.,
+#'   \code{set_icd_data_dir()} for a default location in a suitable place for
+#'   your OS, e.g. \code{~/.local/icd/icd-ver-num} on Linux. Use
+#'   \code{\link{download_all_icd_data}} to download everything at once, which
+#'   will take a few minutes on a broadband connection.
+#'
+#'   Validation depends on the class of code, and is different if the code is
+#'   from France, Belgium, the USA, or the World Health Organization (WHO). Use
+#'   the functions \code{\link{as.icd10who}}, \code{\link{as.icd10fr}},
+#'   \code{\link{as.icd10be}}, and \code{\link{as.icd10cm}} to set the class of
+#'   a set of ICD codes. This doesn't affect comorbidity calculations, but will
+#'   change the result of the above validation functions, and }
 #'
 #'   \item{Conversion}{
 #'
@@ -79,53 +79,48 @@
 #'   different formats and structures. The most commonly used are:
 #'   \code{\link{decimal_to_short}}, \code{\link{short_to_decimal}} to convert,
 #'   e.g., 002.3 to 0023 and back again. See \link{convert} for other options.
-#'   Conversion between ICD-9, ICD-10, and ICD-11 codes is not yet supported.}
+#'   Conversion between ICD-9, ICD-10, and ICD-11 codes is not yet supported,
+#'   but is the subject of an upcoming US National Institutes of Health (NIH)
+#'   hackathon.}
 #'
 #'   \item{Manipulation}{
 #'
 #'   You can find children of a higher-level ICD-9 code with
 #'   \code{\link{children}} and find a common parent to a set of children (or
 #'   arbitrary list of ICD-9 codes) with \code{\link{condense}}.
-#'   \code{\link{sort_icd}} sorts in hierarchical, then numerical order, so
-#'   '100.0' comes before '100.00', for example.
+#'   \code{\link{sort}} (\code{\link{sort.icd9}}, \code{\link{sort.icd10cm}},
+#'   etc.) sorts in hierarchical, then numerical order, so '100.0' comes before
+#'   '100.00', for example.
 #'
-#'   \code{\link{wide_to_long}} and \code{\link{long_to_wide}} convert the two
-#'   most common data structures containing patient disease data. This is more
-#'   sophisticated and tailored to the problem than base reshaping or packages
-#'   like \CRANpkg{dplyr}, although these could no doubt be used.}
+#'   The comorbidity functions in \pkg{icd} accept 'wide' or 'long' format data,
+#'   but you may wish to use \code{\link{wide_to_long}} and
+#'   \code{\link{long_to_wide}}, which convert between these two most common
+#'   data structures containing patient disease data. This is more sophisticated
+#'   and tailored to the problem than base reshaping or packages like
+#'   \CRANpkg{dplyr}, although these could no doubt be used.} These functions
+#'   use base \R functions to avoid dependencies, so are not very fast for very
+#'   big datasets.
 #'
 #'   \item{Explanation and decoding}{
 #'
-#'   Use \code{\link{explain_code}} to convert a list of codes into
-#'   human-readable descriptions. This function can optionally reduce the codes
-#'   to a their top-level groups if all the child members of a group are
+#'   Use \code{\link{explain_code}} to convert a set of ICD codes into
+#'   human-readable descriptions. See above for discussion on WHO, French,
+#'   Belgian and US ICD code classes. This function can can also reduce the
+#'   codes to their top-level groups if all the child members of a group are
 #'   present. \code{\link{diff_comorbid}} allows summary of the differences
-#'   between comorbidity mappings, e.g. to find what has changed from
-#'   year-to-year or between revisions by different authors.
-#'   \code{\link{icd9cm_hierarchy}} is a \code{data.frame} containing the full
-#'   ICD-9 classification for each diagnosis. \code{\link{icd9_chapters}}
-#'   contains definitions of chapters, sub-chapters and three-digit groups.} }
+#'   between comorbidity mappings, e.g. between revisions by different authors.
+#'   } }
 #' @docType package
 #' @name icd-package
 #' @aliases icd icd-package package-icd package-icd9 icd9-package icd10-package
 #'   package-icd10
 #' @author Jack O. Wasey \email{jack@@jackwasey.com}
-#' @keywords misc utilities
-#' @concept ICD-9 ICD-10 comorbidity comorbidities
+#' @keywords misc utilities internal
+#' @concept comorbidity comorbidities comorbid ICD-9 ICD-10 ICD
 #' @useDynLib icd, .registration=TRUE
-#' @importFrom icd.data assign_icd_data
 #' @importFrom Rcpp cppFunction
-#' @importFrom methods setLoadAction
-#' @importFrom checkmate assert assert_flag assert_list assert_data_frame
-#'   assert_string check_string check_null check_factor check_character
-#'   assert_int expect_numeric check_flag assert_logical assert_character
-#'   check_data_frame check_matrix assert_count expect_data_frame assert_scalar
-#'   assert_environment assert_vector assert_matrix assert_integer
-#'   expect_scalar_na expect_logical assert_integerish expect_character
-#'   assert_factor
-#' @importFrom magrittr "%>%" "%<>%" set_names extract2
 #' @importFrom utils head tail read.fwf
-#' @importFrom stats setNames
+#' @importFrom stats setNames reshape
+#' @importFrom graphics barplot
+#' @importFrom methods is
 "_PACKAGE"
-
-icd.data::assign_icd_data()

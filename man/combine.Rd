@@ -4,7 +4,7 @@
 \alias{combine}
 \alias{c.icd9}
 \alias{c.icd10}
-\title{combine ICD codes}
+\title{Combine ICD codes}
 \usage{
 \method{c}{icd9}(..., warn = FALSE)
 
@@ -13,21 +13,23 @@
 \arguments{
 \item{...}{elements to combine}
 
-\item{warn}{single logical value, if TRUE, will give warnings when
-incompatible types are combined using \code{c}}
+\item{warn}{single logical value, if \code{TRUE}, will give warnings when
+incompatible types are combined using \code{\link[base]{c}}}
 }
 \description{
-These function implement combination of lists or vectors of codes, while
-preserving ICD classes. Base R \code{c} just drops all user defined classes
-and casts down to lowest common denominator, e.g. if mixing numbers and
-characters. No attempt here to catch all possible combinations of feeding in
-mixed ICD types and other types. Let R do what it normally does, but just try
-to keep classes of the first item in the list.
+These function implement ICD specific methods for \code{c}, i.e.,
+combinations of lists or vectors of codes, while preserving ICD classes. Base
+\R \code{\link[base]{c}} just drops all user defined classes and casts down
+to lowest common denominator, e.g. if mixing numbers and characters. No
+attempt here to catch all possible combinations of feeding in mixed ICD types
+and other types. Let R do what it normally does, but just try to keep classes
+of the first item in the list.
 }
 \examples{
 # Care with the following:
 c(as.icd9("E998"), as.icd10("A10"))
 # which results in both codes sharing the 'icd9' class.
+# ICD-10 codes
 (a <- as.icd10("A100SSX"))
 (b <- as.icd10("Z999A"))
 c(a, b)
@@ -40,4 +42,7 @@ c(as.icd_decimal_diag(d), as.icd_decimal_diag(e))
 suppressWarnings(
   c(as.icd_short_diag(a), as.icd_decimal_diag(e))
 )
+}
+\seealso{
+\link[=set_icd_class]{ICD data types}
 }

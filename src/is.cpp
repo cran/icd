@@ -1,40 +1,20 @@
-// Copyright (C) 2014 - 2018  Jack O. Wasey
-//
-// This file is part of icd.
-//
-// icd is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// icd is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with icd. If not, see <http://www.gnu.org/licenses/>.
-
-#include "icd_types.h"
 #include "is.h"
+#include "icd_types.h"
 #include <string>
 #include <vector>
 
-bool icd9IsASingleV(const char* s) {
-  while (*s == ' ')
-    ++s;
+bool icd9IsASingleV(const char *s) {
+  while (*s == ' ') ++s;
   return *s == 'V' || *s == 'v';
 }
 
-bool icd9IsASingleE(const char* s) {
-  while (*s == ' ')
-    ++s;
+bool icd9IsASingleE(const char *s) {
+  while (*s == ' ') ++s;
   return *s == 'E' || *s == 'e';
 }
 
-bool icd9IsASingleVE(const char* s) {
-  while (*s == ' ')
-    ++s;
+bool icd9IsASingleVE(const char *s) {
+  while (*s == ' ') ++s;
   return *s == 'V' || *s == 'E' || *s == 'v' || *s == 'e';
 }
 
@@ -50,37 +30,33 @@ bool icd9IsASingleVE(const char* s) {
 //' @param x \code{const char*} of choices of first character to match
 //' @param invert single logical, if TRUE, negates the condition
 //' @keywords internal
+//' @noRd
 // [[Rcpp::export]]
-std::vector<bool> icd9_is_n_cpp(const VecStr& sv) {
+std::vector<bool> icd9_is_n_rcpp(const VecStr &sv) {
   const int len = sv.size();
   std::vector<bool> out(len);
-  for (int i = 0; i < len; ++i) {
-    out[i] = !icd9IsASingleVE(sv[i].c_str());
-  }
+  for (int i = 0; i < len; ++i) { out[i] = !icd9IsASingleVE(sv[i].c_str()); }
   return out;
 }
 
-//' @rdname icd9_is_n_cpp
+//' @title icd9_is_n_rcpp
 //' @keywords internal
+//' @noRd
 // [[Rcpp::export]]
-std::vector<bool> icd9_is_v_cpp(const VecStr& sv) {
+std::vector<bool> icd9_is_v_rcpp(const VecStr &sv) {
   const int len = sv.size();
   std::vector<bool> out(len);
-  for (int i = 0; i < len; ++i) {
-    out[i] = icd9IsASingleV(sv[i].c_str());
-  }
+  for (int i = 0; i < len; ++i) { out[i] = icd9IsASingleV(sv[i].c_str()); }
   return out;
 }
 
-//' @rdname icd9_is_n_cpp
+//' @title icd9_is_n_rcpp
 //' @keywords internal
+//' @noRd
 // [[Rcpp::export]]
-std::vector<bool> icd9_is_e_cpp(const VecStr& sv) {
+std::vector<bool> icd9_is_e_rcpp(const VecStr &sv) {
   const int len = sv.size();
   std::vector<bool> out(len);
-  for (int i = 0; i < len; ++i) {
-    out[i] = icd9IsASingleE(sv[i].c_str());
-  }
+  for (int i = 0; i < len; ++i) { out[i] = icd9IsASingleE(sv[i].c_str()); }
   return out;
 }
-

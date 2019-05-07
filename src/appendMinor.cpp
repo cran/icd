@@ -1,64 +1,46 @@
-// Copyright (C) 2014 - 2018  Jack O. Wasey
-//
-// This file is part of icd.
-//
-// icd is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// icd is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with icd. If not, see <http://www.gnu.org/licenses/>.
-
 #include "icd_types.h"
-#include "is.h"                              // for icd9IsASingleVE
-#include <string.h>                          // for strlen
-#include <algorithm>                         // for fill
-#include <iterator>                          // for distance
-#include <string>                            // for basic_string, operator!=
-#include <vector>                            // for vector, vector<>::iterator
+#include "is.h"      // for icd9IsASingleVE
+#include <algorithm> // for fill
+#include <iterator>  // for distance
+#include <string.h>  // for strlen
+#include <string>    // for basic_string, operator!=
+#include <vector>    // for vector, vector<>::iterator
+
+using namespace Rcpp;
 
 //' Convert \code{mjr} and \code{mnr} vectors to single code
-//'
-//' In debug mode, will check that \code{mjr} and \code{mnr} are same length.
 //' @template mjr
 //' @template mnr
 //' @template isShort
 //' @return Character vector
 //' @keywords internal manip
 // [[Rcpp::export]]
-CV icd9MajMinToCode(const CV mjr, const CV mnr, bool isShort) {
+CV icd9MajMinToCode(const CV& mjr,
+                    const CV& mnr,
+                    const bool isShort) {
 #ifdef ICD_DEBUG_TRACE
-  Rcpp::Rcout << "icd9MajMinToCode: mjr.size() = " << mjr.size()
-              << " and mnr.size() = " << mnr.size() << "\n";
+  Rcout << "icd9MajMinToCode: mjr.size() = " << mjr.size()
+        << " and mnr.size() = " << mnr.size() << "\n";
 #endif
-  if (mjr.size() != mnr.size())
-    Rcpp::stop("mjr and mnr lengths differ");
-  VecStr out(mjr.size());
-  VecChar out_is_na(mjr.size()); // boolean in char
-  CV::const_iterator j = mjr.begin();
-  CV::const_iterator n = mnr.begin();
-  for (; j != mjr.end() && n != mnr.end(); ++j, ++n) {
-    Rcpp::String mjrelem = *j;
+  if (mjr.size() != mnr.size()) stop("major and minor lengths differ");
+  std::vector<std::string> out(mjr.size());
+  std::vector<char> out_is_na(mjr.size()); // boolean in char
+  CV::const_iterator j = mjr.cbegin();
+  CV::const_iterator n = mnr.cbegin();
+  for (; j != mjr.cend() && n != mnr.cend(); ++j, ++n) {
+    String mjrelem = *j;
     if (CV::is_na(*j)) {
-      out_is_na[std::distance(mjr.begin(), j)] = 1;
+      out_is_na[std::distance(mjr.cbegin(), j)] = 1;
       continue;
     }
-    const char* smj_c = mjrelem.get_cstring();
-    Str smj = std::string(smj_c);
+    const char *smj_c = mjrelem.get_cstring();
+    Str smj           = std::string(smj_c);
     switch (strlen(smj_c)) {
     case 0:
-      out_is_na[std::distance(mjr.begin(), j)] = 1;
+      out_is_na[std::distance(mjr.cbegin(), j)] = 1;
       continue;
     case 1:
-      if (!icd9IsASingleVE(smj_c)) {
-        smj.insert(0, "00");
-      }
+      if (!icd9IsASingleVE(smj_c)) { smj.insert(0, "00"); }
       break;
     case 2:
       if (!icd9IsASingleVE(smj_c)) {
@@ -68,46 +50,41 @@ CV icd9MajMinToCode(const CV mjr, const CV mnr, bool isShort) {
       }
       // default: // mjr is 3 (or more) chars already
     }
-    Rcpp::String mnrelem = *n;
-    if (CV::is_na(*n)) {
-      mnrelem = "";
-    }
-    if (!isShort && mnrelem != "") {
-      smj.append(".");
-    }
+    String mnrelem = *n;
+    if (CV::is_na(*n)) { mnrelem = ""; }
+    if (!isShort && mnrelem != "") { smj.append("."); }
     smj.append(mnrelem);
-    out[std::distance(mjr.begin(), j)] = smj;
+    out[std::distance(mjr.cbegin(), j)] = smj;
   }
-  CV r_out = Rcpp::wrap(out);
+  CV r_out = wrap(out);
 #ifdef ICD_DEBUG_TRACE
-  Rcpp::Rcout << "NA loop size: " << out_is_na.size() << "\n";
+  Rcout << "NA loop size: " << out_is_na.size() << "\n";
 #endif
-  for (VecCharIt i = out_is_na.begin(); i != out_is_na.end(); ++i) {
+  for (auto i = out_is_na.cbegin();
+       i != out_is_na.cend();
+       ++i) {
 #ifdef ICD_DEBUG_TRACE
-    Rcpp::Rcout << "NA loop: " << std::distance(out_is_na.begin(), i) << "\n";
+    Rcout << "NA loop: " << std::distance(out_is_na.cbegin(), i) << "\n";
 #endif
-    if (*i == 0)
-      continue;
-    r_out[std::distance(out_is_na.begin(), i)] = NA_STRING;
+    if (*i == 0) continue;
+    r_out[std::distance(out_is_na.cbegin(), i)] = NA_STRING;
   }
   return r_out;
 }
 
 // [[Rcpp::export]]
-CV icd9MajMinToShort(const CV mjr,
-                     const CV mnr) {
+CV icd9MajMinToShort(const CV& mjr, const CV& mnr) {
 #ifdef ICD_DEBUG_TRACE
-  Rcpp::Rcout << "icd9MajMinToShort: mjr.size() = " << mjr.size()
-              << " and mnr.size() = " << mnr.size() << "\n";
+  Rcout << "icd9MajMinToShort: mjr.size() = " << mjr.size()
+        << " and mnr.size() = " << mnr.size() << "\n";
 #endif
-  if ((mjr.size() != 1 && mjr.size() != mnr.size())
-        || (mjr.size() == 1 && mnr.size() == 0)) {
-    Rcpp::stop(
-      "Length of mjrs and mnrs must be equal, unless mjrs length is one.");
+  if ((mjr.size() != 1 && mjr.size() != mnr.size()) ||
+      (mjr.size() == 1 && mnr.size() == 0)) {
+    stop("Length of mjrs and mnrs must be equal, unless major length is one.");
   }
   if (mjr.size() == 1) {
 #ifdef ICD_DEBUG_TRACE
-    Rcpp::Rcout << "icd9MajMinToShort: mjr.size() = 1\n";
+    Rcout << "icd9MajMinToShort: mjr.size() = 1\n";
 #endif
     CV newmjr(mnr.size(), mjr[0]);
     return icd9MajMinToCode(newmjr, mnr, true);

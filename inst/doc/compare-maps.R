@@ -15,7 +15,7 @@ setdiff(AHRQ_comor, Elix_comor)
 setdiff(Elix_comor, AHRQ_comor)
 
 ## ----comparison----------------------------------------------------------
-comp <- diff_comorbid(icd9_map_ahrq, icd9_map_elix, 
+comp <- diff_comorbid(icd9_map_ahrq, icd9_map_elix,
                       show = TRUE, explain = TRUE)
 
 ## ----justCHF-------------------------------------------------------------
