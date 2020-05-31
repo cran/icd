@@ -32,9 +32,11 @@
   }
   res <- lapply(
     string,
-    function(x) unlist(
+    function(x) {
+      unlist(
         regmatches(x, m = regexec(pattern = pattern, text = x, ...))
       )[-1]
+    }
   )
   res <- res[vapply(res, function(x) length(x) != 0, logical(1))]
   res <- do.call(rbind, res)
@@ -88,8 +90,8 @@ strip <- function(x, pattern = " ", use_bytes = TRUE) {
 #' \dontrun{
 #' sapply(icd9cm_hierarchy, get_non_ascii)
 #' get_encodings(icd9cm_hierarchy)
-#' sapply(icd9cm_leaf_v32, get_non_ascii)
-#' sapply(icd9cm_leaf_v32, get_encodings)
+#' sapply(icd9cm2014_leaf, get_non_ascii)
+#' sapply(icd9cm2014_leaf, get_encodings)
 #' }
 #' @noRd
 #' @keywords internal

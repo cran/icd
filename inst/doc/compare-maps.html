@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Andrew Cooper (original)" />
 <meta name="author" content="Jack Wasey (minor updates)" />
@@ -97,7 +97,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -118,9 +118,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -289,7 +286,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -310,7 +308,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 
 <!--
-Copyright (C) 2014 - 2019  Jack O. Wasey
+Copyright (C) 2014 - 2020  Jack O. Wasey
 
 This file is part of icd.
 
@@ -334,14 +332,12 @@ along with icd. If not, see <http:#www.gnu.org/licenses/>.
 <a class="sourceLine" id="cb1-2" title="2">AHRQ_comor &lt;-<span class="st"> </span><span class="kw">names</span>(icd9_map_elix)</a></code></pre></div>
 <p>These comorbidities are shared:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">intersect</span>(AHRQ_comor, Elix_comor)</a></code></pre></div>
-<pre><code>##  [1] &quot;CHF&quot;          &quot;Valvular&quot;     &quot;PHTN&quot;         &quot;PVD&quot;         
-##  [5] &quot;HTN&quot;          &quot;HTNcx&quot;        &quot;Paralysis&quot;    &quot;NeuroOther&quot;  
-##  [9] &quot;Pulmonary&quot;    &quot;DM&quot;           &quot;DMcx&quot;         &quot;Hypothyroid&quot; 
-## [13] &quot;Renal&quot;        &quot;Liver&quot;        &quot;PUD&quot;          &quot;HIV&quot;         
-## [17] &quot;Lymphoma&quot;     &quot;Mets&quot;         &quot;Tumor&quot;        &quot;Rheumatic&quot;   
-## [21] &quot;Coagulopathy&quot; &quot;Obesity&quot;      &quot;WeightLoss&quot;   &quot;FluidsLytes&quot; 
-## [25] &quot;BloodLoss&quot;    &quot;Anemia&quot;       &quot;Alcohol&quot;      &quot;Drugs&quot;       
-## [29] &quot;Psychoses&quot;    &quot;Depression&quot;</code></pre>
+<pre><code>##  [1] &quot;CHF&quot;          &quot;Valvular&quot;     &quot;PHTN&quot;         &quot;PVD&quot;          &quot;HTN&quot;         
+##  [6] &quot;HTNcx&quot;        &quot;Paralysis&quot;    &quot;NeuroOther&quot;   &quot;Pulmonary&quot;    &quot;DM&quot;          
+## [11] &quot;DMcx&quot;         &quot;Hypothyroid&quot;  &quot;Renal&quot;        &quot;Liver&quot;        &quot;PUD&quot;         
+## [16] &quot;HIV&quot;          &quot;Lymphoma&quot;     &quot;Mets&quot;         &quot;Tumor&quot;        &quot;Rheumatic&quot;   
+## [21] &quot;Coagulopathy&quot; &quot;Obesity&quot;      &quot;WeightLoss&quot;   &quot;FluidsLytes&quot;  &quot;BloodLoss&quot;   
+## [26] &quot;Anemia&quot;       &quot;Alcohol&quot;      &quot;Drugs&quot;        &quot;Psychoses&quot;    &quot;Depression&quot;</code></pre>
 <p>These comorbidities are in AHRQ but not in the Elixhauser sets:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">setdiff</span>(AHRQ_comor, Elix_comor)</a></code></pre></div>
 <pre><code>## [1] &quot;Arrhythmia&quot;</code></pre>
@@ -420,21 +416,19 @@ along with icd. If not, see <http:#www.gnu.org/licenses/>.
 <p>The comparison summary provides the size of the asymmetric difference between mapping schemes for each shared comorbidity, along with a list of a few code descriptions in that difference. This summary doesn’t provide a very detailed look at the similarities between comorbidity mappings. We can get a more detailed look at a particular comorbidity by specifying it.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1">comp<span class="op">$</span>CHF</a></code></pre></div>
 <pre><code>## $both
-##   [1] &quot;39891&quot; &quot;40211&quot; &quot;40291&quot; &quot;40411&quot; &quot;40413&quot; &quot;40491&quot; &quot;40493&quot; &quot;4280&quot; 
-##   [9] &quot;42800&quot; &quot;42801&quot; &quot;42802&quot; &quot;42803&quot; &quot;42804&quot; &quot;42805&quot; &quot;42806&quot; &quot;42807&quot;
-##  [17] &quot;42808&quot; &quot;42809&quot; &quot;4281&quot;  &quot;42810&quot; &quot;42811&quot; &quot;42812&quot; &quot;42813&quot; &quot;42814&quot;
-##  [25] &quot;42815&quot; &quot;42816&quot; &quot;42817&quot; &quot;42818&quot; &quot;42819&quot; &quot;4282&quot;  &quot;42820&quot; &quot;42821&quot;
-##  [33] &quot;42822&quot; &quot;42823&quot; &quot;42824&quot; &quot;42825&quot; &quot;42826&quot; &quot;42827&quot; &quot;42828&quot; &quot;42829&quot;
-##  [41] &quot;4283&quot;  &quot;42830&quot; &quot;42831&quot; &quot;42832&quot; &quot;42833&quot; &quot;42834&quot; &quot;42835&quot; &quot;42836&quot;
-##  [49] &quot;42837&quot; &quot;42838&quot; &quot;42839&quot; &quot;4284&quot;  &quot;42840&quot; &quot;42841&quot; &quot;42842&quot; &quot;42843&quot;
-##  [57] &quot;42844&quot; &quot;42845&quot; &quot;42846&quot; &quot;42847&quot; &quot;42848&quot; &quot;42849&quot; &quot;4285&quot;  &quot;42850&quot;
-##  [65] &quot;42851&quot; &quot;42852&quot; &quot;42853&quot; &quot;42854&quot; &quot;42855&quot; &quot;42856&quot; &quot;42857&quot; &quot;42858&quot;
-##  [73] &quot;42859&quot; &quot;4286&quot;  &quot;42860&quot; &quot;42861&quot; &quot;42862&quot; &quot;42863&quot; &quot;42864&quot; &quot;42865&quot;
-##  [81] &quot;42866&quot; &quot;42867&quot; &quot;42868&quot; &quot;42869&quot; &quot;4287&quot;  &quot;42870&quot; &quot;42871&quot; &quot;42872&quot;
-##  [89] &quot;42873&quot; &quot;42874&quot; &quot;42875&quot; &quot;42876&quot; &quot;42877&quot; &quot;42878&quot; &quot;42879&quot; &quot;4288&quot; 
-##  [97] &quot;42880&quot; &quot;42881&quot; &quot;42882&quot; &quot;42883&quot; &quot;42884&quot; &quot;42885&quot; &quot;42886&quot; &quot;42887&quot;
-## [105] &quot;42888&quot; &quot;42889&quot; &quot;4289&quot;  &quot;42890&quot; &quot;42891&quot; &quot;42892&quot; &quot;42893&quot; &quot;42894&quot;
-## [113] &quot;42895&quot; &quot;42896&quot; &quot;42897&quot; &quot;42898&quot; &quot;42899&quot;
+##   [1] &quot;39891&quot; &quot;40211&quot; &quot;40291&quot; &quot;40411&quot; &quot;40413&quot; &quot;40491&quot; &quot;40493&quot; &quot;4280&quot;  &quot;42800&quot;
+##  [10] &quot;42801&quot; &quot;42802&quot; &quot;42803&quot; &quot;42804&quot; &quot;42805&quot; &quot;42806&quot; &quot;42807&quot; &quot;42808&quot; &quot;42809&quot;
+##  [19] &quot;4281&quot;  &quot;42810&quot; &quot;42811&quot; &quot;42812&quot; &quot;42813&quot; &quot;42814&quot; &quot;42815&quot; &quot;42816&quot; &quot;42817&quot;
+##  [28] &quot;42818&quot; &quot;42819&quot; &quot;4282&quot;  &quot;42820&quot; &quot;42821&quot; &quot;42822&quot; &quot;42823&quot; &quot;42824&quot; &quot;42825&quot;
+##  [37] &quot;42826&quot; &quot;42827&quot; &quot;42828&quot; &quot;42829&quot; &quot;4283&quot;  &quot;42830&quot; &quot;42831&quot; &quot;42832&quot; &quot;42833&quot;
+##  [46] &quot;42834&quot; &quot;42835&quot; &quot;42836&quot; &quot;42837&quot; &quot;42838&quot; &quot;42839&quot; &quot;4284&quot;  &quot;42840&quot; &quot;42841&quot;
+##  [55] &quot;42842&quot; &quot;42843&quot; &quot;42844&quot; &quot;42845&quot; &quot;42846&quot; &quot;42847&quot; &quot;42848&quot; &quot;42849&quot; &quot;4285&quot; 
+##  [64] &quot;42850&quot; &quot;42851&quot; &quot;42852&quot; &quot;42853&quot; &quot;42854&quot; &quot;42855&quot; &quot;42856&quot; &quot;42857&quot; &quot;42858&quot;
+##  [73] &quot;42859&quot; &quot;4286&quot;  &quot;42860&quot; &quot;42861&quot; &quot;42862&quot; &quot;42863&quot; &quot;42864&quot; &quot;42865&quot; &quot;42866&quot;
+##  [82] &quot;42867&quot; &quot;42868&quot; &quot;42869&quot; &quot;4287&quot;  &quot;42870&quot; &quot;42871&quot; &quot;42872&quot; &quot;42873&quot; &quot;42874&quot;
+##  [91] &quot;42875&quot; &quot;42876&quot; &quot;42877&quot; &quot;42878&quot; &quot;42879&quot; &quot;4288&quot;  &quot;42880&quot; &quot;42881&quot; &quot;42882&quot;
+## [100] &quot;42883&quot; &quot;42884&quot; &quot;42885&quot; &quot;42886&quot; &quot;42887&quot; &quot;42888&quot; &quot;42889&quot; &quot;4289&quot;  &quot;42890&quot;
+## [109] &quot;42891&quot; &quot;42892&quot; &quot;42893&quot; &quot;42894&quot; &quot;42895&quot; &quot;42896&quot; &quot;42897&quot; &quot;42898&quot; &quot;42899&quot;
 ## 
 ## $only.x
 ## [1] &quot;40201&quot; &quot;40401&quot; &quot;40403&quot; &quot;428&quot;  
@@ -444,6 +438,9 @@ along with icd. If not, see <http:#www.gnu.org/licenses/>.
 <p>In this example we look at the shared comorbidity Congestive Heart Failure (CHF). Note the list first gives us all the ICD codes that exist in both comorbidity mappings. Then it gives a list called <code>only.x</code>, followed by a list called <code>only.y</code>. <code>x</code> and <code>y</code> refer to the first and second mappings given to the function call. In this case, <code>x</code> refers to the AHRQ ICD-9 mapping, and <code>y</code> refers to the Elixhauser original 1998 ICD-9 mapping. So <code>only.x</code> lists all the ICD codes in the AHRQ comorbidity but not the Elixhauser comorbidity. Conversely, <code>only.y</code> lists all the ICD codes in the Elixhauser comorbidity but not in the AHRQ comorbidity, which in this case is none.</p>
 <p>We can see from this comparison that the two mapping schemes are quite similar for this comorbidity. Most of the ICD codes exist in both mappings, and only a handful of mappings exist in the AHRQ mapping but not in the Elixhauser mapping. This makes sense since AHRQ was designed to update the original Elixhauser 1998 comorbidities, and has expanded the comorbidities in annual updates. This means any analysis of CHF that uses either Elixhauser or AHRQ should produce comparable results, since the comorbidity mappings are not wildly different.</p>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

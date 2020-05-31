@@ -1,5 +1,5 @@
 <!--
-Copyright (C) 2014 - 2019  Jack O. Wasey
+Copyright (C) 2014 - 2020  Jack O. Wasey
 
 This file is part of icd.
 
@@ -35,13 +35,13 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 [![Appveyor](https://ci.appveyor.com/api/projects/status/9ncfgxht3n5i8t60/branch/master?svg=true
 "Appveyor Build Status")](https://ci.appveyor.com/project/jackwasey/icd/branch/master)
 [![codecov.io](https://codecov.io/github/jackwasey/icd/coverage.svg?branch=master
-"Core Code Coverage")](https://codecov.io/github/jackwasey/icd?branch=master)
+"Code Coverage")](https://codecov.io/github/jackwasey/icd?branch=master)
 [![CII Best
 Practices](https://bestpractices.coreinfrastructure.org/projects/2092/badge)](https://bestpractices.coreinfrastructure.org/projects/2092)
 [![Dependencies](https://tinyverse.netlify.com/badge/icd)](https://cran.r-project.org/package=icd)
 [![CRAN RStudio mirror downloads last calendar
 month](https://cranlogs.r-pkg.org/badges/icd
-"RStudio Mirror Downloads Last Calendar Month")](https://cran.r-project.org/package=icd)
+"RStudio Mirror Downloads")](https://cran.r-project.org/package=icd)
 <!-- badges: end -->
 <!-- [![CRAN RStudio mirror downloads last week](https://cranlogs.r-pkg.org/badges/last-week/icd "RStudio Mirror Downloads Last Week")](https://cran.r-project.org/package=icd) -->
 
@@ -62,11 +62,12 @@ are supported, most of which are downloaded on demand.
 
 `icd` is used by many researchers around the world who work in public
 health, epidemiology, clinical research, nutrition, journalism, health
-administration and more. I’m grateful for contact from people in these
-fields for their feedback and code contributions, and I’m pleased to say
-that `icd` has been used in works like the [Pulitzer
-finalist](http://www.pulitzer.org/finalists/staff-propublica) work on
-[maternal death](http://www.pulitzer.org/finalists/staff-propublica) by
+administration, insurance, and more. I’m grateful for contact from
+people in these fields for their feedback and code contributions, and
+I’m pleased to say that `icd` has been used in works like the
+[Pulitzer finalist](http://www.pulitzer.org/finalists/staff-propublica)
+work on [maternal
+death](http://www.pulitzer.org/finalists/staff-propublica) by
 [ProPublica](https://www.propublica.org).
 
 ## Features
@@ -82,8 +83,9 @@ finalist](http://www.pulitzer.org/finalists/staff-propublica) work on
     columns are ICD-9 or ICD-10 codes.
   - explain and summarize groups of ICD codes in natural language, using
     ICD editions from the WHO, USA, France and Belgium. Many different
-    annual editions of these data are available, all via the ‘icd.data’
-    companion package.
+    annual editions of these data are available, and these may be
+    downloaded automatically when used, or in bulk with
+    `download_all_icd_data()`.
   - Charlson and Van Walraven score calculations
   - Hierarchical Condition Codes (HCC) from CMS
   - Clinical Classifications Software (CCS) comorbidities from AHRQ
@@ -139,7 +141,7 @@ plot_comorbid(uranium_pathology)
 
 ![](man/figures/README-example-1.png)<!-- -->
 
-## Comorbodities example: make “Table 1” summary data
+## Comorbidities example: make “Table 1” summary data
 
 A common requirement for medical research involving patients is
 determining new or existing comorbidities. This is often reported in
@@ -262,8 +264,7 @@ then two alphanumeric characters. However, especially for ICD-10-CM,
 there are a multitude of qualifiers, e.g. specifying recurrence,
 laterality, which vastly increase the number of possible codes. This
 package recognizes validity of codes by syntax alone, or whether the
-codes appear in a canonical list. The current ICD-10-CM master list is
-the 2016 set. There is not yet the capability of converting between
-ICD-9 and ICD-10, but comorbidities can be generated from older ICD-9
-codes and newer ICD-10 codes in parallel, and the comorbidities can then
-be compared.
+codes appear in a canonical list. There is not yet the capability of
+converting between ICD-9 and ICD-10, but comorbidities can be generated
+from older ICD-9 codes and newer ICD-10 codes in parallel, and the
+comorbidities can then be compared.

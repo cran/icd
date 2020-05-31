@@ -1,5 +1,21 @@
 # !diagnostics suppress=year
 # (apparently non-functional attempt to suppress incorrect rstudio diagnostic)
+
+
+skip_no_icd_data_raw <- function(
+                                 fun,
+                                 msg = paste0(fun, "() did not find existing raw data.")) {
+  if (with_offline(
+    TRUE,
+    with_absent_action(
+      "silent",
+      with_interact(FALSE, is.null(fun()))
+    )
+  )) {
+    skip(msg)
+  }
+}
+
 rtf_year_ok <- function(year, ...) {
   !is.null(
     with_absent_action(
@@ -15,21 +31,21 @@ rtf_year_ok <- function(year, ...) {
   )
 }
 
-have_icd_data_resource <- function() {
-  opt_ok <- !is.null(.get_opt("resource", default = NULL))
+have_cache <- function() {
+  opt_ok <- !is.null(.get_opt("cache", default = NULL))
   if (!opt_ok && dir.exists(.default_icd_data_dir())) {
     if (.verbose()) {
-      message("have_icd_data_resource() is setting data opt to default")
+      message("have_cache() is setting data opt to default")
     }
-    options("icd.data.resource" = .default_icd_data_dir())
+    .set_opt("cache" = .default_icd_data_dir())
     return(TRUE)
   }
   opt_ok
 }
 
-skip_no_icd_data_resource <- function() {
-  if (!have_icd_data_resource()) {
-    skip("Skipping - no icd.data.resource option defined.")
+skip_no_icd_data_cache <- function() {
+  if (!have_cache()) {
+    skip("Skipping - no cache option defined.")
   }
 }
 
@@ -40,7 +56,7 @@ skip_if_offline <- function() {
 }
 
 skip_on_no_rtf <- function(test_year) {
-  if (!have_icd_data_resource() || !rtf_year_ok(test_year)) {
+  if (!have_cache() || !rtf_year_ok(test_year)) {
     testthat::skip(paste(
       test_year,
       "ICD-9-CM codes unavailable offline for testsing"
@@ -49,7 +65,7 @@ skip_on_no_rtf <- function(test_year) {
 }
 
 skip_flat_icd9_avail <- function(ver, year) {
-  skip_no_icd_data_resource()
+  skip_no_icd_data_cache()
   if (missing(ver)) {
     if (missing(year)) stop("specify ver or year")
     ver <- .icd9cm_sources[.icd9cm_sources$year == year, "version"]
@@ -84,23 +100,11 @@ skip_icd10cm_flat_avail <- function(year, dx = TRUE) {
 }
 
 skip_icd10cm_xml_avail <- function() {
-  skip_no_icd_data_resource()
-  msg <- "skipping test because XML file ICD-10-CM source not available"
-  if (is.null(
-    with_absent_action(
-      absent_action = "silent",
-      with_offline(
-        offline = TRUE,
-        with_interact(
-          interact = FALSE,
-          .dl_icd10cm_xml()
-        )
-      )
-    )
-  )) {
-    testthat::skip(msg)
-  }
-  invisible()
+  skip_no_icd_data_cache()
+  skip_no_icd_data_raw(
+    .dl_icd10cm_xml,
+    "skipping test because XML file ICD-10-CM source not available"
+  )
 }
 
 skip_flat_icd9_avail_all <- function() {
@@ -136,11 +140,12 @@ expect_chap_equal <- function(x, start, end, ver_chaps, ...) {
   )))
 }
 
-expect_icd10_sub_chap_equal <- function(x, start, end, ...)
+expect_icd10_sub_chap_equal <- function(x, start, end, ...) {
   eval(bquote(expect_chap_equal(.(x), .(start), .(end),
     ver_chaps = icd10_sub_chapters,
     ...
   )))
+}
 
 eee <- function(x, desc, ...) {
   x <- sub("\\.", "", x)
@@ -204,7 +209,7 @@ chap_present <- function(x, ver_chaps, ...) {
   x %in% lnames
 }
 
-expect_chap_missing <- function(x, ver_chaps, info = NULL, label = NULL, ...)
+expect_chap_missing <- function(x, ver_chaps, info = NULL, label = NULL, ...) {
   eval(
     bquote(
       expect_true(
@@ -214,18 +219,23 @@ expect_chap_missing <- function(x, ver_chaps, info = NULL, label = NULL, ...)
       )
     )
   )
+}
 
-expect_icd9_sub_chap_missing <- function(x, ...)
+expect_icd9_sub_chap_missing <- function(x, ...) {
   eval(bquote(expect_chap_missing(.(x), ver_chaps = icd9_sub_chapters, ...)))
+}
 
-expect_icd9_chap_missing <- function(x, ...)
+expect_icd9_chap_missing <- function(x, ...) {
   eval(bquote(expect_chap_missing(.(x), ver_chaps = icd9_chapters, ...)))
+}
 
-expect_icd10_sub_chap_missing <- function(x, ...)
+expect_icd10_sub_chap_missing <- function(x, ...) {
   eval(bquote(expect_chap_missing(.(x), ver_chaps = icd10_sub_chapters, ...)))
+}
 
-expect_icd10_chap_missing <- function(x, ...)
+expect_icd10_chap_missing <- function(x, ...) {
   eval(bquote(expect_chap_missing(.(x), ver_chaps = icd10_chapters, ...)))
+}
 
 # expect that a chapter with given title exists, case-insensitive
 expect_chap_present <- function(x, ver_chaps, info = NULL, label = NULL, ...) {
@@ -325,6 +335,7 @@ expect_equal_no_icd <- function(object, expected, ...) {
 #' removed in the future.
 #' @param ver Version of WHO ICD-10 to use, currently a four-digit year
 #' @param lang Language, currently either 'en' or 'fr'
+#' @noRd
 skip_missing_icd10who <- function(ver = "2016", lang = "en") {
   if (ver == "2016" && lang == "en") {
     if (!.exists_in_cache("icd10who2016")) {
@@ -342,5 +353,32 @@ skip_missing_icd10who <- function(ver = "2016", lang = "en") {
 skip_missing_dat <- function(var_name) {
   if (!.exists_in_cache(var_name, USE.NAMES = FALSE)) {
     skip(paste(var_name, "not available"))
+  }
+}
+
+skip_missing_icd10fr <- function() {
+  if (!.exists_anywhere("icd10fr2019")) {
+    testthat::skip("No ICD-10-FR 2019 French data")
+  }
+}
+
+skip_slow <- function(msg = "Skipping slow test") {
+  testthat::skip_on_cran()
+  if (!.get_opt("test_slow", default = FALSE)) {
+    testthat::skip(msg)
+  }
+}
+
+skip_no_icd_data_raw <- function(
+                                 fun,
+                                 msg = paste0(fun, "() did not find existing raw data.")) {
+  if (with_offline(
+    TRUE,
+    with_absent_action(
+      "silent",
+      is.null(fun())
+    )
+  )) {
+    skip(msg)
   }
 }

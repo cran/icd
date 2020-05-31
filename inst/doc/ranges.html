@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Jack O. Wasey" />
 
-<meta name="date" content="2019-05-06" />
+<meta name="date" content="2020-05-30" />
 
 <title>Ranges of ICD codes</title>
 
@@ -96,7 +96,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -117,9 +117,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -288,7 +285,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -303,7 +301,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">Ranges of ICD codes</h1>
 <h4 class="author">Jack O. Wasey</h4>
-<h4 class="date">2019-05-06</h4>
+<h4 class="date">2020-05-30</h4>
 
 
 <div id="TOC">
@@ -317,7 +315,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </div>
 
 <!--
-Copyright (C) 2014 - 2019  Jack O. Wasey
+Copyright (C) 2014 - 2020  Jack O. Wasey
 
 This file is part of icd.
 
@@ -368,17 +366,16 @@ along with icd. If not, see <http:#www.gnu.org/licenses/>.
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">icd<span class="op">:::</span><span class="kw">expand_range</span>(<span class="st">&quot;4820&quot;</span>, <span class="st">&quot;4823&quot;</span>) <span class="co"># default, equivalent to %i9s%</span></a>
 <a class="sourceLine" id="cb4-2" title="2"><span class="co">#&gt; [1] &quot;4820&quot;  &quot;4821&quot;  &quot;4822&quot;  &quot;4823&quot;  &quot;48230&quot; &quot;48231&quot; &quot;48232&quot; &quot;48239&quot;</span></a>
 <a class="sourceLine" id="cb4-3" title="3">icd<span class="op">:::</span><span class="kw">expand_range</span>(<span class="st">&quot;4820&quot;</span>, <span class="st">&quot;4823&quot;</span>, <span class="dt">defined =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb4-4" title="4"><span class="co">#&gt;  [1] &quot;4820&quot;  &quot;48200&quot; &quot;48201&quot; &quot;48202&quot; &quot;48203&quot; &quot;48204&quot; &quot;48205&quot; &quot;48206&quot;</span></a>
-<a class="sourceLine" id="cb4-5" title="5"><span class="co">#&gt;  [9] &quot;48207&quot; &quot;48208&quot; &quot;48209&quot; &quot;4821&quot;  &quot;48210&quot; &quot;48211&quot; &quot;48212&quot; &quot;48213&quot;</span></a>
-<a class="sourceLine" id="cb4-6" title="6"><span class="co">#&gt; [17] &quot;48214&quot; &quot;48215&quot; &quot;48216&quot; &quot;48217&quot; &quot;48218&quot; &quot;48219&quot; &quot;4822&quot;  &quot;48220&quot;</span></a>
-<a class="sourceLine" id="cb4-7" title="7"><span class="co">#&gt; [25] &quot;48221&quot; &quot;48222&quot; &quot;48223&quot; &quot;48224&quot; &quot;48225&quot; &quot;48226&quot; &quot;48227&quot; &quot;48228&quot;</span></a>
-<a class="sourceLine" id="cb4-8" title="8"><span class="co">#&gt; [33] &quot;48229&quot; &quot;4823&quot;  &quot;48230&quot; &quot;48231&quot; &quot;48232&quot; &quot;48233&quot; &quot;48234&quot; &quot;48235&quot;</span></a>
-<a class="sourceLine" id="cb4-9" title="9"><span class="co">#&gt; [41] &quot;48236&quot; &quot;48237&quot; &quot;48238&quot; &quot;48239&quot;</span></a>
-<a class="sourceLine" id="cb4-10" title="10"><span class="co"># see the first few differences (which are by definition not &#39;real&#39; codes):</span></a>
-<a class="sourceLine" id="cb4-11" title="11"><span class="kw">head</span>(</a>
-<a class="sourceLine" id="cb4-12" title="12">  <span class="kw">setdiff</span>(icd<span class="op">:::</span><span class="kw">expand_range</span>(<span class="st">&quot;4820&quot;</span>, <span class="st">&quot;4823&quot;</span>, <span class="dt">defined =</span> <span class="ot">FALSE</span>),</a>
-<a class="sourceLine" id="cb4-13" title="13">          icd<span class="op">:::</span><span class="kw">expand_range</span>(<span class="st">&quot;4820&quot;</span>, <span class="st">&quot;4823&quot;</span>)))</a>
-<a class="sourceLine" id="cb4-14" title="14"><span class="co">#&gt; [1] &quot;48200&quot; &quot;48201&quot; &quot;48202&quot; &quot;48203&quot; &quot;48204&quot; &quot;48205&quot;</span></a></code></pre></div>
+<a class="sourceLine" id="cb4-4" title="4"><span class="co">#&gt;  [1] &quot;4820&quot;  &quot;48200&quot; &quot;48201&quot; &quot;48202&quot; &quot;48203&quot; &quot;48204&quot; &quot;48205&quot; &quot;48206&quot; &quot;48207&quot;</span></a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="co">#&gt; [10] &quot;48208&quot; &quot;48209&quot; &quot;4821&quot;  &quot;48210&quot; &quot;48211&quot; &quot;48212&quot; &quot;48213&quot; &quot;48214&quot; &quot;48215&quot;</span></a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="co">#&gt; [19] &quot;48216&quot; &quot;48217&quot; &quot;48218&quot; &quot;48219&quot; &quot;4822&quot;  &quot;48220&quot; &quot;48221&quot; &quot;48222&quot; &quot;48223&quot;</span></a>
+<a class="sourceLine" id="cb4-7" title="7"><span class="co">#&gt; [28] &quot;48224&quot; &quot;48225&quot; &quot;48226&quot; &quot;48227&quot; &quot;48228&quot; &quot;48229&quot; &quot;4823&quot;  &quot;48230&quot; &quot;48231&quot;</span></a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="co">#&gt; [37] &quot;48232&quot; &quot;48233&quot; &quot;48234&quot; &quot;48235&quot; &quot;48236&quot; &quot;48237&quot; &quot;48238&quot; &quot;48239&quot;</span></a>
+<a class="sourceLine" id="cb4-9" title="9"><span class="co"># see the first few differences (which are by definition not &#39;real&#39; codes):</span></a>
+<a class="sourceLine" id="cb4-10" title="10"><span class="kw">head</span>(</a>
+<a class="sourceLine" id="cb4-11" title="11">  <span class="kw">setdiff</span>(icd<span class="op">:::</span><span class="kw">expand_range</span>(<span class="st">&quot;4820&quot;</span>, <span class="st">&quot;4823&quot;</span>, <span class="dt">defined =</span> <span class="ot">FALSE</span>),</a>
+<a class="sourceLine" id="cb4-12" title="12">          icd<span class="op">:::</span><span class="kw">expand_range</span>(<span class="st">&quot;4820&quot;</span>, <span class="st">&quot;4823&quot;</span>)))</a>
+<a class="sourceLine" id="cb4-13" title="13"><span class="co">#&gt; [1] &quot;48200&quot; &quot;48201&quot; &quot;48202&quot; &quot;48203&quot; &quot;48204&quot; &quot;48205&quot;</span></a></code></pre></div>
 </div>
 <div id="finding-codes-in-hierarchy" class="section level2">
 <h2>Finding codes in hierarchy</h2>
@@ -398,21 +395,24 @@ along with icd. If not, see <http:#www.gnu.org/licenses/>.
 <p>By adding <code>defined = TRUE</code>, all syntactically valid ICD-9 codes are returned, even if not defined by CMS as diagnoses. This is relevant because of minor coding errors, or coding in a different year to the master list. A planned feature is to allow testing of an ICD-9 code against the valid codes for the year it was entered, but at present only the 2014 master list is used. This means that some older valid codes may no longer be on the list. However, there have been very few changes to ICD-9-CM in the last five years with ICD-10-CM in the wings.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="co"># first ten possible ICD-9 child codes from 391</span></a>
 <a class="sourceLine" id="cb6-2" title="2"><span class="kw">children</span>(<span class="st">&quot;391&quot;</span>, <span class="dt">defined =</span> <span class="ot">FALSE</span>)[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>]</a>
-<a class="sourceLine" id="cb6-3" title="3"><span class="co">#&gt;  [1] &quot;391&quot;   &quot;3910&quot;  &quot;39100&quot; &quot;39101&quot; &quot;39102&quot; &quot;39103&quot; &quot;39104&quot; &quot;39105&quot;</span></a>
-<a class="sourceLine" id="cb6-4" title="4"><span class="co">#&gt;  [9] &quot;39106&quot; &quot;39107&quot;</span></a></code></pre></div>
+<a class="sourceLine" id="cb6-3" title="3"><span class="co">#&gt;  [1] &quot;391&quot;   &quot;3910&quot;  &quot;39100&quot; &quot;39101&quot; &quot;39102&quot; &quot;39103&quot; &quot;39104&quot; &quot;39105&quot; &quot;39106&quot;</span></a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="co">#&gt; [10] &quot;39107&quot;</span></a></code></pre></div>
 <p><code>condense</code> is the reverse operation to <code>children</code>. You need to specify whether you want to consider all possible children or just defined codes.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">icd<span class="op">::</span><span class="kw">condense</span>(<span class="kw">children</span>(<span class="st">&quot;0032&quot;</span>), <span class="dt">defined =</span> <span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb7-2" title="2"><span class="co">#&gt; [1] &quot;0032&quot;</span></a>
 <a class="sourceLine" id="cb7-3" title="3"></a>
 <a class="sourceLine" id="cb7-4" title="4">codes &lt;-<span class="st"> </span><span class="kw">children</span>(<span class="st">&quot;0032&quot;</span>, <span class="dt">defined =</span> <span class="ot">FALSE</span>)</a>
 <a class="sourceLine" id="cb7-5" title="5">codes</a>
-<a class="sourceLine" id="cb7-6" title="6"><span class="co">#&gt;  [1] &quot;0032&quot;  &quot;00320&quot; &quot;00321&quot; &quot;00322&quot; &quot;00323&quot; &quot;00324&quot; &quot;00325&quot; &quot;00326&quot;</span></a>
-<a class="sourceLine" id="cb7-7" title="7"><span class="co">#&gt;  [9] &quot;00327&quot; &quot;00328&quot; &quot;00329&quot;</span></a>
+<a class="sourceLine" id="cb7-6" title="6"><span class="co">#&gt;  [1] &quot;0032&quot;  &quot;00320&quot; &quot;00321&quot; &quot;00322&quot; &quot;00323&quot; &quot;00324&quot; &quot;00325&quot; &quot;00326&quot; &quot;00327&quot;</span></a>
+<a class="sourceLine" id="cb7-7" title="7"><span class="co">#&gt; [10] &quot;00328&quot; &quot;00329&quot;</span></a>
 <a class="sourceLine" id="cb7-8" title="8">icd<span class="op">::</span><span class="kw">condense</span>(codes, <span class="dt">defined =</span> <span class="ot">FALSE</span>)</a>
 <a class="sourceLine" id="cb7-9" title="9"><span class="co">#&gt; [1] &quot;0032&quot;</span></a></code></pre></div>
 </div>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

@@ -118,12 +118,12 @@
   .msg("Correcting order of ", nrow(dat), " codes")
   dat <- dat[order.icd10cm(dat$code), ]
   row.names(dat) <- NULL
-  .msg("Saving in resource dir")
-  .save_in_resource_dir(
+  .msg("Saving in cache dir")
+  .save_in_cache(
     var_name = .get_icd10cm_name(year = year, dx = dx),
     x = dat
   )
-  if (save_pkg_data && year %in% c("2016", "2019")) {
+  if (save_pkg_data && year == "2019") {
     if (.verbose()) {
       message("Saving in package data: ", .get_icd10cm_name(year, dx))
     }

@@ -17,20 +17,23 @@ strim <- function(x) {
   }
 }
 
-"%nin%" <- function(x, table)
+"%nin%" <- function(x, table) {
   match(x, table, nomatch = 0L) == 0L
+}
 
 #' Use faster matching for %in%
 #' @keywords internal
 #' @noRd
-"%fin%" <- function(x, table)
+"%fin%" <- function(x, table) {
   fin(x, table)
+}
 
 #' Use faster matching for %nin%
 #' @keywords internal
 #' @noRd
-"%fnin%" <- function(x, table)
+"%fnin%" <- function(x, table) {
   !fin(x, table)
+}
 
 #' Encode \code{TRUE} as 1, and \code{FALSE} as 0 (integers)
 #'
@@ -368,7 +371,7 @@ na_to_false <- function(x) {
 str_extract <- function(string,
                         pattern,
                         fun = `[[`,
-                        ...)
+                        ...) {
   vapply(
     regmatches(string,
       m = regexec(
@@ -381,20 +384,12 @@ str_extract <- function(string,
     1,
     FUN.VALUE = character(1L)
   )
-
-capitalize_first <- function(x)
-  trimws(paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x))))
-# nocov end
-
-#' Get the raw data directory
-#'
-#' Following Hadley Wickham recommendations in R Packages, this should be in
-#' \code{inst/extdata}. \pkg{devtools} overrides \code{system.file}.
-#' @noRd
-#' @keywords internal
-get_raw_data_dir <- function() {
-  system.file("data-raw", package = "icd")
 }
+
+capitalize_first <- function(x) {
+  trimws(paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x))))
+}
+# nocov end
 
 .stopifnot_year <- function(year) {
   if (!all(grepl("^[[:digit:]]{4}$", as.character(year)))) {

@@ -6,12 +6,21 @@
 \alias{van_walraven_from_comorbid}
 \title{Calculate van Walraven Elixhauser Score}
 \usage{
-van_walraven(x, visit_name = NULL, return_df = FALSE,
-  stringsAsFactors = getOption("stringsAsFactors"), ...)
+van_walraven(
+  x,
+  visit_name = NULL,
+  return_df = FALSE,
+  stringsAsFactors = getOption("stringsAsFactors"),
+  ...
+)
 
-\method{van_walraven}{data.frame}(x, visit_name = NULL,
-  return_df = FALSE, stringsAsFactors = getOption("stringsAsFactors"),
-  ...)
+\method{van_walraven}{data.frame}(
+  x,
+  visit_name = NULL,
+  return_df = FALSE,
+  stringsAsFactors = getOption("stringsAsFactors"),
+  ...
+)
 
 van_walraven_from_comorbid(x, visit_name = NULL, hierarchy = FALSE)
 }
@@ -68,7 +77,7 @@ mydf <- data.frame(
   icd9 = c("412.93", "441", "042")
 )
 van_walraven(mydf)
-# or calculate comorbodities first:
+# or calculate comorbidities first:
 cmb <- icd9_comorbid_quan_elix(mydf, short_code = FALSE, hierarchy = TRUE)
 vwr <- van_walraven_from_comorbid(cmb)
 stopifnot(identical(van_walraven(mydf), vwr))

@@ -13,21 +13,45 @@ Tabulates the decimal format alongside converted non-decimal format.}
 \usage{
 explain_table(...)
 
-\method{explain_table}{default}(x, short_code = guess_short(x),
-  condense = FALSE, brief = TRUE, warn = TRUE, ...)
+\method{explain_table}{default}(
+  x,
+  short_code = guess_short(x),
+  condense = FALSE,
+  brief = TRUE,
+  warn = TRUE,
+  ...
+)
 
 \method{explain_table}{icd9}(...)
 
 \method{explain_table}{icd10}(...)
 
-\method{explain_table}{icd9cm}(x, short_code = guess_short(x),
-  condense = FALSE, brief = TRUE, warn = TRUE, ...)
+\method{explain_table}{icd9cm}(
+  x,
+  short_code = guess_short(x),
+  condense = FALSE,
+  brief = TRUE,
+  warn = TRUE,
+  ...
+)
 
-\method{explain_table}{icd10cm}(x, short_code = guess_short(x),
-  condense = FALSE, brief = TRUE, warn = TRUE, ...)
+\method{explain_table}{icd10cm}(
+  x,
+  short_code = guess_short(x),
+  condense = FALSE,
+  brief = TRUE,
+  warn = TRUE,
+  ...
+)
 
-\method{explain_table}{icd10who}(x, short_code = guess_short(x),
-  condense = FALSE, brief = TRUE, warn = TRUE, ...)
+\method{explain_table}{icd10who}(
+  x,
+  short_code = guess_short(x),
+  condense = FALSE,
+  brief = TRUE,
+  warn = TRUE,
+  ...
+)
 }
 \arguments{
 \item{...}{arguments passed on to other functions}
@@ -79,11 +103,11 @@ guessing ICD version
 
 \item \code{icd10}: from vector of ICD-10 codes.
 
-\item \code{icd9cm}: explain character vector of ICD1-10-CM codes
+\item \code{icd9cm}: explain character vector of ICD-9-CM codes
 
 \item \code{icd10cm}: explain character vector of ICD1-10-CM codes
 
-\item \code{icd10who}: explain character vector of ICD1-10-CM codes
+\item \code{icd10who}: explain character vector of ICD-10-WHO codes
 }}
 
 \author{

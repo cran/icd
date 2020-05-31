@@ -1,4 +1,4 @@
-## ----setup, include=FALSE------------------------------------------------
+## ----setup, include=FALSE-----------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -29,10 +29,10 @@ if (icd:::.exists_in_cache("icd10cm2019_pc")) {
   )
 }
 
-## ----headdat-------------------------------------------------------------
+## ----headdat------------------------------------------------------------------
 head(dat)
 
-## ----calcpre, eval = TRUE, echo = FALSE----------------------------------
+## ----calcpre, eval = TRUE, echo = FALSE---------------------------------------
 pccc_dx <- comorbid_pccc_dx(dat)
 if (icd:::.exists_in_cache("icd10cm2019_pc")) {
   pccc_pcs <- icd10_comorbid_pccc_pcs(dat,
@@ -43,23 +43,23 @@ if (icd:::.exists_in_cache("icd10cm2019_pc")) {
   res <- pccc_dx
 }
 
-## ----calc, eval = FALSE--------------------------------------------------
+## ----calc, eval = FALSE-------------------------------------------------------
 #  pccc_dx <- comorbid_pccc_dx(dat)
 #  pccc_pcs <- icd10_comorbid_pccc_pcs(dat,
 #    icd_name = c("icd_pcs1", "icd_pcs2")
 #  )
 #  res <- pccc_dx | pccc_pcs
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 res[295:300, ]
 
-## ----colsumpccc----------------------------------------------------------
+## ----colsumpccc---------------------------------------------------------------
 colSums(res)
 
-## ----par, include = FALSE------------------------------------------------
+## ----par, include = FALSE-----------------------------------------------------
 #graphics::par(mar = c(12, 4, 4, 2) + 0.1) # bottom, left, top, right
 
-## ----pcccbarplot, echo=FALSE---------------------------------------------
+## ----pcccbarplot, echo=FALSE--------------------------------------------------
 graphics::barplot(sort(colSums(res), decreasing = TRUE),
   names.arg = names_pccc,
   ylab = "count",

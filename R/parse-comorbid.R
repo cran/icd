@@ -35,7 +35,7 @@ ahrq_order_all <- c(
 #' get the SAS code from AHRQ
 #'
 #' Get the SAS code from AHRQ and save in raw data directory, if not already
-#' there.
+#' there. Do keep things like this in data-raw, not cache dir.
 #' @keywords internal
 #' @noRd
 icd9_fetch_ahrq_sas <- function() {

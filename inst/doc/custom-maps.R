@@ -1,13 +1,13 @@
-## ----setup, include = FALSE----------------------------------------------
+## ----setup, include = FALSE---------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 
-## ----charlsonexample-----------------------------------------------------
+## ----charlsonexample----------------------------------------------------------
 print(icd::icd10_map_quan_deyo, n_comorbidities = 3, n_codes = 8)
 
-## ----obesity-------------------------------------------------------------
+## ----obesity------------------------------------------------------------------
 library(icd)
 obesity_map <- list(
   "1" = "E663",
@@ -38,7 +38,7 @@ icd::icd10_comorbid_quan_elix(
   obesity,
   return_df = TRUE)["Obesity"]
 
-## ----sotwo---------------------------------------------------------------
+## ----sotwo--------------------------------------------------------------------
 library(icd)
 diagnoses <- c("C349", "A219", "B003", "C509", "B700", "A090")
 one_pt <- data.frame(id = rep("patient1", length(diagnoses)),
@@ -57,7 +57,7 @@ print(my_map)
 icd::comorbid(one_pt, map = my_map)
 (six_pts_cmb <- icd::comorbid(dif_pt, map = my_map))
 
-## ----matriximage, fig.width=6, echo = FALSE------------------------------
+## ----matriximage, fig.width=6, echo = FALSE-----------------------------------
 {
   image(t(six_pts_cmb),
         col = c("light blue", "blue"),

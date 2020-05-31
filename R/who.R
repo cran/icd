@@ -19,7 +19,7 @@
   # memoise package has given me problems and crashes. DIY
   mem_file_name <- paste(
     "WHO", year, lang,
-    gsub("JsonGetChildrenConcepts\\?ConceptId=|&useHtml=false", "", resource),
+    gsub("JsonGetChildrenConcepts\\?ConceptId=|(&|\\?)useHtml=false", "", resource),
     "json",
     sep = "."
   )
@@ -45,7 +45,7 @@
 
 .dl_icd10who_json <- function(year, lang, resource) {
   json_url <- paste(
-    getOption("icd.data.who_url"),
+    getOption("icd.who_url"),
     year,
     lang,
     resource,
@@ -70,7 +70,7 @@
       )
     }
   } # end 400+
-  json_data <- rawToChar(http_response$content)
+  json_data <- httr::content(http_response, simplifyDataFrame=TRUE)
   jsonlite::fromJSON(json_data)
 }
 
@@ -91,7 +91,8 @@
 }
 
 #' Get the children of a concept (ICD-10 chapter, code or range)
-#' @param concept_id NULl for root, concept string for any leaf or intermediate.
+#' @param concept_id \code{NULL} for root, concept string for any leaf or
+#' intermediate.
 #' @examples
 #' .dl_icd10who_children("XXII")
 #' .dl_icd10who_children("U84")
@@ -275,7 +276,7 @@
   rownames(dat) <- NULL
   var_name <- paste0("icd10who", year, ifelse(lang == "en", "", lang))
   dat$code <- as.icd10who(dat$code)
-  .save_in_resource_dir(var_name, x = dat)
+  .save_in_cache(var_name, x = dat)
   invisible(dat)
 }
 
@@ -301,5 +302,10 @@
 }
 
 .downloading_who_message <- function() {
-  message("Downloading or parsing cached WHO ICD data. This may take a few minutes. Data is cached, so if there is a download error, repeating the instruction will return the data immediately if cached, or pick up where it left off.") # nolint
+  message(paste(
+    "Downloading or parsing cached WHO ICD data.",
+    "This may take a few minutes.",
+    "Data is cached, so repeating the command will return immediately,",
+    "or finish caching, then return."
+  ))
 }

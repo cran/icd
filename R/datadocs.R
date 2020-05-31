@@ -163,6 +163,14 @@ NULL
 #' @export
 NULL
 
+#' @name get_icd10cm2016
+#' @title ICD-10-CM 2016
+#' @seealso \code{\link{icd10cm2019}}
+#' @docType data
+#' @keywords datasets
+#' @export
+NULL
+
 #' @name get_icd10cm2017
 #' @title ICD-10-CM 2017
 #' @seealso \code{\link{icd10cm2019}}
@@ -173,6 +181,14 @@ NULL
 
 #' @name get_icd10cm2018
 #' @title ICD-10-CM 2018
+#' @seealso \code{\link{icd10cm2019}}
+#' @docType data
+#' @keywords datasets
+#' @export
+NULL
+
+#' @name get_icd10cm2019
+#' @title ICD-10-CM 2019
 #' @seealso \code{\link{icd10cm2019}}
 #' @docType data
 #' @keywords datasets
@@ -353,8 +369,8 @@ NULL
 #'   users, including pulling the data from the web pages directly. Despite my
 #'   best efforts, current locale can give different results, but this packaged
 #'   data is correct, with some \code{UTF-8} encoded strings.
-#'   \code{icd9cm_billable} has been removed, and is replaced by now includes
-#'   only the latest version (32).
+#'   \code{icd9cm_billable} has been removed, and is replaced by
+#'   \code{icd9cm2014_leaf} now includes only the latest version (32).
 #' @docType data
 #' @keywords datasets
 #' @format data frames with columns \code{code}, \code{short_desc}, and
@@ -364,7 +380,7 @@ NULL
 #' \url{http://www.cms.gov/Medicare/Coding/ICD9ProviderDiagnosticCodes/codes.html}
 # nolint end
 #' @name get_icd9cm2014_leaf
-#' @aliases iget_cd9cm2005_leaf get_icd9cm2006_leaf get_icd9cm2007_leaf
+#' @aliases get_cd9cm2005_leaf get_icd9cm2006_leaf get_icd9cm2007_leaf
 #'   get_icd9cm2008_leaf get_icd9cm2009_leaf get_icd9cm2010_leaf
 #'   get_icd9cm2011_leaf get_icd9cm2012_leaf get_icd9cm2013_leaf
 #'   get_icd9cm2014_leaf
@@ -472,30 +488,6 @@ NULL
 #' @name get_icd9cm2013_leaf
 #' @rdname get_icd9cm2014_leaf
 #' @export
-NULL
-
-#' Deprecated name for the list of annual ICD-9-CM billable/leaf descriptions
-#'
-#' This now just contains the final version (2014, version number 32). This is
-#' actually the same from 2011 to 2014. Use \code{get_xxx} functions such as
-#' \code{\link{get_icd9cm2014}} instead.
-#' @docType data
-#' @keywords datasets
-#' @format list of data frames with columns \code{code}, \code{short_desc}, and
-#'   \code{long_desc}, containing just the leaf (in USA, \sQuote{billable})
-#'   codes, and their descriptions.
-#' @seealso For 2005 -- 2014, the following functions provide ICD-9-CM data:
-#'   \code{\link{get_icd9cm2009}} and \code{\link{get_icd9cm2013_leaf}}. The
-#'   former includes three-digit \sQuote{major} down to the leaf/billable level,
-#'   and any intermediate descriptors, e.g. if a four-digit code is not
-#'   billable, and encompasses some five-digit codes, then the four digit code
-#'   would appear in \code{\link{get_icd9cm2014}} but not
-#'   \code{\link{get_icd9cm2014_leaf}}.
-#' @source
-# nolint start
-#' \url{http://www.cms.gov/Medicare/Coding/ICD9ProviderDiagnosticCodes/codes.html}
-# nolint end
-#' @name icd9cm_billable
 NULL
 
 #' The latest available version of ICD-10-CM in this package

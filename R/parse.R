@@ -43,11 +43,11 @@
       paste(versions, collapse = ", ")
     )
   }
-  icd9cm_leaf_v32 <- .parse_icd9cm_leaf_year(
+  icd9cm2014_leaf <- .parse_icd9cm_leaf_year(
     year = "2014",
     ...
   )
-  invisible(icd9cm_leaf_v32)
+  invisible(icd9cm2014_leaf)
 }
 
 .dl_icd9cm_leaf_year <- function(year, ...) {
@@ -187,7 +187,7 @@
   out <- out[order.icd9(out$code), ]
   out$code <- as.icd9cm(out$code)
   rownames(out) <- NULL
-  .save_in_resource_dir(var_name = var_name, x = out)
+  .save_in_cache(var_name = var_name, x = out)
   invisible(out)
 }
 

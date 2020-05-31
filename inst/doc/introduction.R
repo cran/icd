@@ -1,4 +1,4 @@
-## ----setup, echo = FALSE, cache = FALSE----------------------------------
+## ----setup, echo = FALSE, cache = FALSE---------------------------------------
 suppressWarnings({
   suppressPackageStartupMessages({
     loadNamespace("knitr") # for opts_chunk only
@@ -23,7 +23,7 @@ patients_icd9 <- data.frame(
   stringsAsFactors = FALSE
   )
 
-## ----quickstart----------------------------------------------------------
+## ----quickstart---------------------------------------------------------------
 library(icd)
 head(uranium_pathology, 10)
 head(comorbid_charlson(uranium_pathology))
@@ -34,10 +34,10 @@ hist(charlson(uranium_pathology),
      main = "Uranium data",
      xlab = "Charlson Score")
 
-## ----pkgdesc, results='asis', echo = FALSE-------------------------------
+## ----pkgdesc, results='asis', echo = FALSE------------------------------------
 cat(utils::packageDescription("icd")$Description)
 
-## ----show data formats, echo=TRUE----------------------------------------
+## ----show data formats, echo=TRUE---------------------------------------------
 # long format ICD-9-CM codes, with present-on-arrival flags
 patients_icd9
 
@@ -47,13 +47,13 @@ uranium_pathology[1:5, ]
 # wide format, real ICD-9 discharge diagnoses
 vermont_dx[1:5, c(1, 6:15)]
 
-## ----getcomorbidities----------------------------------------------------
+## ----getcomorbidities---------------------------------------------------------
 # use AHRQ revision of Elixhauser comorbidities, show only first eight columns
 comorbid_ahrq(patients_icd9)[, 1:8]
 # use Elixhauser (Quan revision) comorbidities, show first few results
 comorbid_quan_elix(vermont_dx)[1:5, 1:8]
 
-## ----getcomorbidities2---------------------------------------------------
+## ----getcomorbidities2--------------------------------------------------------
 # find Elixhauser comorbidities which were present-on-arrival
 patients_icd9 %>%
   filter_poa %>%
@@ -78,15 +78,15 @@ barplot(colSums(vermont_cmb[, 1:5]),
 plot_comorbid(vermont_dx, comorbid_fun = comorbid_ahrq,
         main = "Incidence of all AHRQ Comorbidities in Vermont data")
 
-## ----lots of brackets, eval = FALSE--------------------------------------
+## ----lots of brackets, eval = FALSE-------------------------------------------
 #  head(apply(icd9_comorbid_quan_deyo(vermont_dx), 2, as.integer))
 
-## ----type guessing-------------------------------------------------------
+## ----type guessing------------------------------------------------------------
 is_valid("100") # valid ICD-9 code
 is_valid("A1001") # valid ICD-10 code
 is_valid(c("100", "A1001")) # they can't both be valid
 
-## ----set type------------------------------------------------------------
+## ----set type-----------------------------------------------------------------
 # decimal format ICD-10 codes
 codes <- c("A10.01", "L40.50", "Z77.098")
 # set class to be icd10cm (and implicitly icd10)
@@ -94,7 +94,7 @@ as.icd10cm(codes)
 # indicate decimal code and icd10 (not necessarily icd10cm)
 codes %>% as.decimal_diag %>% as.icd10
 
-## ----simple conversion---------------------------------------------------
+## ----simple conversion--------------------------------------------------------
 decimal_to_short(c("1", "10.20", "100", "123.45"))
 short_to_decimal(c("1", "22", "2244", "1005"))
 
@@ -105,8 +105,7 @@ decimal_to_short(codes)
 # ICD-10
 decimal_to_short("T81.10XD")
 
-
-## ----validation----------------------------------------------------------
+## ----validation---------------------------------------------------------------
 # guess both ICD version (9, but could be 10?), and decimal vs short form
 is_valid("V10.2")
 
@@ -115,11 +114,11 @@ is_valid(c("099.17", "-1"), short_code = TRUE)
 is_valid(c("099.17", "-1.1"), short_code = FALSE)
 is_valid(c("1", "001", "100", "123456", "003.21"), short_code = TRUE)
 
-## ----explain simple------------------------------------------------------
+## ----explain simple-----------------------------------------------------------
 explain_code("1.0") # 'decimal' format code inferred
 explain_code("0019") # 'short' format code inferred
 
-## ----explain complex-----------------------------------------------------
+## ----explain complex----------------------------------------------------------
 # we can be explicit about short vs decimal
 explain_code("434.00", short_code = FALSE)
 explain_code(c("43410", "43491"), short_code = TRUE)
@@ -129,17 +128,17 @@ explain_code(c("43410", "43491"), short_code = TRUE)
 "391" %>% children %>% explain_code # children condensed to parent code
 "391" %>% children %>% explain_code(condense = FALSE) # prevent condense
 
-## ----explainarbitrary----------------------------------------------------
+## ----explainarbitrary---------------------------------------------------------
 explain_code(list(somecodes = as.icd9(c("001", "391")),
                  morecodes = as.icd9cm(c("001.1", "001.9"))))
 
-## ----cholera-------------------------------------------------------------
+## ----cholera------------------------------------------------------------------
 explain_code(list(cholera = "001", rheumatic_heart = "390"))
 
-## ----noexplain, eval = FALSE---------------------------------------------
+## ----noexplain, eval = FALSE--------------------------------------------------
 #  s <- explain_code("001.5") # gives warning
 
-## ----Example Dementia----------------------------------------------------
+## ----Example Dementia---------------------------------------------------------
 length(icd9_map_quan_deyo[["Dementia"]]) # 133 possible ICD-9 codes
 length(icd10_map_quan_deyo[["Dementia"]]) # the ICD-10 map is different
 # explain_code summarizes these to just two groups:
@@ -147,25 +146,25 @@ icd9_map_quan_deyo[["Dementia"]] %>% explain_code(warn = FALSE)
 # contrast with:
 icd9_map_quan_deyo[["Dementia"]] %>% explain_code(condense = TRUE, warn = FALSE)
 
-## ----Show Range Operator-------------------------------------------------
+## ----Show Range Operator------------------------------------------------------
 length("390" %i9da% "392.1")
 "390" %i9da% "392.1" %>% explain_code(warn = FALSE)
 
-## ----Show POA Choices, echo=FALSE----------------------------------------
+## ----Show POA Choices, echo=FALSE---------------------------------------------
 poa_choices
 
-## ----simplepoa-----------------------------------------------------------
+## ----simplepoa----------------------------------------------------------------
 patients_icd9 %>% filter_poa_yes
 
-## ----notnopoa------------------------------------------------------------
+## ----notnopoa-----------------------------------------------------------------
 patients_icd9 %>% filter_poa_not_no
 
-## ----ahrq----------------------------------------------------------------
+## ----ahrq---------------------------------------------------------------------
 names(icd9_map_ahrq)
 icd9_map_ahrq$CHF[1:5]
 icd10_map_ahrq$CHF[1:5]
 
-## ----elix----------------------------------------------------------------
+## ----elix---------------------------------------------------------------------
 # the names of the comorbidities in each map are available as named lists:
 names_elix[1:5]
 unlist(unname(names_elix))
@@ -173,48 +172,48 @@ unlist(unname(names_elix))
 icd9_map_elix$HTNcx
 icd10_map_elix$HTNcx
 
-## ----quan elix-----------------------------------------------------------
+## ----quan elix----------------------------------------------------------------
 names(icd10_map_quan_deyo)
 names(icd10_map_quan_elix)
 
-## ----chainpoatocomorbid--------------------------------------------------
+## ----chainpoatocomorbid-------------------------------------------------------
 patients_icd9 %>%
   filter_poa_not_no %>%
   icd9_comorbid_ahrq %>%
   extract(1:9)
 
-## ----elixvsquanelix------------------------------------------------------
+## ----elixvsquanelix-----------------------------------------------------------
 difference <- diff_comorbid(icd9_map_elix, icd9_map_quan_elix,
                             all_names = c("CHF", "PHTN", "HTN", "Valvular"))
 # reuslts also returned as data
 str(difference)
 
-## ----quanonlyphtn--------------------------------------------------------
+## ----quanonlyphtn-------------------------------------------------------------
 difference$PHTN$only.y %>% get_defined %>% explain_code
 
-## ----cardiacgrep---------------------------------------------------------
+## ----cardiacgrep--------------------------------------------------------------
 icd9cm_hierarchy[
   grepl(pattern = "(heart)|(cardiac)",
         x = c(icd9cm_hierarchy$long_desc, icd9cm_hierarchy$short_desc),
         ignore.case = TRUE),
   "code"] %>% unique -> cardiac
 
-## ----cardiac Chain Explain Example---------------------------------------
+## ----cardiac Chain Explain Example--------------------------------------------
 as.icd9(cardiac) %>% explain_code(warn = FALSE) %>% head(10)
 
-## ----speed, eval = FALSE-------------------------------------------------
+## ----speed, eval = FALSE------------------------------------------------------
 #  # codes selected from AHRQ mapping
 #  many_patients <- icd:::generate_random_pts(1e7)
 #  system.time(
 #    comorbid_ahrq(many_patients)
 #    )[["elapsed"]]
 
-## ----arbitrary Mapping---------------------------------------------------
+## ----arbitrary Mapping--------------------------------------------------------
 names(icd9_chapters)[c(1:5, 14)]
 my_map <- icd:::chapters_to_map(icd9_chapters[c(2, 5, 14)])
 icd9_comorbid(patients_icd9, my_map) # no positive
 
-## ----realmapping---------------------------------------------------------
+## ----realmapping--------------------------------------------------------------
 ahrq_strict <- lapply(icd9_map_ahrq, get_defined)
 str(icd9_map_ahrq[1:5]) # first five of the original:
 str(ahrq_strict[1:5]) # and first five of the result:

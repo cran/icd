@@ -77,8 +77,9 @@ generate_random_unordered_pts <- function(num_patients = 50000,
   )
 }
 
-generate_random_short_ahrq_icd9 <- function(n = 50000)
+generate_random_short_ahrq_icd9 <- function(n = 50000) {
   sample(unname(unlist(icd::icd9_map_ahrq)), size = n, replace = TRUE)
+}
 
 #' generate random strings
 #'
@@ -86,8 +87,9 @@ generate_random_short_ahrq_icd9 <- function(n = 50000)
 #' @keywords internal debugging datagen
 #' @noRd
 random_string <- function(n, max_chars = 4) {
-  rand_ch <- function()
+  rand_ch <- function() {
     sample(c(LETTERS, letters, 0:9, rep("", times = 50)), replace = TRUE, size = n)
+  }
 
   v <- vapply(1:max_chars,
     FUN = function(x) rand_ch(),
@@ -101,15 +103,17 @@ random_string <- function(n, max_chars = 4) {
 #'   expression in \code{microbenchmark::microbenchmark}
 #' @keywords internal
 #' @noRd
-all_identical <- function(x)
+all_identical <- function(x) {
   all(vapply(x[-1], function(y) identical(x[[1]], y), FUN.VALUE = logical(1)))
+}
 
-get_one_of_each <- function()
+get_one_of_each <- function() {
   c(
     "002.3", "140.25", "245", "285", "290.01", "389.00",
     "390.00", "518", "525", "581", "631", "700", "720", "759.99",
     "765", "780.95", "800", "V02.34", "E900.4"
   )
+}
 
 #' Set up a test environment which also has the internal functions
 #' @keywords internal debugging data
@@ -229,43 +233,14 @@ expect_character <- function(x, ...) {
   testthat::expect_true(is.character(x))
 }
 
-with_offline <- function(offline, code) {
-  old <- options("icd.data.offline" = offline)
-  on.exit(options(old), add = TRUE)
-  force(code)
-}
-
 with_interact <- function(interact, code) {
-  old <- options("icd.data.interact" = interact)
+  old <- .set_opt("interact" = interact)
   on.exit(options(old), add = TRUE)
   force(code)
 }
 
 with_absent_action <- function(absent_action, code) {
-  old <- options("icd.data.absent_action" = absent_action)
+  old <- .set_opt("absent_action" = absent_action)
   on.exit(options(old), add = TRUE)
   force(code)
-}
-
-# workaround so icd.data 1.0 will not cause CRAN or user errors
-skip_missing_icd10who <- function() {
-  if (!.exists_anywhere("icd10who2016")) {
-    testthat::skip("No WHO ICD-10 2016 English data")
-  }
-  if (!.exists_anywhere("icd10who2008fr")) {
-    testthat::skip("No WHO ICD-10 2008 French data")
-  }
-}
-
-skip_missing_icd10fr <- function() {
-  if (!.exists_anywhere("icd10fr2019")) {
-    testthat::skip("No ICD-10-FR 2019 French data")
-  }
-}
-
-skip_slow <- function(msg = "Skipping slow test") {
-  testthat::skip_on_cran()
-  if (!.get_opt("test_slow", default = FALSE)) {
-    testthat::skip(msg)
-  }
 }
